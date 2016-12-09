@@ -2,13 +2,13 @@ package integrationtest
 
 import (
 	"bytes"
+	"context"
 	"testing"
 
 	"github.com/ipfs/go-ipfs/blocks"
 	"github.com/ipfs/go-ipfs/core"
 	"github.com/ipfs/go-ipfs/core/mock"
 
-	context "context"
 	cid "gx/ipfs/QmV5gPoRsjN1Gid3LMdNZTyfCtP2DsvqEbMAmz82RmmiGk/go-cid"
 	mocknet "gx/ipfs/QmeWJwi61vii5g8zQUB9UGegfUbmhTKHgeDFP9XuSp5jZ4/go-libp2p/p2p/net/mock"
 )

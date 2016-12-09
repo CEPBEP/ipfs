@@ -1,6 +1,7 @@
 package dagcmd
 
 import (
+	"encoding/hex"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -9,8 +10,10 @@ import (
 	cmds "github.com/ipfs/go-ipfs/commands"
 	path "github.com/ipfs/go-ipfs/path"
 
+	btc "gx/ipfs/QmSDHtBWfSSQABtYW7fjnujWkLpqGuvHzGV3CUj9fpXitQ/go-ipld-btc"
 	cid "gx/ipfs/QmV5gPoRsjN1Gid3LMdNZTyfCtP2DsvqEbMAmz82RmmiGk/go-cid"
 	node "gx/ipfs/QmYDscK7dmdo2GZ9aumS8s5auUUAH5mR1jvj5pYhWusfK7/go-ipld-node"
+	zec "gx/ipfs/QmdSETWRpFvJsyH2a1HaJgoNL5KjDf3Zdcy2k6EaCVBFC5/go-ipld-zcash"
 	ipldcbor "gx/ipfs/QmdaC21UyoyN3t9QdapHZfsaUo3mqVf5p4CEuFaYVFqwap/go-ipld-cbor"
 )
 
@@ -89,13 +92,33 @@ into an object of the specified format.
 			}
 
 			c, err := n.DAG.Add(nd)
+
+			res.SetOutput(&OutputObject{Cid: c})
+			return
+		case "hex":
+			nds, err := convertHexToType(fi, format)
 			if err != nil {
 				res.SetError(err, cmds.ErrNormal)
 				return
 			}
 
-			res.SetOutput(&OutputObject{Cid: c})
-			return
+			blkc, err := n.DAG.Add(nds[0])
+			if err != nil {
+				res.SetError(err, cmds.ErrNormal)
+				return
+			}
+
+			if len(nds) > 1 {
+				for _, nd := range nds[1:] {
+					_, err := n.DAG.Add(nd)
+					if err != nil {
+						res.SetError(err, cmds.ErrNormal)
+						return
+					}
+				}
+			}
+
+			res.SetOutput(&OutputObject{Cid: blkc})
 		default:
 			res.SetError(fmt.Errorf("unrecognized input encoding: %s", ienc), cmds.ErrNormal)
 			return
@@ -179,5 +202,30 @@ func convertRawToType(r io.Reader, format string) (node.Node, error) {
 		return ipldcbor.Decode(data)
 	default:
 		return nil, fmt.Errorf("unsupported target format for raw input: %s", format)
+	}
+}
+
+func convertHexToType(r io.Reader, format string) ([]node.Node, error) {
+	data, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+
+	if data[len(data)-1] == '\n' {
+		data = data[:len(data)-1]
+	}
+
+	decd, err := hex.DecodeString(string(data))
+	if err != nil {
+		return nil, err
+	}
+
+	switch format {
+	case "zec", "zcash":
+		return zec.DecodeBlockMessage(decd)
+	case "btc", "bitcoin":
+		return btc.DecodeBlockMessage(decd)
+	default:
+		return nil, fmt.Errorf("unknown target format: %s", format)
 	}
 }

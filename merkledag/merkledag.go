@@ -11,9 +11,11 @@ import (
 	bserv "github.com/ipfs/go-ipfs/blockservice"
 	offline "github.com/ipfs/go-ipfs/exchange/offline"
 
+	btc "gx/ipfs/QmSDHtBWfSSQABtYW7fjnujWkLpqGuvHzGV3CUj9fpXitQ/go-ipld-btc"
 	logging "gx/ipfs/QmSpJByNKFX1sCsHBEp3R73FL4NF6FnQTEGyNAXHm2GS52/go-log"
 	cid "gx/ipfs/QmV5gPoRsjN1Gid3LMdNZTyfCtP2DsvqEbMAmz82RmmiGk/go-cid"
 	node "gx/ipfs/QmYDscK7dmdo2GZ9aumS8s5auUUAH5mR1jvj5pYhWusfK7/go-ipld-node"
+	zec "gx/ipfs/QmdSETWRpFvJsyH2a1HaJgoNL5KjDf3Zdcy2k6EaCVBFC5/go-ipld-zcash"
 	ipldcbor "gx/ipfs/QmdaC21UyoyN3t9QdapHZfsaUo3mqVf5p4CEuFaYVFqwap/go-ipld-cbor"
 )
 
@@ -119,8 +121,16 @@ func decodeBlock(b blocks.Block) (node.Node, error) {
 		return NewRawNode(b.RawData()), nil
 	case cid.DagCBOR:
 		return ipldcbor.Decode(b.RawData())
+	case cid.ZcashBlock:
+		return zec.DecodeBlock(b.RawData())
+	case cid.ZcashTx:
+		return zec.DecodeMaybeTx(b.RawData())
+	case cid.BitcoinBlock:
+		return btc.DecodeBlock(b.RawData())
+	case cid.BitcoinTx:
+		return btc.DecodeTx(b.RawData())
 	default:
-		return nil, fmt.Errorf("unrecognized object type: %s", c.Type())
+		return nil, fmt.Errorf("unrecognized object type: %x", c.Type())
 	}
 }
 

@@ -293,7 +293,7 @@
       "author": "libp2p",
       "hash": "QmRPFbahurzFXhEcDJHjkAT3TiN8XktDZhgrteHSeAWiuz",
       "name": "go-libp2p-pnet",
-      "version": "2.2.1"
+      "version": "2.2.2"
     },
     {
       "author": "kubuxu",
@@ -306,6 +306,18 @@
       "hash": "QmfJHywXQu98UeZtGJBQrPAR6AtmDjjbe3qjTo9piXHPnx",
       "name": "murmur3",
       "version": "0.0.0"
+    },
+    {
+      "author": "whyrusleeping",
+      "hash": "QmSDHtBWfSSQABtYW7fjnujWkLpqGuvHzGV3CUj9fpXitQ",
+      "name": "go-ipld-btc",
+      "version": "0.0.1"
+    },
+    {
+      "author": "whyrusleeping",
+      "hash": "QmdSETWRpFvJsyH2a1HaJgoNL5KjDf3Zdcy2k6EaCVBFC5",
+      "name": "go-ipld-zcash",
+      "version": "0.0.1"
     }
   ],
   "gxVersion": "0.10.0",
