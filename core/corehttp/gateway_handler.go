@@ -160,12 +160,15 @@ func (i *gatewayHandler) getOrHeadHandler(ctx context.Context, w http.ResponseWr
 
 	dr, err := i.api.Cat(ctx, urlPath)
 	dir := false
+	symLink := false
 	switch err {
 	case nil:
 		// core.Resolve worked
 		defer dr.Close()
 	case coreiface.ErrIsDir:
 		dir = true
+	case coreiface.ErrIsSymLink:
+		symLink = true
 	case namesys.ErrResolveFailed:
 		// Don't log that error as it is just noise
 		w.WriteHeader(http.StatusInternalServerError)
@@ -223,6 +226,18 @@ func (i *gatewayHandler) getOrHeadHandler(ctx context.Context, w http.ResponseWr
 
 		// set modtime to a really long time ago, since files are immutable and should stay cached
 		modtime = time.Unix(1, 0)
+	}
+
+	if symLink {
+		link, err := i.api.ReadSymLink(ctx, urlPath)
+		if err != nil {
+			internalWebError(w, err)
+			return
+		}
+		newPath := gopath.Join(gopath.Dir(urlPath), link);
+		http.Redirect(w, r, newPath, 302)
+		log.Debugf("symlink: redirect to %s", newPath)
+		return
 	}
 
 	if !dir {

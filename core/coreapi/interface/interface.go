@@ -25,6 +25,7 @@ type UnixfsAPI interface {
 	Add(context.Context, io.Reader) (*cid.Cid, error)
 	Cat(context.Context, string) (Reader, error)
 	Ls(context.Context, string) ([]*Link, error)
+	ReadSymLink(context.Context, string) (string, error) // Read symbolic link
 }
 
 // type ObjectAPI interface {
@@ -50,5 +51,6 @@ type UnixfsAPI interface {
 // }
 
 var ErrIsDir = errors.New("object is a directory")
+var ErrIsSymLink = errors.New("object is a symbolic link")
 var ErrIsNonDag = errors.New("not a merkledag object")
 var ErrOffline = errors.New("can't resolve, ipfs node is offline")
