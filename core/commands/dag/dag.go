@@ -10,6 +10,7 @@ import (
 	cmds "github.com/ipfs/go-ipfs/commands"
 	path "github.com/ipfs/go-ipfs/path"
 
+	eth "github.com/ipfs/go-ipld-eth"
 	btc "gx/ipfs/QmSDHtBWfSSQABtYW7fjnujWkLpqGuvHzGV3CUj9fpXitQ/go-ipld-btc"
 	cid "gx/ipfs/QmV5gPoRsjN1Gid3LMdNZTyfCtP2DsvqEbMAmz82RmmiGk/go-cid"
 	node "gx/ipfs/QmYDscK7dmdo2GZ9aumS8s5auUUAH5mR1jvj5pYhWusfK7/go-ipld-node"
@@ -84,17 +85,6 @@ into an object of the specified format.
 
 			res.SetOutput(&OutputObject{Cid: c})
 			return
-		case "raw":
-			nd, err := convertRawToType(fi, format)
-			if err != nil {
-				res.SetError(err, cmds.ErrNormal)
-				return
-			}
-
-			c, err := n.DAG.Add(nd)
-
-			res.SetOutput(&OutputObject{Cid: c})
-			return
 		case "hex":
 			nds, err := convertHexToType(fi, format)
 			if err != nil {
@@ -106,6 +96,29 @@ into an object of the specified format.
 			if err != nil {
 				res.SetError(err, cmds.ErrNormal)
 				return
+			}
+
+			if len(nds) > 1 {
+				for _, nd := range nds[1:] {
+					_, err := n.DAG.Add(nd)
+					if err != nil {
+						res.SetError(err, cmds.ErrNormal)
+						return
+					}
+				}
+			}
+
+			res.SetOutput(&OutputObject{Cid: blkc})
+		case "raw":
+			nds, err := convertRawToType(fi, format)
+			if err != nil {
+				res.SetError(err, cmds.ErrNormal)
+				return
+			}
+
+			blkc, err := n.DAG.Add(nds[0])
+			if err != nil {
+				res.SetError(err, cmds.ErrNormal)
 			}
 
 			if len(nds) > 1 {
@@ -191,20 +204,6 @@ func convertJsonToType(r io.Reader, format string) (node.Node, error) {
 	}
 }
 
-func convertRawToType(r io.Reader, format string) (node.Node, error) {
-	switch format {
-	case "cbor", "dag-cbor":
-		data, err := ioutil.ReadAll(r)
-		if err != nil {
-			return nil, err
-		}
-
-		return ipldcbor.Decode(data)
-	default:
-		return nil, fmt.Errorf("unsupported target format for raw input: %s", format)
-	}
-}
-
 func convertHexToType(r io.Reader, format string) ([]node.Node, error) {
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
@@ -225,6 +224,45 @@ func convertHexToType(r io.Reader, format string) ([]node.Node, error) {
 		return zec.DecodeBlockMessage(decd)
 	case "btc", "bitcoin":
 		return btc.DecodeBlockMessage(decd)
+	default:
+		return nil, fmt.Errorf("unknown target format: %s", format)
+	}
+}
+
+func convertRawToType(r io.Reader, format string) ([]node.Node, error) {
+	switch format {
+	case "eth":
+		blk, txs, tries, _, err := eth.FromRlpBlockMessage(r)
+		if err != nil {
+			return nil, err
+		}
+
+		var out []node.Node
+		out = append(out, blk)
+		for _, tx := range txs {
+			out = append(out, tx)
+		}
+		for _, t := range tries {
+			out = append(out, t)
+		}
+		/*
+			for _, unc := range uncles {
+				out = append(out, unc)
+			}
+		*/
+		return out, nil
+	case "cbor", "dag-cbor":
+		data, err := ioutil.ReadAll(r)
+		if err != nil {
+			return nil, err
+		}
+
+		nd, err := ipldcbor.Decode(data)
+		if err != nil {
+			return nil, err
+		}
+
+		return []node.Node{nd}, nil
 	default:
 		return nil, fmt.Errorf("unknown target format: %s", format)
 	}

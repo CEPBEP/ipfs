@@ -2,6 +2,7 @@
 package merkledag
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"strings"
@@ -11,6 +12,7 @@ import (
 	bserv "github.com/ipfs/go-ipfs/blockservice"
 	offline "github.com/ipfs/go-ipfs/exchange/offline"
 
+	eth "github.com/ipfs/go-ipld-eth"
 	btc "gx/ipfs/QmSDHtBWfSSQABtYW7fjnujWkLpqGuvHzGV3CUj9fpXitQ/go-ipld-btc"
 	logging "gx/ipfs/QmSpJByNKFX1sCsHBEp3R73FL4NF6FnQTEGyNAXHm2GS52/go-log"
 	cid "gx/ipfs/QmV5gPoRsjN1Gid3LMdNZTyfCtP2DsvqEbMAmz82RmmiGk/go-cid"
@@ -129,6 +131,8 @@ func decodeBlock(b blocks.Block) (node.Node, error) {
 		return btc.DecodeBlock(b.RawData())
 	case cid.BitcoinTx:
 		return btc.DecodeTx(b.RawData())
+	case cid.EthereumBlock:
+		return eth.DecodeBlock(bytes.NewReader(b.RawData()))
 	default:
 		return nil, fmt.Errorf("unrecognized object type: %x", c.Type())
 	}
