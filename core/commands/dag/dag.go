@@ -69,6 +69,7 @@ into an object of the specified format.
 		ienc, _, _ := req.Option("input-enc").String()
 		format, _, _ := req.Option("format").String()
 
+		var outnodes []node.Node
 		switch ienc {
 		case "json":
 			nd, err := convertJsonToType(fi, format)
@@ -77,14 +78,7 @@ into an object of the specified format.
 				return
 			}
 
-			c, err := n.DAG.Add(nd)
-			if err != nil {
-				res.SetError(err, cmds.ErrNormal)
-				return
-			}
-
-			res.SetOutput(&OutputObject{Cid: c})
-			return
+			outnodes = []node.Node{nd}
 		case "hex":
 			nds, err := convertHexToType(fi, format)
 			if err != nil {
@@ -92,23 +86,7 @@ into an object of the specified format.
 				return
 			}
 
-			blkc, err := n.DAG.Add(nds[0])
-			if err != nil {
-				res.SetError(err, cmds.ErrNormal)
-				return
-			}
-
-			if len(nds) > 1 {
-				for _, nd := range nds[1:] {
-					_, err := n.DAG.Add(nd)
-					if err != nil {
-						res.SetError(err, cmds.ErrNormal)
-						return
-					}
-				}
-			}
-
-			res.SetOutput(&OutputObject{Cid: blkc})
+			outnodes = nds
 		case "raw":
 			nds, err := convertRawToType(fi, format)
 			if err != nil {
@@ -116,26 +94,33 @@ into an object of the specified format.
 				return
 			}
 
-			blkc, err := n.DAG.Add(nds[0])
-			if err != nil {
-				res.SetError(err, cmds.ErrNormal)
-			}
-
-			if len(nds) > 1 {
-				for _, nd := range nds[1:] {
-					_, err := n.DAG.Add(nd)
-					if err != nil {
-						res.SetError(err, cmds.ErrNormal)
-						return
-					}
-				}
-			}
-
-			res.SetOutput(&OutputObject{Cid: blkc})
+			outnodes = nds
 		default:
 			res.SetError(fmt.Errorf("unrecognized input encoding: %s", ienc), cmds.ErrNormal)
 			return
 		}
+
+		blkc, err := n.DAG.Add(outnodes[0])
+		if err != nil {
+			res.SetError(err, cmds.ErrNormal)
+		}
+
+		if len(outnodes) > 1 {
+			b := n.DAG.Batch()
+			for _, nd := range outnodes[1:] {
+				_, err := b.Add(nd)
+				if err != nil {
+					res.SetError(err, cmds.ErrNormal)
+					return
+				}
+			}
+			if err := b.Commit(); err != nil {
+				res.SetError(err, cmds.ErrNormal)
+				return
+			}
+		}
+
+		res.SetOutput(&OutputObject{Cid: blkc})
 	},
 	Type: OutputObject{},
 	Marshalers: cmds.MarshalerMap{

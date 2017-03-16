@@ -130,7 +130,7 @@ func decodeBlock(b blocks.Block) (node.Node, error) {
 	case cid.BitcoinBlock:
 		return btc.DecodeBlock(b.RawData())
 	case cid.BitcoinTx:
-		return btc.DecodeTx(b.RawData())
+		return btc.DecodeMaybeTx(b.RawData())
 	case cid.EthereumBlock:
 		return eth.DecodeBlock(bytes.NewReader(b.RawData()))
 	default:

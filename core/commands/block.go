@@ -10,6 +10,7 @@ import (
 	"github.com/ipfs/go-ipfs/blocks"
 	util "github.com/ipfs/go-ipfs/blocks/blockstore/util"
 	cmds "github.com/ipfs/go-ipfs/commands"
+	path "github.com/ipfs/go-ipfs/path"
 
 	cid "gx/ipfs/QmV5gPoRsjN1Gid3LMdNZTyfCtP2DsvqEbMAmz82RmmiGk/go-cid"
 	u "gx/ipfs/QmZuY8aV7zbNXVy6DyN9SmnuH3o9nG852F4aTiSBpts8d1/go-ipfs-util"
@@ -212,9 +213,14 @@ It reads from stdin, and <key> is a base58 encoded multihash.
 	Type: BlockStat{},
 }
 
-func getBlockForKey(req cmds.Request, skey string) (blocks.Block, error) {
-	if len(skey) == 0 {
-		return nil, fmt.Errorf("zero length cid invalid")
+func getBlockForKey(req cmds.Request, p string) (blocks.Block, error) {
+	if len(p) == 0 {
+		return nil, fmt.Errorf("zero length path invalid")
+	}
+
+	pth, err := path.ParsePath(p)
+	if err != nil {
+		return nil, err
 	}
 
 	n, err := req.InvocContext().GetNode()
@@ -222,17 +228,17 @@ func getBlockForKey(req cmds.Request, skey string) (blocks.Block, error) {
 		return nil, err
 	}
 
-	c, err := cid.Decode(skey)
+	// TODO: 'resolve to block' method
+	nd, err := n.Resolver.ResolvePath(req.Context(), pth)
 	if err != nil {
 		return nil, err
 	}
 
-	b, err := n.Blocks.GetBlock(req.Context(), c)
+	b, err := n.Blocks.GetBlock(req.Context(), nd.Cid())
 	if err != nil {
 		return nil, err
 	}
 
-	log.Debugf("ipfs block: got block with key: %s", b.Cid())
 	return b, nil
 }
 
