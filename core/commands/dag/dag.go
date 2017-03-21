@@ -217,7 +217,7 @@ func convertHexToType(r io.Reader, format string) ([]node.Node, error) {
 func convertRawToType(r io.Reader, format string) ([]node.Node, error) {
 	switch format {
 	case "eth":
-		blk, txs, tries, _, err := eth.FromRlpBlockMessage(r)
+		blk, txs, tries, uncles, err := eth.FromRlpBlockMessage(r)
 		if err != nil {
 			return nil, err
 		}
@@ -230,11 +230,9 @@ func convertRawToType(r io.Reader, format string) ([]node.Node, error) {
 		for _, t := range tries {
 			out = append(out, t)
 		}
-		/*
-			for _, unc := range uncles {
-				out = append(out, unc)
-			}
-		*/
+		for _, unc := range uncles {
+			out = append(out, unc)
+		}
 		return out, nil
 	case "cbor", "dag-cbor":
 		data, err := ioutil.ReadAll(r)
