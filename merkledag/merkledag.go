@@ -133,6 +133,8 @@ func decodeBlock(b blocks.Block) (node.Node, error) {
 		return btc.DecodeMaybeTx(b.RawData())
 	case cid.EthereumBlock:
 		return eth.DecodeBlock(bytes.NewReader(b.RawData()))
+	case eth.MEthTxTrie:
+		return eth.NewTrieNode(b.RawData())
 	default:
 		return nil, fmt.Errorf("unrecognized object type: %x", c.Type())
 	}
