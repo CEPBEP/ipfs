@@ -13,12 +13,12 @@ import (
 	offline "github.com/ipfs/go-ipfs/exchange/offline"
 
 	eth "github.com/ipfs/go-ipld-eth"
-	btc "gx/ipfs/QmSDHtBWfSSQABtYW7fjnujWkLpqGuvHzGV3CUj9fpXitQ/go-ipld-btc"
+	ipldcbor "gx/ipfs/QmNrbCt8j9DT5W9Pmjy2SdudT9k8GpaDr4sRuFix3BXhgR/go-ipld-cbor"
 	logging "gx/ipfs/QmSpJByNKFX1sCsHBEp3R73FL4NF6FnQTEGyNAXHm2GS52/go-log"
-	cid "gx/ipfs/QmV5gPoRsjN1Gid3LMdNZTyfCtP2DsvqEbMAmz82RmmiGk/go-cid"
-	node "gx/ipfs/QmYDscK7dmdo2GZ9aumS8s5auUUAH5mR1jvj5pYhWusfK7/go-ipld-node"
-	zec "gx/ipfs/QmdSETWRpFvJsyH2a1HaJgoNL5KjDf3Zdcy2k6EaCVBFC5/go-ipld-zcash"
-	ipldcbor "gx/ipfs/QmdaC21UyoyN3t9QdapHZfsaUo3mqVf5p4CEuFaYVFqwap/go-ipld-cbor"
+	btc "gx/ipfs/QmW3iy3akabBoGPriRX29Bsg698eMcZgQ17QYaFhpscCy7/go-ipld-btc"
+	zec "gx/ipfs/QmYMG6BMmcMuEdLFtsNocXQE9ZWwCpoxNkZnvht1GHYRpu/go-ipld-zcash"
+	cid "gx/ipfs/QmYhQaCYEcaPPjxJX7YcPcVKkQfRy6sJ7B3XmGFk82XYdQ/go-cid"
+	node "gx/ipfs/Qmb3Hm9QDFmfYuET4pu7Kyg8JV78jFa1nvZx5vnCZsK4ck/go-ipld-format"
 )
 
 var log = logging.Logger("merkledag")
@@ -131,7 +131,7 @@ func decodeBlock(b blocks.Block) (node.Node, error) {
 		return btc.DecodeBlock(b.RawData())
 	case cid.BitcoinTx:
 		return btc.DecodeMaybeTx(b.RawData())
-	case cid.EthereumBlock:
+	case cid.EthBlock:
 		return eth.DecodeBlock(bytes.NewReader(b.RawData()))
 	case eth.MEthTx:
 		return eth.ParseTx(b.RawData())
