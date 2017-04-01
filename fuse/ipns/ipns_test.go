@@ -4,8 +4,8 @@ package ipns
 
 import (
 	"bytes"
-	"context"
 	"fmt"
+	"gx/ipfs/QmTEmsyNnckEq8rEfALfdhLHjrEHGoSGFDrAYReuetn7MC/go-net/context"
 	"io/ioutil"
 	mrand "math/rand"
 	"os"

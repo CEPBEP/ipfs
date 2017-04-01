@@ -36,7 +36,7 @@ func RepoStat(n *core.IpfsNode, ctx context.Context) (*Stat, error) {
 	}
 
 	count := uint64(0)
-	for range allKeys {
+	for _ = range allKeys {
 		count++
 	}
 

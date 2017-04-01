@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	files "github.com/ipfs/go-ipfs/commands/files"
+	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit/files"
 )
 
 func TestOutput(t *testing.T) {

@@ -1,13 +1,12 @@
 package mfs
 
 import (
+	"context"
 	"testing"
 	"time"
 
-	ci "gx/ipfs/QmQgLZP9haZheimMHqqAjJh2LhRmNfEoZDfbtkpeMhi9xK/go-testutil/ci"
-
-	"context"
 	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
+	ci "gx/ipfs/QmQgLZP9haZheimMHqqAjJh2LhRmNfEoZDfbtkpeMhi9xK/go-testutil/ci"
 )
 
 func TestRepublisher(t *testing.T) {

@@ -9,20 +9,26 @@ import (
 	"time"
 
 	cmds "github.com/ipfs/go-ipfs/commands"
+	e "github.com/ipfs/go-ipfs/core/commands/e"
+
+	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
 )
 
 var ActiveReqsCmd = &cmds.Command{
-	Helptext: cmds.HelpText{
+	Helptext: cmdkit.HelpText{
 		Tagline: "List commands run on this IPFS node.",
 		ShortDescription: `
 Lists running and recently run commands.
 `,
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
-		res.SetOutput(req.InvocContext().ReqLog.Report())
+		ctx := req.InvocContext()
+		reqLog := ctx.ReqLog
+		report := reqLog.Report()
+		res.SetOutput(report)
 	},
-	Options: []cmds.Option{
-		cmds.BoolOption("verbose", "v", "Print extra information.").Default(false),
+	Options: []cmdkit.Option{
+		cmdkit.BoolOption("verbose", "v", "Print extra information.").Default(false),
 	},
 	Subcommands: map[string]*cmds.Command{
 		"clear":    clearInactiveCmd,
@@ -30,10 +36,14 @@ Lists running and recently run commands.
 	},
 	Marshalers: map[cmds.EncodingType]cmds.Marshaler{
 		cmds.Text: func(res cmds.Response) (io.Reader, error) {
-			out, ok := res.Output().(*[]*cmds.ReqLogEntry)
+			v, err := unwrapOutput(res.Output())
+			if err != nil {
+				return nil, err
+			}
+
+			out, ok := v.(*[]*cmds.ReqLogEntry)
 			if !ok {
-				log.Errorf("%#v", res.Output())
-				return nil, cmds.ErrIncorrectType
+				return nil, e.TypeErr(out, v)
 			}
 			buf := new(bytes.Buffer)
 
@@ -57,7 +67,7 @@ Lists running and recently run commands.
 				if verbose {
 					fmt.Fprintf(w, "%v\t[", req.Args)
 					var keys []string
-					for k, _ := range req.Options {
+					for k := range req.Options {
 						keys = append(keys, k)
 					}
 					sort.Strings(keys)
@@ -86,7 +96,7 @@ Lists running and recently run commands.
 }
 
 var clearInactiveCmd = &cmds.Command{
-	Helptext: cmds.HelpText{
+	Helptext: cmdkit.HelpText{
 		Tagline: "Clear inactive requests from the log.",
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
@@ -95,16 +105,16 @@ var clearInactiveCmd = &cmds.Command{
 }
 
 var setRequestClearCmd = &cmds.Command{
-	Helptext: cmds.HelpText{
+	Helptext: cmdkit.HelpText{
 		Tagline: "Set how long to keep inactive requests in the log.",
 	},
-	Arguments: []cmds.Argument{
-		cmds.StringArg("time", true, false, "Time to keep inactive requests in log."),
+	Arguments: []cmdkit.Argument{
+		cmdkit.StringArg("time", true, false, "Time to keep inactive requests in log."),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		tval, err := time.ParseDuration(req.Arguments()[0])
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdkit.ErrNormal)
 			return
 		}
 

@@ -7,30 +7,14 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime/debug"
 	"strings"
+
+	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
 )
 
 // ErrorType signfies a category of errors
 type ErrorType uint
-
-// ErrorTypes convey what category of error ocurred
-const (
-	ErrNormal         ErrorType = iota // general errors
-	ErrClient                          // error was caused by the client, (e.g. invalid CLI usage)
-	ErrImplementation                  // programmer error in the server
-	ErrNotFound                        // == HTTP 404 Not Found
-	// TODO: add more types of errors for better error-specific handling
-)
-
-// Error is a struct for marshalling errors
-type Error struct {
-	Message string
-	Code    ErrorType
-}
-
-func (e Error) Error() string {
-	return e.Message
-}
 
 // EncodingType defines a supported encoding
 type EncodingType string
@@ -94,8 +78,8 @@ type Response interface {
 	Request() Request
 
 	// Set/Return the response Error
-	SetError(err error, code ErrorType)
-	Error() *Error
+	SetError(err error, code cmdkit.ErrorType)
+	Error() *cmdkit.Error
 
 	// Sets/Returns the response value
 	SetOutput(interface{})
@@ -123,7 +107,7 @@ type Response interface {
 
 type response struct {
 	req    Request
-	err    *Error
+	err    *cmdkit.Error
 	value  interface{}
 	out    io.Reader
 	length uint64
@@ -152,12 +136,13 @@ func (r *response) SetLength(l uint64) {
 	r.length = l
 }
 
-func (r *response) Error() *Error {
+func (r *response) Error() *cmdkit.Error {
 	return r.err
 }
 
-func (r *response) SetError(err error, code ErrorType) {
-	r.err = &Error{Message: err.Error(), Code: code}
+func (r *response) SetError(err error, code cmdkit.ErrorType) {
+	log.Debugf("SerError called. Stack: %s", debug.Stack())
+	r.err = &cmdkit.Error{Message: err.Error(), Code: code}
 }
 
 func (r *response) Marshal() (io.Reader, error) {
@@ -165,7 +150,7 @@ func (r *response) Marshal() (io.Reader, error) {
 		return bytes.NewReader([]byte{}), nil
 	}
 
-	enc, found, err := r.req.Option(EncShort).String()
+	enc, found, err := r.req.Option(cmdkit.EncShort).String()
 	if err != nil {
 		return nil, err
 	}

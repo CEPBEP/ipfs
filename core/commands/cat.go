@@ -1,67 +1,113 @@
 package commands
 
 import (
+	"context"
 	"io"
+	"os"
 
-	cmds "github.com/ipfs/go-ipfs/commands"
 	core "github.com/ipfs/go-ipfs/core"
 	coreunix "github.com/ipfs/go-ipfs/core/coreunix"
 
-	context "context"
+	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
+	cmds "gx/ipfs/QmPhtZyjPYddJ8yGPWreisp47H6iQjt3Lg8sZrzqMP5noy/go-ipfs-cmds"
 )
 
 const progressBarMinSize = 1024 * 1024 * 8 // show progress bar for outputs > 8MiB
 
 var CatCmd = &cmds.Command{
-	Helptext: cmds.HelpText{
+	Helptext: cmdkit.HelpText{
 		Tagline:          "Show IPFS object data.",
 		ShortDescription: "Displays the data contained by an IPFS or IPNS object(s) at the given path.",
 	},
 
-	Arguments: []cmds.Argument{
-		cmds.StringArg("ipfs-path", true, true, "The path to the IPFS object(s) to be outputted.").EnableStdin(),
+	Arguments: []cmdkit.Argument{
+		cmdkit.StringArg("ipfs-path", true, true, "The path to the IPFS object(s) to be outputted.").EnableStdin(),
 	},
-	Run: func(req cmds.Request, res cmds.Response) {
+	Run: func(req cmds.Request, re cmds.ResponseEmitter) {
 		node, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			re.SetError(err, cmdkit.ErrNormal)
 			return
 		}
 
 		if !node.OnlineMode() {
 			if err := node.SetupOfflineRouting(); err != nil {
-				res.SetError(err, cmds.ErrNormal)
+				re.SetError(err, cmdkit.ErrNormal)
 				return
 			}
 		}
 
 		readers, length, err := cat(req.Context(), node, req.Arguments())
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			re.SetError(err, cmdkit.ErrNormal)
 			return
 		}
 
 		/*
 			if err := corerepo.ConditionalGC(req.Context(), node, length); err != nil {
-				res.SetError(err, cmds.ErrNormal)
+				re.SetError(err, cmdkit.ErrNormal)
 				return
 			}
 		*/
 
-		res.SetLength(length)
-
+		re.SetLength(length)
 		reader := io.MultiReader(readers...)
-		res.SetOutput(reader)
-	},
-	PostRun: func(req cmds.Request, res cmds.Response) {
-		if res.Length() < progressBarMinSize {
-			return
+
+		// Since the reader returns the error that a block is missing, and that error is
+		// returned from io.Copy inside Emit, we need to take Emit errors and send
+		// them to the client. Usually we don't do that because it means the connection
+		// is broken or we supplied an illegal argument etc.
+		err = re.Emit(reader)
+		if err != nil {
+			re.SetError(err, cmdkit.ErrNormal)
 		}
+	},
+	PostRun: map[cmds.EncodingType]func(cmds.Request, cmds.ResponseEmitter) cmds.ResponseEmitter{
+		cmds.CLI: func(req cmds.Request, re cmds.ResponseEmitter) cmds.ResponseEmitter {
+			reNext, res := cmds.NewChanResponsePair(req)
 
-		bar, reader := progressBarForReader(res.Stderr(), res.Output().(io.Reader), int64(res.Length()))
-		bar.Start()
+			go func() {
+				if res.Length() > 0 && res.Length() < progressBarMinSize {
+					if err := cmds.Copy(re, res); err != nil {
+						re.SetError(err, cmdkit.ErrNormal)
+					}
 
-		res.SetOutput(reader)
+					return
+				}
+
+				// Copy closes by itself, so we must not do this before
+				defer re.Close()
+				for {
+					v, err := res.Next()
+					if err == io.EOF {
+						break
+					} else if err != nil {
+						if err == cmds.ErrRcvdError {
+							re.Emit(res.Error())
+						} else {
+							re.SetError(err, cmdkit.ErrNormal)
+						}
+					}
+
+					switch val := v.(type) {
+					case *cmdkit.Error:
+						re.Emit(val)
+					case io.Reader:
+						bar, reader := progressBarForReader(os.Stderr, val, int64(res.Length()))
+						bar.Start()
+
+						err = re.Emit(reader)
+						if err != nil {
+							log.Error(err)
+						}
+					default:
+						log.Warningf("cat postrun: received unexpected type %T", val)
+					}
+				}
+			}()
+
+			return reNext
+		},
 	},
 }
 

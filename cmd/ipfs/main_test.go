@@ -3,15 +3,12 @@ package main
 import (
 	"testing"
 
-	"github.com/ipfs/go-ipfs/commands"
+	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
 )
 
 func TestIsCientErr(t *testing.T) {
-	t.Log("Catch both pointers and values")
-	if !isClientError(commands.Error{Code: commands.ErrClient}) {
-		t.Errorf("misidentified value")
-	}
-	if !isClientError(&commands.Error{Code: commands.ErrClient}) {
-		t.Errorf("misidentified pointer")
+	t.Log("Only catch pointers")
+	if !isClientError(&cmdkit.Error{Code: cmdkit.ErrClient}) {
+		t.Errorf("misidentified error")
 	}
 }

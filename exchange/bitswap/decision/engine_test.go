@@ -1,6 +1,7 @@
 package decision
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"math"
@@ -8,7 +9,6 @@ import (
 	"sync"
 	"testing"
 
-	context "context"
 	blockstore "github.com/ipfs/go-ipfs/blocks/blockstore"
 	message "github.com/ipfs/go-ipfs/exchange/bitswap/message"
 	testutil "gx/ipfs/QmQgLZP9haZheimMHqqAjJh2LhRmNfEoZDfbtkpeMhi9xK/go-testutil"
