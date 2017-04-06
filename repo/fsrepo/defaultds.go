@@ -9,9 +9,6 @@ import (
 	"github.com/ipfs/go-ipfs/thirdparty/dir"
 
 	measure "gx/ipfs/QmNPv1yzXBqxzqjfTzHCeBoicxxZgHzLezdY2hMCZ3r6EU/go-ds-measure"
-	ds "gx/ipfs/QmRWDav6mzWseLWeYfVd5fvUKiVe9xNH29YfMF438fG364/go-datastore"
-	mount "gx/ipfs/QmRWDav6mzWseLWeYfVd5fvUKiVe9xNH29YfMF438fG364/go-datastore/syncmount"
-	flatfs "gx/ipfs/QmXZEfbEv9sXG9JnLoMNhREDMDgkq5Jd7uWJ7d77VJ4pxn/go-ds-flatfs"
 	levelds "gx/ipfs/QmaHHmfEozrrotyhyN44omJouyuEtx6ahddqV6W5yRaUSQ/go-ds-leveldb"
 	ldbopts "gx/ipfs/QmbBhyDKsY4mbY6xsKt3qu9Y7FPvMJ6qbD8AMjYYvPRw1g/goleveldb/leveldb/opt"
 )
@@ -32,15 +29,6 @@ func openDefaultDatastore(r *FSRepo) (repo.Datastore, error) {
 		return nil, fmt.Errorf("unable to open leveldb datastore: %v", err)
 	}
 
-	syncfs := !r.config.Datastore.NoSync
-
-	// 2 characters of base32 suffix gives us 10 bits of freedom.
-	// Leaving us with 10 bits, or 1024 way sharding
-	blocksDS, err := flatfs.CreateOrOpen(path.Join(r.path, flatfsDirectory), flatfs.NextToLast(2), syncfs)
-	if err != nil {
-		return nil, fmt.Errorf("unable to open flatfs datastore: %v", err)
-	}
-
 	// Add our PeerID to metrics paths to keep them unique
 	//
 	// As some tests just pass a zero-value Config to fsrepo.Init,
@@ -52,20 +40,9 @@ func openDefaultDatastore(r *FSRepo) (repo.Datastore, error) {
 	}
 
 	prefix := "ipfs.fsrepo.datastore."
-	metricsBlocks := measure.New(prefix+"blocks", blocksDS)
 	metricsLevelDB := measure.New(prefix+"leveldb", leveldbDS)
-	mountDS := mount.New([]mount.Mount{
-		{
-			Prefix:    ds.NewKey("/blocks"),
-			Datastore: metricsBlocks,
-		},
-		{
-			Prefix:    ds.NewKey("/"),
-			Datastore: metricsLevelDB,
-		},
-	})
 
-	return mountDS, nil
+	return metricsLevelDB, nil
 }
 
 func initDefaultDatastore(repoPath string, conf *config.Config) error {
