@@ -228,13 +228,29 @@ func getBlockForKey(req cmds.Request, p string) (blocks.Block, error) {
 		return nil, err
 	}
 
-	// TODO: 'resolve to block' method
-	nd, err := n.Resolver.ResolvePath(req.Context(), pth)
+	tpath, last, err := pth.PopLastSegment()
+	if err != nil {
+		return nil, err
+	}
+	if last == "" {
+		root, err := cid.Parse(tpath.String())
+		if err != nil {
+			return nil, err
+		}
+		return n.Blocks.GetBlock(req.Context(), root)
+	}
+
+	nd, err := n.Resolver.ResolvePath(req.Context(), tpath)
 	if err != nil {
 		return nil, err
 	}
 
-	b, err := n.Blocks.GetBlock(req.Context(), nd.Cid())
+	lnk, _, err := nd.ResolveLink([]string{last})
+	if err != nil {
+		return nil, err
+	}
+
+	b, err := n.Blocks.GetBlock(req.Context(), lnk.Cid)
 	if err != nil {
 		return nil, err
 	}
