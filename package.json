@@ -255,9 +255,9 @@
     },
     {
       "author": "whyrusleeping",
-      "hash": "QmYDscK7dmdo2GZ9aumS8s5auUUAH5mR1jvj5pYhWusfK7",
+      "hash": "Qmb3Hm9QDFmfYuET4pu7Kyg8JV78jFa1nvZx5vnCZsK4ck",
       "name": "go-ipld-format",
-      "version": "0.4.5"
+      "version": "0.4.6"
     },
     {
       "author": "whyrusleeping",
@@ -318,6 +318,12 @@
       "hash": "QmYMG6BMmcMuEdLFtsNocXQE9ZWwCpoxNkZnvht1GHYRpu",
       "name": "go-ipld-zcash",
       "version": "0.0.4"
+    },
+    {
+      "author": "whyrusleeping",
+      "hash": "QmdtmRZK1C1EonaNnGTAz5DqPHNuKzPvuJ7Hf8Dg6sZMa4",
+      "name": "go-ipld-eth",
+      "version": "0.0.1"
     }
   ],
   "gxVersion": "0.10.0",
