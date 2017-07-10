@@ -251,6 +251,10 @@ func (n *IpfsNode) startOnlineServices(ctx context.Context, routingOption Routin
 
 	if pubsub {
 		n.Floodsub = floodsub.NewFloodSub(ctx, peerhost)
+		err = namesys.AddPubsubNameSystem(ctx, n.Namesys, n.PeerHost, n.Routing, n.Repo.Datastore(), n.Floodsub)
+		if err != nil {
+			return err
+		}
 	}
 
 	n.P2P = p2p.NewP2P(n.Identity, n.PeerHost, n.Peerstore)

@@ -12,22 +12,24 @@ import (
 	path "github.com/ipfs/go-ipfs/path"
 	dshelp "github.com/ipfs/go-ipfs/thirdparty/ds-help"
 
-	ci "gx/ipfs/QmP1DfoUjiWH2ZBo1PBH6FupdBucbDepx3HpWmEY6JMUpY/go-libp2p-crypto"
-	routing "gx/ipfs/QmP1wMAqk6aZYRZirbaAwmrNeqFRgQrwBt3orUtvSa1UYD/go-libp2p-routing"
-	floodsub "gx/ipfs/QmUpeULWfmtsgCnfuRN3BHsfhHvBxNphoYh4La4CMxGt2Z/floodsub"
-	p2phost "gx/ipfs/QmUywuGNZoUKV8B9iyvup9bPkLiMrhTsyVMkeSXW5VxAfC/go-libp2p-host"
-	mh "gx/ipfs/QmVGtdTZdTFaLsaj2RwdVG8jcjNNcp1DE914DKZ2kHmXHw/go-multihash"
+	pstore "gx/ipfs/QmPgDWmTmuzvP7QE5zwo1TmjbJme9pmZHNujB2453jkCTr/go-libp2p-peerstore"
+	routing "gx/ipfs/QmPjTrrSfE6TzLv6ya6VWhGcCgPrUAdcgrDcQyRDX2VyW1/go-libp2p-routing"
+	u "gx/ipfs/QmSU6eubNdhXjFBJBSksTp8kv8YRub8mGAPv8tVJHmL2EU/go-ipfs-util"
+	cid "gx/ipfs/QmTprEaAA2A9bst5XH7exuyi5KzNMK3SEDNN8rBDnKWcUS/go-cid"
+	mh "gx/ipfs/QmU9a9NV9RdPNwZQDYd5uKsm6N6LJLSvLbywDDYFbaaC6P/go-multihash"
 	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
-	record "gx/ipfs/QmWYCqr6UDqqD1bfRybaAPtbAqcN3TSJpveaBXMwbQ3ePZ/go-libp2p-record"
-	dhtpb "gx/ipfs/QmWYCqr6UDqqD1bfRybaAPtbAqcN3TSJpveaBXMwbQ3ePZ/go-libp2p-record/pb"
-	u "gx/ipfs/QmWbjfz3u6HkAdPh34dgPchGbQjob6LXLhAeCGii2TX69n/go-ipfs-util"
-	pstore "gx/ipfs/QmXZSd1qR5BxZkPyuwfT5jpqQFScZccoZvDneXsKzCNHWX/go-libp2p-peerstore"
+	ds_sync "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore/sync"
+	peer "gx/ipfs/QmXYjuNuxVzXKJCfWasQk1RqkhVLDM9jtUKhqc2WPQmFSB/go-libp2p-peer"
 	proto "gx/ipfs/QmZ4Qi3GaRbjcx28Sme5eMH7RQjGkt8wHxt2a65oLaeFEV/gogo-protobuf/proto"
-	cid "gx/ipfs/Qma4RJSuh7mMeJQYCqMbKzekn6EwBo7HEs5AQYjVRMQATB/go-cid"
-	peer "gx/ipfs/QmdS9KpbDyPrieswibZhkod1oXqRwZJrUPzxCofAMWpFGq/go-libp2p-peer"
+	floodsub "gx/ipfs/QmZdsQf8BiCpAj61nz9NgqVeRUkw9vATvCs7UHFTxoUMDb/floodsub"
+	p2phost "gx/ipfs/QmZy7c24mmkEHpNJndwgsEE3wcVxHd8yB969yTnAJFVw7f/go-libp2p-host"
+	ci "gx/ipfs/QmaPbCnUMBohSGo3KnxEa2bHqyJVVeEEcwtqJAYxerieBo/go-libp2p-crypto"
+	record "gx/ipfs/QmbxkgUceEcuSZ4ZdBA3x74VUDSSYjHYmmeEqkjxbtZ6Jg/go-libp2p-record"
+	dhtpb "gx/ipfs/QmbxkgUceEcuSZ4ZdBA3x74VUDSSYjHYmmeEqkjxbtZ6Jg/go-libp2p-record/pb"
 )
 
-type pubsubPublisher struct {
+// PubsubPublisher is a publisher that distributes IPNS records through pubsub
+type PubsubPublisher struct {
 	ctx  context.Context
 	ds   ds.Datastore
 	host p2phost.Host
@@ -37,7 +39,8 @@ type pubsubPublisher struct {
 	mx   sync.Mutex
 }
 
-type pubsubResolver struct {
+// PubsubResolver is a resolver that receives IPNS records through pubsub
+type PubsubResolver struct {
 	ctx  context.Context
 	ds   ds.Datastore
 	host p2phost.Host
@@ -51,8 +54,8 @@ type pubsubResolver struct {
 // NewPubsubPublisher constructs a new Publisher that publishes IPNS records through pubsub.
 // The constructor interface is complicated by the need to bootstrap the pubsub topic.
 // This could be greatly simplified if the pubsub implementation handled bootstrap itself
-func NewPubsubPublisher(ctx context.Context, ds ds.Datastore, host p2phost.Host, cr routing.ContentRouting, ps *floodsub.PubSub) Publisher {
-	return &pubsubPublisher{
+func NewPubsubPublisher(ctx context.Context, host p2phost.Host, ds ds.Datastore, cr routing.ContentRouting, ps *floodsub.PubSub) *PubsubPublisher {
+	return &PubsubPublisher{
 		ctx:  ctx,
 		ds:   ds,
 		host: host, // needed for pubsub bootstrap
@@ -64,10 +67,10 @@ func NewPubsubPublisher(ctx context.Context, ds ds.Datastore, host p2phost.Host,
 
 // NewPubsubResolver constructs a new Resolver that resolves IPNS records through pubsub.
 // same as above for pubsub bootstrap dependencies
-func NewPubsubResolver(ctx context.Context, host p2phost.Host, cr routing.ContentRouting, pkf routing.PubKeyFetcher, ps *floodsub.PubSub) Resolver {
-	return &pubsubResolver{
+func NewPubsubResolver(ctx context.Context, host p2phost.Host, cr routing.ContentRouting, pkf routing.PubKeyFetcher, ps *floodsub.PubSub) *PubsubResolver {
+	return &PubsubResolver{
 		ctx:  ctx,
-		ds:   ds.NewMapDatastore(),
+		ds:   ds_sync.MutexWrap(ds.NewMapDatastore()),
 		host: host, // needed for pubsub bootstrap
 		cr:   cr,   // needed for pubsub bootstrap
 		pkf:  pkf,
@@ -76,12 +79,13 @@ func NewPubsubResolver(ctx context.Context, host p2phost.Host, cr routing.Conten
 	}
 }
 
-// PubsubPublisher implementation
-func (p *pubsubPublisher) Publish(ctx context.Context, k ci.PrivKey, value path.Path) error {
+// Publish publishes an IPNS record through pubsub with default TTL
+func (p *PubsubPublisher) Publish(ctx context.Context, k ci.PrivKey, value path.Path) error {
 	return p.PublishWithEOL(ctx, k, value, time.Now().Add(DefaultRecordTTL))
 }
 
-func (p *pubsubPublisher) PublishWithEOL(ctx context.Context, k ci.PrivKey, value path.Path, eol time.Time) error {
+// PublishWithEOL publishes an IPNS record through pubsub
+func (p *PubsubPublisher) PublishWithEOL(ctx context.Context, k ci.PrivKey, value path.Path, eol time.Time) error {
 	id, err := peer.IDFromPrivateKey(k)
 	if err != nil {
 		return err
@@ -99,7 +103,7 @@ func (p *pubsubPublisher) PublishWithEOL(ctx context.Context, k ci.PrivKey, valu
 	return p.publishRecord(ctx, k, value, seqno, eol, ipnskey, id)
 }
 
-func (p *pubsubPublisher) getPreviousSeqNo(ctx context.Context, ipnskey string) (uint64, error) {
+func (p *PubsubPublisher) getPreviousSeqNo(ctx context.Context, ipnskey string) (uint64, error) {
 	// the datastore is shared with the routing publisher to properly increment and persist
 	// ipns record sequence numbers.
 	prevrec, err := p.ds.Get(dshelp.NewKeyFromBinary([]byte(ipnskey)))
@@ -131,7 +135,7 @@ func (p *pubsubPublisher) getPreviousSeqNo(ctx context.Context, ipnskey string) 
 	return entry.GetSequence(), nil
 }
 
-func (p *pubsubPublisher) publishRecord(ctx context.Context, k ci.PrivKey, value path.Path, seqno uint64, eol time.Time, ipnskey string, ID peer.ID) error {
+func (p *PubsubPublisher) publishRecord(ctx context.Context, k ci.PrivKey, value path.Path, seqno uint64, eol time.Time, ipnskey string, ID peer.ID) error {
 	entry, err := CreateRoutingEntryData(k, value, seqno, eol)
 	if err != nil {
 		return err
@@ -163,7 +167,7 @@ func (p *pubsubPublisher) publishRecord(ctx context.Context, k ci.PrivKey, value
 	_, ok := p.subs[topic]
 
 	if !ok {
-		p.subs[ipnskey] = struct{}{}
+		p.subs[topic] = struct{}{}
 		p.mx.Unlock()
 
 		bootstrapPubsub(p.ctx, p.cr, p.host, topic)
@@ -175,88 +179,125 @@ func (p *pubsubPublisher) publishRecord(ctx context.Context, k ci.PrivKey, value
 	return p.ps.Publish(topic, data)
 }
 
-// PubsubResolver implementation
-func (r *pubsubResolver) Resolve(ctx context.Context, name string) (value path.Path, err error) {
+// Resolve resolves a name through pubsub and default depth limit
+func (r *PubsubResolver) Resolve(ctx context.Context, name string) (value path.Path, err error) {
 	return r.ResolveN(ctx, name, DefaultDepthLimit)
 }
 
-func (r *pubsubResolver) ResolveN(ctx context.Context, name string, depth int) (value path.Path, err error) {
+// ResolveN resolves a name through pubsub with the specified depth limit
+func (r *PubsubResolver) ResolveN(ctx context.Context, name string, depth int) (value path.Path, err error) {
 	return resolve(ctx, r, name, depth, "/ipns/")
 }
 
-func (r *pubsubResolver) resolveOnce(ctx context.Context, name string) (value path.Path, err error) {
-	log.Debugf("PubsubResolve: '%s'", name)
+func (r *PubsubResolver) resolveOnce(ctx context.Context, name string) (path.Path, error) {
+	log.Debugf("PubsubResolve: resolve '%s'", name)
 
 	// retrieve the public key once (for verifying messages)
 	xname := strings.TrimPrefix(name, "/ipns/")
 	hash, err := mh.FromB58String(xname)
 	if err != nil {
 		log.Warningf("PubsubResolve: bad input hash: [%s]", xname)
-		return
+		return "", err
 	}
 
-	pubk, err := r.pkf.GetPublicKey(ctx, peer.ID(hash))
+	id := peer.ID(hash)
+	if r.host.Peerstore().PrivKey(id) != nil {
+		return "", errors.New("Cannot resolve own name through pubsub")
+	}
+
+	pubk, err := r.pkf.GetPublicKey(ctx, id)
 	if err != nil {
 		log.Warningf("PubsubResolve: error fetching public key: %s [%s]", err.Error(), xname)
-		return
+		return "", err
 	}
 
-	// the mutex is locked both for subscription map manipulation and datastore
-	// manipulation (otherwise race in TTL checking/invalidation)
-	r.mx.Lock()
-	defer r.mx.Unlock()
+	// the topic is /ipns/Qmhash
+	if !strings.HasPrefix(name, "/ipns/") {
+		name = "/ipns/" + name
+	}
 
+	r.mx.Lock()
 	// see if we already have a pubsub subscription; if not, subscribe
 	sub, ok := r.subs[name]
 	if !ok {
 		sub, err = r.ps.Subscribe(name)
 		if err != nil {
-			return
+			r.mx.Unlock()
+			return "", err
 		}
+
+		log.Debugf("PubsubResolve: subscribed to %s", name)
 
 		r.subs[name] = sub
 		go r.handleSubscription(sub, name, pubk)
 		go bootstrapPubsub(r.ctx, r.cr, r.host, name)
 	}
+	r.mx.Unlock()
 
 	// resolve to what we may already have in the datastore
 	dsval, err := r.ds.Get(dshelp.NewKeyFromBinary([]byte(name)))
 	if err != nil {
-		// this signals ds.ErrNotFound when we have no record
-		return
+		if err == ds.ErrNotFound {
+			return "", ErrResolveFailed
+		}
+		return "", err
 	}
 
-	entry := dsval.(*pb.IpnsEntry)
+	data := dsval.([]byte)
+	entry := new(pb.IpnsEntry)
+
+	err = proto.Unmarshal(data, entry)
+	if err != nil {
+		return "", err
+	}
 
 	// check EOL; if the entry has expired, delete from datastore and return ds.ErrNotFound
 	eol, ok := checkEOL(entry)
 	if ok && eol.Before(time.Now()) {
-		r.ds.Delete(dshelp.NewKeyFromBinary([]byte(name)))
-		return "", ds.ErrNotFound
+		err = r.ds.Delete(dshelp.NewKeyFromBinary([]byte(name)))
+		if err != nil {
+			log.Warningf("PubsubResolve: error deleting stale value: %s", err.Error())
+		}
+
+		return "", ErrResolveFailed
 	}
 
-	value, err = path.ParsePath(string(entry.GetValue()))
-	return
+	value, err := path.ParsePath(string(entry.GetValue()))
+	return value, err
 }
 
-func (r *pubsubResolver) handleSubscription(sub *floodsub.Subscription, name string, pubk ci.PubKey) {
+// Cancel cancels a topic subscription
+func (r *PubsubResolver) Cancel(name string) {
+	r.mx.Lock()
+	defer r.mx.Unlock()
+
+	sub, ok := r.subs[name]
+	if ok {
+		sub.Cancel()
+		delete(r.subs, name)
+	}
+}
+
+func (r *PubsubResolver) handleSubscription(sub *floodsub.Subscription, name string, pubk ci.PubKey) {
 	defer sub.Cancel()
 
 	for {
 		msg, err := sub.Next(r.ctx)
 		if err != nil {
-			log.Warningf("PubsubResolve: subscription error in %s: %s", name, err.Error())
+			if err != context.Canceled {
+				log.Warningf("PubsubResolve: subscription error in %s: %s", name, err.Error())
+			}
 			return
 		}
 
 		err = r.receive(msg, name, pubk)
 		if err != nil {
-			log.Debugf("PubsubResolve: error proessing update for %s: %s", name, err.Error())
+			log.Warningf("PubsubResolve: error proessing update for %s: %s", name, err.Error())
 		}
 	}
 }
 
-func (r *pubsubResolver) receive(msg *floodsub.Message, name string, pubk ci.PubKey) error {
+func (r *PubsubResolver) receive(msg *floodsub.Message, name string, pubk ci.PubKey) error {
 	data := msg.GetData()
 	if data == nil {
 		return errors.New("empty message")
@@ -280,24 +321,29 @@ func (r *pubsubResolver) receive(msg *floodsub.Message, name string, pubk ci.Pub
 
 	eol, ok := checkEOL(entry)
 	if ok && eol.Before(time.Now()) {
-		return errors.New("stale update")
+		return errors.New("stale update; EOL exceeded")
 	}
 
-	r.mx.Lock()
-	defer r.mx.Unlock()
-
 	// check the sequence number against what we may already have in our datastore
-	dsval, err := r.ds.Get(dshelp.NewKeyFromBinary([]byte(name)))
+	oval, err := r.ds.Get(dshelp.NewKeyFromBinary([]byte(name)))
 	if err == nil {
-		oentry := dsval.(*pb.IpnsEntry)
+		odata := oval.([]byte)
+		oentry := new(pb.IpnsEntry)
+
+		err = proto.Unmarshal(odata, oentry)
+		if err != nil {
+			return err
+		}
+
 		if entry.GetSequence() <= oentry.GetSequence() {
-			return errors.New("stale update")
+			return errors.New("stale update; sequence number too small")
 		}
 	}
 
 	log.Debugf("PubsubResolve: receive IPNS record for %s", name)
-	r.ds.Put(dshelp.NewKeyFromBinary([]byte(name)), entry)
-	return nil
+
+	err = r.ds.Put(dshelp.NewKeyFromBinary([]byte(name)), data)
+	return err
 }
 
 // rendezvous with peers in the name topic through provider records
@@ -332,6 +378,10 @@ func bootstrapPubsub(ctx context.Context, cr routing.ContentRouting, host p2phos
 				log.Debugf("Error connecting to pubsub peer %s: %s", pi.ID, err.Error())
 				return
 			}
+
+			// delay to let pubsub perform its handshake
+			time.Sleep(time.Millisecond * 250)
+
 			log.Debugf("Connected to pubsub peer %s", pi.ID)
 		}(pi)
 	}

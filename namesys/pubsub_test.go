@@ -10,14 +10,15 @@ import (
 	mockrouting "github.com/ipfs/go-ipfs/routing/mock"
 	testutil "github.com/ipfs/go-ipfs/thirdparty/testutil"
 
-	ci "gx/ipfs/QmP1DfoUjiWH2ZBo1PBH6FupdBucbDepx3HpWmEY6JMUpY/go-libp2p-crypto"
-	routing "gx/ipfs/QmP1wMAqk6aZYRZirbaAwmrNeqFRgQrwBt3orUtvSa1UYD/go-libp2p-routing"
-	floodsub "gx/ipfs/QmUpeULWfmtsgCnfuRN3BHsfhHvBxNphoYh4La4CMxGt2Z/floodsub"
-	p2phost "gx/ipfs/QmUywuGNZoUKV8B9iyvup9bPkLiMrhTsyVMkeSXW5VxAfC/go-libp2p-host"
+	pstore "gx/ipfs/QmPgDWmTmuzvP7QE5zwo1TmjbJme9pmZHNujB2453jkCTr/go-libp2p-peerstore"
+	routing "gx/ipfs/QmPjTrrSfE6TzLv6ya6VWhGcCgPrUAdcgrDcQyRDX2VyW1/go-libp2p-routing"
 	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
-	netutil "gx/ipfs/Qma2j8dYePrvN5DoNgwh1uAuu3FFtEtrUQFmr737ws8nCp/go-libp2p-netutil"
-	bhost "gx/ipfs/Qma4Xhhqtr9tpV814eNjbLHzjuDaRjs96XLcZPJiR742ZV/go-libp2p-blankhost"
-	peer "gx/ipfs/QmdS9KpbDyPrieswibZhkod1oXqRwZJrUPzxCofAMWpFGq/go-libp2p-peer"
+	netutil "gx/ipfs/QmViDDJGzv2TKrheoxckReECc72iRgaYsobG2HYUGWuPVF/go-libp2p-netutil"
+	peer "gx/ipfs/QmXYjuNuxVzXKJCfWasQk1RqkhVLDM9jtUKhqc2WPQmFSB/go-libp2p-peer"
+	floodsub "gx/ipfs/QmZdsQf8BiCpAj61nz9NgqVeRUkw9vATvCs7UHFTxoUMDb/floodsub"
+	p2phost "gx/ipfs/QmZy7c24mmkEHpNJndwgsEE3wcVxHd8yB969yTnAJFVw7f/go-libp2p-host"
+	ci "gx/ipfs/QmaPbCnUMBohSGo3KnxEa2bHqyJVVeEEcwtqJAYxerieBo/go-libp2p-crypto"
+	bhost "gx/ipfs/QmbQXcWAa9ZbTH74m6yroexY8QjTS4oivLNEFwjamZCJTU/go-libp2p-blankhost"
 )
 
 func newNetHost(ctx context.Context, t *testing.T) p2phost.Host {
@@ -90,7 +91,7 @@ func newMockRoutingForHosts(ms mockrouting.Server, ks *mockKeyStore, hosts []p2p
 }
 
 // tests
-func TestPubsubPublishResolve(t *testing.T) {
+func TestPubsubPublishSubscribe(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -99,21 +100,27 @@ func TestPubsubPublishResolve(t *testing.T) {
 
 	pubhost := newNetHost(ctx, t)
 	pubmr := newMockRouting(ms, ks, pubhost)
-	pub := NewPubsubPublisher(ctx, ds.NewMapDatastore(), pubhost, pubmr, floodsub.NewFloodSub(ctx, pubhost))
+	pub := NewPubsubPublisher(ctx, pubhost, ds.NewMapDatastore(), pubmr, floodsub.NewFloodSub(ctx, pubhost))
 	privk := pubhost.Peerstore().PrivKey(pubhost.ID())
+	pubpinfo := pstore.PeerInfo{ID: pubhost.ID(), Addrs: pubhost.Addrs()}
 
 	name := "/ipns/" + pubhost.ID().Pretty()
 
-	reshosts := newNetHosts(ctx, t, 20)
+	reshosts := newNetHosts(ctx, t, 5)
 	resmrs := newMockRoutingForHosts(ms, ks, reshosts)
-	res := make([]Resolver, len(reshosts))
+	res := make([]*PubsubResolver, len(reshosts))
 	for i := 0; i < len(res); i++ {
 		res[i] = NewPubsubResolver(ctx, reshosts[i], resmrs[i], ks, floodsub.NewFloodSub(ctx, reshosts[i]))
+		if err := reshosts[i].Connect(ctx, pubpinfo); err != nil {
+			t.Fatal(err)
+		}
 	}
 
 	time.Sleep(time.Millisecond * 100)
 	for i := 0; i < len(res); i++ {
-		checkResolveNotFound(ctx, t, res[i], name)
+		checkResolveNotFound(ctx, t, i, res[i], name)
+		// delay to avoid connection storms
+		time.Sleep(time.Millisecond * 100)
 	}
 
 	// let the bootstrap finish
@@ -125,9 +132,10 @@ func TestPubsubPublishResolve(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	time.Sleep(time.Second * 3)
+	// let the flood propagate
+	time.Sleep(time.Second * 1)
 	for i := 0; i < len(res); i++ {
-		checkResolve(ctx, t, res[i], name, val)
+		checkResolve(ctx, t, i, res[i], name, val)
 	}
 
 	val = path.Path("/ipfs/QmP1wMAqk6aZYRZirbaAwmrNeqFRgQrwBt3orUtvSa1UYD")
@@ -136,25 +144,44 @@ func TestPubsubPublishResolve(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	time.Sleep(time.Second * 3)
+	// let the flood propagate
+	time.Sleep(time.Second * 1)
 	for i := 0; i < len(res); i++ {
-		checkResolve(ctx, t, res[i], name, val)
+		checkResolve(ctx, t, i, res[i], name, val)
 	}
-}
 
-func checkResolveNotFound(ctx context.Context, t *testing.T, resolver Resolver, name string) {
-	_, err := resolver.Resolve(ctx, name)
-	if err != ds.ErrNotFound {
-		t.Fatalf("unexpected value: %#v", err)
+	// cancel subscriptions
+	for i := 0; i < len(res); i++ {
+		res[i].Cancel(name)
 	}
-}
+	time.Sleep(time.Millisecond * 100)
 
-func checkResolve(ctx context.Context, t *testing.T, resolver Resolver, name string, val path.Path) {
-	xval, err := resolver.Resolve(ctx, name)
+	nval := path.Path("/ipfs/QmPgDWmTmuzvP7QE5zwo1TmjbJme9pmZHNujB2453jkCTr")
+	err = pub.Publish(ctx, privk, nval)
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	// check we still have the old value in the resolver
+	time.Sleep(time.Second * 1)
+	for i := 0; i < len(res); i++ {
+		checkResolve(ctx, t, i, res[i], name, val)
+	}
+}
+
+func checkResolveNotFound(ctx context.Context, t *testing.T, i int, resolver Resolver, name string) {
+	_, err := resolver.Resolve(ctx, name)
+	if err != ErrResolveFailed {
+		t.Fatalf("[resolver %d] unexpected error: %s", i, err.Error())
+	}
+}
+
+func checkResolve(ctx context.Context, t *testing.T, i int, resolver Resolver, name string, val path.Path) {
+	xval, err := resolver.Resolve(ctx, name)
+	if err != nil {
+		t.Fatalf("[resolver %d] resolve failed: %s", i, err.Error())
+	}
 	if xval != val {
-		t.Fatalf("resolver resolves to unexpected value %s %s", val, xval)
+		t.Fatalf("[resolver %d] unexpected value: %s %s", i, val, xval)
 	}
 }

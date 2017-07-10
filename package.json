@@ -506,9 +506,9 @@
     },
     {
       "author": "whyrusleeping",
-      "hash": "Qma4Xhhqtr9tpV814eNjbLHzjuDaRjs96XLcZPJiR742ZV",
+      "hash": "QmbQXcWAa9ZbTH74m6yroexY8QjTS4oivLNEFwjamZCJTU",
       "name": "go-libp2p-blankhost",
-      "version": "0.1.13"
+      "version": "0.1.15"
     }
   ],
   "gxVersion": "0.10.0",
@@ -517,3 +517,4 @@
   "name": "go-ipfs",
   "version": "0.4.14-dev"
 }
+
