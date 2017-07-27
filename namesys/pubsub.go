@@ -18,7 +18,7 @@ import (
 	cid "gx/ipfs/QmTprEaAA2A9bst5XH7exuyi5KzNMK3SEDNN8rBDnKWcUS/go-cid"
 	mh "gx/ipfs/QmU9a9NV9RdPNwZQDYd5uKsm6N6LJLSvLbywDDYFbaaC6P/go-multihash"
 	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
-	ds_sync "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore/sync"
+	dssync "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore/sync"
 	peer "gx/ipfs/QmXYjuNuxVzXKJCfWasQk1RqkhVLDM9jtUKhqc2WPQmFSB/go-libp2p-peer"
 	proto "gx/ipfs/QmZ4Qi3GaRbjcx28Sme5eMH7RQjGkt8wHxt2a65oLaeFEV/gogo-protobuf/proto"
 	floodsub "gx/ipfs/QmZdsQf8BiCpAj61nz9NgqVeRUkw9vATvCs7UHFTxoUMDb/floodsub"
@@ -35,8 +35,9 @@ type PubsubPublisher struct {
 	host p2phost.Host
 	cr   routing.ContentRouting
 	ps   *floodsub.PubSub
-	subs map[string]struct{}
+
 	mx   sync.Mutex
+	subs map[string]struct{}
 }
 
 // PubsubResolver is a resolver that receives IPNS records through pubsub
@@ -47,8 +48,9 @@ type PubsubResolver struct {
 	cr   routing.ContentRouting
 	pkf  routing.PubKeyFetcher
 	ps   *floodsub.PubSub
-	subs map[string]*floodsub.Subscription
+
 	mx   sync.Mutex
+	subs map[string]*floodsub.Subscription
 }
 
 // NewPubsubPublisher constructs a new Publisher that publishes IPNS records through pubsub.
@@ -70,7 +72,7 @@ func NewPubsubPublisher(ctx context.Context, host p2phost.Host, ds ds.Datastore,
 func NewPubsubResolver(ctx context.Context, host p2phost.Host, cr routing.ContentRouting, pkf routing.PubKeyFetcher, ps *floodsub.PubSub) *PubsubResolver {
 	return &PubsubResolver{
 		ctx:  ctx,
-		ds:   ds_sync.MutexWrap(ds.NewMapDatastore()),
+		ds:   dssync.MutexWrap(ds.NewMapDatastore()),
 		host: host, // needed for pubsub bootstrap
 		cr:   cr,   // needed for pubsub bootstrap
 		pkf:  pkf,
@@ -175,17 +177,17 @@ func (p *PubsubPublisher) publishRecord(ctx context.Context, k ci.PrivKey, value
 		p.mx.Unlock()
 	}
 
-	log.Debugf("PubsubPublish: publish IPNS record for %s", topic)
+	log.Debugf("PubsubPublish: publish IPNS record for %s (%d)", topic, seqno)
 	return p.ps.Publish(topic, data)
 }
 
 // Resolve resolves a name through pubsub and default depth limit
-func (r *PubsubResolver) Resolve(ctx context.Context, name string) (value path.Path, err error) {
+func (r *PubsubResolver) Resolve(ctx context.Context, name string) (path.Path, error) {
 	return r.ResolveN(ctx, name, DefaultDepthLimit)
 }
 
 // ResolveN resolves a name through pubsub with the specified depth limit
-func (r *PubsubResolver) ResolveN(ctx context.Context, name string, depth int) (value path.Path, err error) {
+func (r *PubsubResolver) ResolveN(ctx context.Context, name string, depth int) (path.Path, error) {
 	return resolve(ctx, r, name, depth, "/ipns/")
 }
 
@@ -229,8 +231,10 @@ func (r *PubsubResolver) resolveOnce(ctx context.Context, name string) (path.Pat
 		log.Debugf("PubsubResolve: subscribed to %s", name)
 
 		r.subs[name] = sub
-		go r.handleSubscription(sub, name, pubk)
-		go bootstrapPubsub(r.ctx, r.cr, r.host, name)
+
+		ctx, cancel := context.WithCancel(r.ctx)
+		go r.handleSubscription(sub, name, pubk, cancel)
+		go bootstrapPubsub(ctx, r.cr, r.host, name)
 	}
 	r.mx.Unlock()
 
@@ -256,7 +260,7 @@ func (r *PubsubResolver) resolveOnce(ctx context.Context, name string) (path.Pat
 	if ok && eol.Before(time.Now()) {
 		err = r.ds.Delete(dshelp.NewKeyFromBinary([]byte(name)))
 		if err != nil {
-			log.Warningf("PubsubResolve: error deleting stale value: %s", err.Error())
+			log.Warningf("PubsubResolve: error deleting stale value for %s: %s", name, err.Error())
 		}
 
 		return "", ErrResolveFailed
@@ -278,8 +282,9 @@ func (r *PubsubResolver) Cancel(name string) {
 	}
 }
 
-func (r *PubsubResolver) handleSubscription(sub *floodsub.Subscription, name string, pubk ci.PubKey) {
+func (r *PubsubResolver) handleSubscription(sub *floodsub.Subscription, name string, pubk ci.PubKey, cancel func()) {
 	defer sub.Cancel()
+	defer cancel()
 
 	for {
 		msg, err := sub.Next(r.ctx)
@@ -351,12 +356,26 @@ func (r *PubsubResolver) receive(msg *floodsub.Message, name string, pubk ci.Pub
 func bootstrapPubsub(ctx context.Context, cr routing.ContentRouting, host p2phost.Host, name string) {
 	topic := "floodsub:" + name
 	hash := u.Hash([]byte(topic))
-	rz := cid.NewCidV1(cid.Raw, hash) // perhaps this should be V0
+	rz := cid.NewCidV1(cid.Raw, hash)
 
 	err := cr.Provide(ctx, rz, true)
 	if err != nil {
-		log.Warningf("bootstrapPubsub: Error providing rendezvous for %s: %s", topic, err.Error())
+		log.Warningf("bootstrapPubsub: error providing rendezvous for %s: %s", topic, err.Error())
 	}
+
+	go func() {
+		for {
+			select {
+			case <-time.After(24 * time.Hour):
+				err := cr.Provide(ctx, rz, true)
+				if err != nil {
+					log.Warningf("bootstrapPubsub: error providing rendezvous for %s: %s", topic, err.Error())
+				}
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
 
 	rzctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()

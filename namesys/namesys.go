@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"sync"
 	"time"
 
 	path "github.com/ipfs/go-ipfs/path"
@@ -50,12 +51,12 @@ func NewNameSystem(r routing.ValueStore, ds ds.Datastore, cachesize int) NameSys
 func AddPubsubNameSystem(ctx context.Context, ns NameSystem, host p2phost.Host, r routing.IpfsRouting, ds ds.Datastore, ps *floodsub.PubSub) error {
 	mpns, ok := ns.(*mpns)
 	if !ok {
-		return errors.New("Unexpected NameSystem; not an mpns instance")
+		return errors.New("unexpected NameSystem; not an mpns instance")
 	}
 
 	pkf, ok := r.(routing.PubKeyFetcher)
 	if !ok {
-		return errors.New("Unexpected IpfsRouting; not a PubKeyFetcher instance")
+		return errors.New("unexpected IpfsRouting; not a PubKeyFetcher instance")
 	}
 
 	mpns.resolvers["pubsub"] = NewPubsubResolver(ctx, host, r, pkf, ps)
@@ -162,18 +163,32 @@ func (ns *mpns) Publish(ctx context.Context, name ci.PrivKey, value path.Path) e
 }
 
 func (ns *mpns) PublishWithEOL(ctx context.Context, name ci.PrivKey, value path.Path, eol time.Time) error {
-	err := ns.publishers["dht"].PublishWithEOL(ctx, name, value, eol)
-	if err != nil {
-		return err
-	}
-	ns.addToDHTCache(name, value, eol)
+	var dhtErr error
+
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		dhtErr = ns.publishers["dht"].PublishWithEOL(ctx, name, value, eol)
+		if dhtErr == nil {
+			ns.addToDHTCache(name, value, eol)
+		}
+		wg.Done()
+	}()
 
 	pub, ok := ns.publishers["pubsub"]
 	if ok {
-		pub.PublishWithEOL(ctx, name, value, eol)
+		wg.Add(1)
+		go func() {
+			err := pub.PublishWithEOL(ctx, name, value, eol)
+			if err != nil {
+				log.Warningf("error publishing %s with pubsub: %s", name, err.Error())
+			}
+			wg.Done()
+		}()
 	}
 
-	return nil
+	wg.Wait()
+	return dhtErr
 }
 
 func (ns *mpns) addToDHTCache(key ci.PrivKey, value path.Path, eol time.Time) {
