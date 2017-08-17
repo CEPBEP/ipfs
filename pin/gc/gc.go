@@ -158,14 +158,14 @@ func ColoredSet(ctx context.Context, pn pin.Pinner, ls dag.LinkService, bestEffo
 		output <- Result{Error: err}
 	}
 
-	for _, k := range pn.DirectKeys() {
-		gcs.Add(k)
-	}
-
 	err = Descendants(ctx, getLinks, gcs, pn.InternalPins())
 	if err != nil {
 		errors = true
 		output <- Result{Error: err}
+	}
+
+	for _, k := range pn.DirectKeys() {
+		gcs.Add(k)
 	}
 
 	if errors {
