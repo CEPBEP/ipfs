@@ -160,7 +160,10 @@ func (p *PubsubPublisher) publishRecord(ctx context.Context, k ci.PrivKey, value
 		return err
 	}
 
-	p.ds.Put(dshelp.NewKeyFromBinary([]byte(ipnskey)), dsdata)
+	err = p.ds.Put(dshelp.NewKeyFromBinary([]byte(ipnskey)), dsdata)
+	if err != nil {
+		return err
+	}
 
 	// now we publish, but we also need to bootstrap pubsub for our messages to propagate
 	topic := "/ipns/" + ID.Pretty()
@@ -347,8 +350,7 @@ func (r *PubsubResolver) receive(msg *floodsub.Message, name string, pubk ci.Pub
 
 	log.Debugf("PubsubResolve: receive IPNS record for %s", name)
 
-	err = r.ds.Put(dshelp.NewKeyFromBinary([]byte(name)), data)
-	return err
+	return r.ds.Put(dshelp.NewKeyFromBinary([]byte(name)), data)
 }
 
 // rendezvous with peers in the name topic through provider records
