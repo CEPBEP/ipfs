@@ -8,8 +8,8 @@ import (
 	"runtime"
 	"time"
 
-	goprocess "gx/ipfs/QmSF8fPo3jgVBAy8fpdjjYqgG87dkJgUprRBHRd2tmfgpP/goprocess"
-	logging "gx/ipfs/QmSpJByNKFX1sCsHBEp3R73FL4NF6FnQTEGyNAXHm2GS52/go-log"
+	logging "github.com/ipfs/go-log"
+	goprocess "github.com/jbenet/goprocess"
 )
 
 var log = logging.Logger("mount")
@@ -90,7 +90,7 @@ type closer struct {
 }
 
 func (c *closer) Close() error {
-	log.Warning(" (c *closer) Close(),", c.M.MountPoint())
+	log.Error(" (c *closer) Close(),", c.M.MountPoint())
 	return c.M.Unmount()
 }
 

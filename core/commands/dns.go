@@ -4,9 +4,9 @@ import (
 	"io"
 	"strings"
 
+	util "github.com/ipfs/go-ipfs-util"
 	cmds "github.com/ipfs/go-ipfs/commands"
 	namesys "github.com/ipfs/go-ipfs/namesys"
-	util "gx/ipfs/QmSU6eubNdhXjFBJBSksTp8kv8YRub8mGAPv8tVJHmL2EU/go-ipfs-util"
 )
 
 var DNSCmd = &cmds.Command{

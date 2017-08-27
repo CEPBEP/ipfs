@@ -6,11 +6,11 @@ import (
 	"io"
 	"sort"
 
+	u "github.com/ipfs/go-ipfs-util"
 	cmds "github.com/ipfs/go-ipfs/commands"
 	repo "github.com/ipfs/go-ipfs/repo"
 	config "github.com/ipfs/go-ipfs/repo/config"
 	"github.com/ipfs/go-ipfs/repo/fsrepo"
-	u "gx/ipfs/QmSU6eubNdhXjFBJBSksTp8kv8YRub8mGAPv8tVJHmL2EU/go-ipfs-util"
 )
 
 type BootstrapOutput struct {

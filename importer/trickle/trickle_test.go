@@ -16,7 +16,7 @@ import (
 	ft "github.com/ipfs/go-ipfs/unixfs"
 	uio "github.com/ipfs/go-ipfs/unixfs/io"
 
-	u "gx/ipfs/QmSU6eubNdhXjFBJBSksTp8kv8YRub8mGAPv8tVJHmL2EU/go-ipfs-util"
+	u "github.com/ipfs/go-ipfs-util"
 )
 
 func buildTestDag(ds merkledag.DAGService, spl chunk.Splitter) (*merkledag.ProtoNode, error) {

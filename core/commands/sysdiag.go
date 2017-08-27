@@ -8,8 +8,8 @@ import (
 	cmds "github.com/ipfs/go-ipfs/commands"
 	config "github.com/ipfs/go-ipfs/repo/config"
 
-	manet "gx/ipfs/QmX3U3YXCQ6UYBxq2LVWF8dARS1hPUTEYLrSx654Qyxyw6/go-multiaddr-net"
-	sysi "gx/ipfs/QmZRjKbHa6DenStpQJFiaPcEwkZqrx7TH6xTf342LDU3qM/go-sysinfo"
+	manet "github.com/multiformats/go-multiaddr-net"
+	sysi "github.com/whyrusleeping/go-sysinfo"
 )
 
 var sysDiagCmd = &cmds.Command{

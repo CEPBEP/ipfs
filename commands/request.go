@@ -11,10 +11,10 @@ import (
 	"strconv"
 	"time"
 
+	u "github.com/ipfs/go-ipfs-util"
 	"github.com/ipfs/go-ipfs/commands/files"
 	"github.com/ipfs/go-ipfs/core"
 	"github.com/ipfs/go-ipfs/repo/config"
-	u "gx/ipfs/QmSU6eubNdhXjFBJBSksTp8kv8YRub8mGAPv8tVJHmL2EU/go-ipfs-util"
 )
 
 type OptMap map[string]interface{}

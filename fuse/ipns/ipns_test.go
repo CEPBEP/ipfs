@@ -15,12 +15,12 @@ import (
 	core "github.com/ipfs/go-ipfs/core"
 	namesys "github.com/ipfs/go-ipfs/namesys"
 	offroute "github.com/ipfs/go-ipfs/routing/offline"
-	ci "gx/ipfs/QmWRCn8vruNAzHx8i6SAXinuheRitKEGu8c7m26stKvsYx/go-testutil/ci"
+	ci "github.com/libp2p/go-testutil/ci"
 
 	racedet "github.com/ipfs/go-ipfs/Godeps/_workspace/src/github.com/jbenet/go-detect-race"
 
-	u "gx/ipfs/QmSU6eubNdhXjFBJBSksTp8kv8YRub8mGAPv8tVJHmL2EU/go-ipfs-util"
-	fstest "gx/ipfs/QmaFNtBAXX4nVMQWbUqNysXyhevUj1k4B1y5uS45LC7Vw9/fuse/fs/fstestutil"
+	fstest "bazil.org/fuse/fs/fstestutil"
+	u "github.com/ipfs/go-ipfs-util"
 )
 
 func maybeSkipFuseTests(t *testing.T) {

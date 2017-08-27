@@ -13,7 +13,7 @@ import (
 	trickle "github.com/ipfs/go-ipfs/importer/trickle"
 	dag "github.com/ipfs/go-ipfs/merkledag"
 
-	node "gx/ipfs/QmPN7cwmpcc4DWXb4KTB9dNAJgjuPY69h3npsMfhRrQL9c/go-ipld-format"
+	node "github.com/ipfs/go-ipld-format"
 )
 
 // Builds a DAG from the given file, writing created blocks to disk as they are

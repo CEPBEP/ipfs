@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	"gx/ipfs/QmSU6eubNdhXjFBJBSksTp8kv8YRub8mGAPv8tVJHmL2EU/go-ipfs-util"
+	"github.com/ipfs/go-ipfs-util"
 )
 
 // Types of Command options

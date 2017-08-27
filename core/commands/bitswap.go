@@ -9,10 +9,10 @@ import (
 	bitswap "github.com/ipfs/go-ipfs/exchange/bitswap"
 	decision "github.com/ipfs/go-ipfs/exchange/bitswap/decision"
 
-	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
-	"gx/ipfs/QmPSBJL4momYnE7DcUyk2DVhD6rH488ZmHBGLbxNdhU44K/go-humanize"
-	u "gx/ipfs/QmSU6eubNdhXjFBJBSksTp8kv8YRub8mGAPv8tVJHmL2EU/go-ipfs-util"
-	peer "gx/ipfs/QmXYjuNuxVzXKJCfWasQk1RqkhVLDM9jtUKhqc2WPQmFSB/go-libp2p-peer"
+	"github.com/dustin/go-humanize"
+	cid "github.com/ipfs/go-cid"
+	u "github.com/ipfs/go-ipfs-util"
+	peer "github.com/libp2p/go-libp2p-peer"
 )
 
 var BitswapCmd = &cmds.Command{

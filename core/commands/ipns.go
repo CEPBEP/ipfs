@@ -5,10 +5,10 @@ import (
 	"io"
 	"strings"
 
+	u "github.com/ipfs/go-ipfs-util"
 	cmds "github.com/ipfs/go-ipfs/commands"
 	namesys "github.com/ipfs/go-ipfs/namesys"
 	offline "github.com/ipfs/go-ipfs/routing/offline"
-	u "gx/ipfs/QmSU6eubNdhXjFBJBSksTp8kv8YRub8mGAPv8tVJHmL2EU/go-ipfs-util"
 )
 
 var IpnsCmd = &cmds.Command{

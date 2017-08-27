@@ -5,9 +5,9 @@ import (
 	"context"
 	"io"
 
-	blocks "gx/ipfs/QmSn9Td7xgxm9EV7iEjTckpUWmWApggzPxu7eFGWkkpwin/go-block-format"
+	blocks "github.com/ipfs/go-block-format"
 
-	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
+	cid "github.com/ipfs/go-cid"
 )
 
 // Any type that implements exchange.Interface may be used as an IPFS block

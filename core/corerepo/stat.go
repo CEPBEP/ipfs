@@ -7,7 +7,7 @@ import (
 	"github.com/ipfs/go-ipfs/core"
 	fsrepo "github.com/ipfs/go-ipfs/repo/fsrepo"
 
-	humanize "gx/ipfs/QmPSBJL4momYnE7DcUyk2DVhD6rH488ZmHBGLbxNdhU44K/go-humanize"
+	humanize "github.com/dustin/go-humanize"
 )
 
 type Stat struct {

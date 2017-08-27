@@ -7,17 +7,17 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ipfs/go-block-format"
 	"github.com/ipfs/go-ipfs/blocks/blockstore"
 	pb "github.com/ipfs/go-ipfs/filestore/pb"
 	dshelp "github.com/ipfs/go-ipfs/thirdparty/ds-help"
 	posinfo "github.com/ipfs/go-ipfs/thirdparty/posinfo"
-	"gx/ipfs/QmSn9Td7xgxm9EV7iEjTckpUWmWApggzPxu7eFGWkkpwin/go-block-format"
 
-	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
-	proto "gx/ipfs/QmT6n4mspWYEya864BhCUJEgyxiRfmiSY9ruQwTUNpRKaM/protobuf/proto"
-	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
-	dsns "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore/namespace"
-	dsq "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore/query"
+	proto "github.com/golang/protobuf/proto"
+	cid "github.com/ipfs/go-cid"
+	ds "github.com/ipfs/go-datastore"
+	dsns "github.com/ipfs/go-datastore/namespace"
+	dsq "github.com/ipfs/go-datastore/query"
 )
 
 // FilestorePrefix identifies the key prefix for FileManager blocks.

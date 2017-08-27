@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
-	proto "gx/ipfs/QmZ4Qi3GaRbjcx28Sme5eMH7RQjGkt8wHxt2a65oLaeFEV/gogo-protobuf/proto"
+	proto "github.com/gogo/protobuf/proto"
 
+	u "github.com/ipfs/go-ipfs-util"
 	pb "github.com/ipfs/go-ipfs/namesys/pb"
 	path "github.com/ipfs/go-ipfs/path"
-	u "gx/ipfs/QmSU6eubNdhXjFBJBSksTp8kv8YRub8mGAPv8tVJHmL2EU/go-ipfs-util"
-	ci "gx/ipfs/QmaPbCnUMBohSGo3KnxEa2bHqyJVVeEEcwtqJAYxerieBo/go-libp2p-crypto"
+	ci "github.com/libp2p/go-libp2p-crypto"
 )
 
 func shuffle(a []*pb.IpnsEntry) {

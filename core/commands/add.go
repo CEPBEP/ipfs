@@ -18,9 +18,9 @@ import (
 	mfs "github.com/ipfs/go-ipfs/mfs"
 	ft "github.com/ipfs/go-ipfs/unixfs"
 
-	u "gx/ipfs/QmSU6eubNdhXjFBJBSksTp8kv8YRub8mGAPv8tVJHmL2EU/go-ipfs-util"
-	mh "gx/ipfs/QmU9a9NV9RdPNwZQDYd5uKsm6N6LJLSvLbywDDYFbaaC6P/go-multihash"
-	"gx/ipfs/QmeWjRodbcZFKe5tMN7poEx3izym6osrLSnTLf9UjJZBbs/pb"
+	"github.com/cheggaaa/pb"
+	u "github.com/ipfs/go-ipfs-util"
+	mh "github.com/multiformats/go-multihash"
 )
 
 // Error indicating the max depth has been exceded.

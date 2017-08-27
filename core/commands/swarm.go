@@ -14,11 +14,11 @@ import (
 	config "github.com/ipfs/go-ipfs/repo/config"
 	"github.com/ipfs/go-ipfs/repo/fsrepo"
 	iaddr "github.com/ipfs/go-ipfs/thirdparty/ipfsaddr"
-	pstore "gx/ipfs/QmPgDWmTmuzvP7QE5zwo1TmjbJme9pmZHNujB2453jkCTr/go-libp2p-peerstore"
-	swarm "gx/ipfs/QmQUmDr1DMDDy6KMSsJuyV9nVD7dJZ9iWxXESQWPvte2NP/go-libp2p-swarm"
+	pstore "github.com/libp2p/go-libp2p-peerstore"
+	swarm "github.com/libp2p/go-libp2p-swarm"
 
-	mafilter "gx/ipfs/QmSMZwvs3n4GBikZ7hKzT17c3bk65FmyZo2JqtJ16swqCv/multiaddr-filter"
-	ma "gx/ipfs/QmXY77cVe7rVRQXZZQRioukUM7aRW3BTcAgJe12MCtb3Ji/go-multiaddr"
+	ma "github.com/multiformats/go-multiaddr"
+	mafilter "github.com/whyrusleeping/multiaddr-filter"
 )
 
 type stringList struct {

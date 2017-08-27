@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	ci "gx/ipfs/QmaPbCnUMBohSGo3KnxEa2bHqyJVVeEEcwtqJAYxerieBo/go-libp2p-crypto"
+	ci "github.com/libp2p/go-libp2p-crypto"
 )
 
 type Keystore interface {

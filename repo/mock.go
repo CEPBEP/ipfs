@@ -7,7 +7,7 @@ import (
 	keystore "github.com/ipfs/go-ipfs/keystore"
 	"github.com/ipfs/go-ipfs/repo/config"
 
-	ma "gx/ipfs/QmXY77cVe7rVRQXZZQRioukUM7aRW3BTcAgJe12MCtb3Ji/go-multiaddr"
+	ma "github.com/multiformats/go-multiaddr"
 )
 
 var errTODO = errors.New("TODO: mock repo")

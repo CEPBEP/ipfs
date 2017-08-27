@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"gx/ipfs/QmSn9Td7xgxm9EV7iEjTckpUWmWApggzPxu7eFGWkkpwin/go-block-format"
+	"github.com/ipfs/go-block-format"
 
 	context "context"
-	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
-	dsq "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore/query"
-	syncds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore/sync"
+	ds "github.com/ipfs/go-datastore"
+	dsq "github.com/ipfs/go-datastore/query"
+	syncds "github.com/ipfs/go-datastore/sync"
 )
 
 func testBloomCached(ctx context.Context, bs Blockstore) (*bloomcache, error) {

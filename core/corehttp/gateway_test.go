@@ -19,8 +19,8 @@ import (
 	config "github.com/ipfs/go-ipfs/repo/config"
 	ds2 "github.com/ipfs/go-ipfs/thirdparty/datastore2"
 
-	id "gx/ipfs/QmXZyBQMkqSYigxhJResC6fLWDGFhbphK67eZoqMDUvBmK/go-libp2p/p2p/protocol/identify"
-	ci "gx/ipfs/QmaPbCnUMBohSGo3KnxEa2bHqyJVVeEEcwtqJAYxerieBo/go-libp2p-crypto"
+	ci "github.com/libp2p/go-libp2p-crypto"
+	id "github.com/libp2p/go-libp2p/p2p/protocol/identify"
 )
 
 // `ipfs object new unixfs-dir`

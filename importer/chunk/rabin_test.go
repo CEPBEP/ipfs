@@ -3,8 +3,8 @@ package chunk
 import (
 	"bytes"
 	"fmt"
-	"gx/ipfs/QmSU6eubNdhXjFBJBSksTp8kv8YRub8mGAPv8tVJHmL2EU/go-ipfs-util"
-	"gx/ipfs/QmSn9Td7xgxm9EV7iEjTckpUWmWApggzPxu7eFGWkkpwin/go-block-format"
+	"github.com/ipfs/go-block-format"
+	"github.com/ipfs/go-ipfs-util"
 	"io"
 	"testing"
 )

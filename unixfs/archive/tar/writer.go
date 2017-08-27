@@ -13,8 +13,8 @@ import (
 	uio "github.com/ipfs/go-ipfs/unixfs/io"
 	upb "github.com/ipfs/go-ipfs/unixfs/pb"
 
-	node "gx/ipfs/QmPN7cwmpcc4DWXb4KTB9dNAJgjuPY69h3npsMfhRrQL9c/go-ipld-format"
-	proto "gx/ipfs/QmZ4Qi3GaRbjcx28Sme5eMH7RQjGkt8wHxt2a65oLaeFEV/gogo-protobuf/proto"
+	proto "github.com/gogo/protobuf/proto"
+	node "github.com/ipfs/go-ipld-format"
 )
 
 // Writer is a utility structure that helps to write

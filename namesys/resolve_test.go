@@ -8,11 +8,11 @@ import (
 
 	path "github.com/ipfs/go-ipfs/path"
 	mockrouting "github.com/ipfs/go-ipfs/routing/mock"
-	testutil "gx/ipfs/QmWRCn8vruNAzHx8i6SAXinuheRitKEGu8c7m26stKvsYx/go-testutil"
+	testutil "github.com/libp2p/go-testutil"
 
-	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
-	dssync "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore/sync"
-	peer "gx/ipfs/QmXYjuNuxVzXKJCfWasQk1RqkhVLDM9jtUKhqc2WPQmFSB/go-libp2p-peer"
+	ds "github.com/ipfs/go-datastore"
+	dssync "github.com/ipfs/go-datastore/sync"
+	peer "github.com/libp2p/go-libp2p-peer"
 )
 
 func TestRoutingResolve(t *testing.T) {

@@ -6,8 +6,8 @@ import (
 
 	mdag "github.com/ipfs/go-ipfs/merkledag"
 
-	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
-	node "gx/ipfs/QmPN7cwmpcc4DWXb4KTB9dNAJgjuPY69h3npsMfhRrQL9c/go-ipld-format"
+	cid "github.com/ipfs/go-cid"
+	node "github.com/ipfs/go-ipld-format"
 )
 
 // DiffEnumerate fetches every object in the graph pointed to by 'to' that is

@@ -5,8 +5,8 @@ import (
 	"errors"
 	"io"
 
-	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
-	ipld "gx/ipfs/QmPN7cwmpcc4DWXb4KTB9dNAJgjuPY69h3npsMfhRrQL9c/go-ipld-format"
+	cid "github.com/ipfs/go-cid"
+	ipld "github.com/ipfs/go-ipld-format"
 )
 
 type Path interface {

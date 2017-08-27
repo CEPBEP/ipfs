@@ -15,8 +15,8 @@ import (
 	cmds "github.com/ipfs/go-ipfs/commands"
 	"github.com/ipfs/go-ipfs/repo/config"
 
-	cors "gx/ipfs/QmPG2kW5t27LuHgHnvhUwbHCNHAt2eUcb4gPHqofrESUdB/cors"
-	logging "gx/ipfs/QmSpJByNKFX1sCsHBEp3R73FL4NF6FnQTEGyNAXHm2GS52/go-log"
+	logging "github.com/ipfs/go-log"
+	cors "github.com/rs/cors"
 )
 
 var log = logging.Logger("commands/http")

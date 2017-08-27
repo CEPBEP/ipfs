@@ -9,10 +9,10 @@ import (
 	"github.com/ipfs/go-ipfs/core/coredag"
 	"github.com/ipfs/go-ipfs/plugin"
 
-	"gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
-	"gx/ipfs/QmPN7cwmpcc4DWXb4KTB9dNAJgjuPY69h3npsMfhRrQL9c/go-ipld-format"
-	mh "gx/ipfs/QmU9a9NV9RdPNwZQDYd5uKsm6N6LJLSvLbywDDYFbaaC6P/go-multihash"
-	git "gx/ipfs/QmaWPGUJJFb75PvWwnkXAxYXUtsRFCRQiCZhpr5ks4F9K9/go-ipld-git"
+	"github.com/ipfs/go-cid"
+	"github.com/ipfs/go-ipld-format"
+	git "github.com/ipfs/go-ipld-git"
+	mh "github.com/multiformats/go-multihash"
 )
 
 // Plugins is exported list of plugins that will be loaded

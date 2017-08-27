@@ -11,9 +11,9 @@ import (
 	gc "github.com/ipfs/go-ipfs/pin/gc"
 	repo "github.com/ipfs/go-ipfs/repo"
 
-	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
-	humanize "gx/ipfs/QmPSBJL4momYnE7DcUyk2DVhD6rH488ZmHBGLbxNdhU44K/go-humanize"
-	logging "gx/ipfs/QmSpJByNKFX1sCsHBEp3R73FL4NF6FnQTEGyNAXHm2GS52/go-log"
+	humanize "github.com/dustin/go-humanize"
+	cid "github.com/ipfs/go-cid"
+	logging "github.com/ipfs/go-log"
 )
 
 var log = logging.Logger("corerepo")

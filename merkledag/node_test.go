@@ -8,7 +8,7 @@ import (
 	. "github.com/ipfs/go-ipfs/merkledag"
 	mdtest "github.com/ipfs/go-ipfs/merkledag/test"
 
-	node "gx/ipfs/QmPN7cwmpcc4DWXb4KTB9dNAJgjuPY69h3npsMfhRrQL9c/go-ipld-format"
+	node "github.com/ipfs/go-ipld-format"
 )
 
 func TestRemoveLink(t *testing.T) {

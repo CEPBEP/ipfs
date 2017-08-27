@@ -13,8 +13,8 @@ import (
 	keystore "github.com/ipfs/go-ipfs/keystore"
 	path "github.com/ipfs/go-ipfs/path"
 
-	peer "gx/ipfs/QmXYjuNuxVzXKJCfWasQk1RqkhVLDM9jtUKhqc2WPQmFSB/go-libp2p-peer"
-	crypto "gx/ipfs/QmaPbCnUMBohSGo3KnxEa2bHqyJVVeEEcwtqJAYxerieBo/go-libp2p-crypto"
+	crypto "github.com/libp2p/go-libp2p-crypto"
+	peer "github.com/libp2p/go-libp2p-peer"
 )
 
 var errNotOnline = errors.New("This command must be run in online mode. Try running 'ipfs daemon' first.")

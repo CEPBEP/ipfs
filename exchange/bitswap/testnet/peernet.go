@@ -2,12 +2,12 @@ package bitswap
 
 import (
 	"context"
+	ds "github.com/ipfs/go-datastore"
 	bsnet "github.com/ipfs/go-ipfs/exchange/bitswap/network"
 	mockrouting "github.com/ipfs/go-ipfs/routing/mock"
-	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
-	testutil "gx/ipfs/QmWRCn8vruNAzHx8i6SAXinuheRitKEGu8c7m26stKvsYx/go-testutil"
-	peer "gx/ipfs/QmXYjuNuxVzXKJCfWasQk1RqkhVLDM9jtUKhqc2WPQmFSB/go-libp2p-peer"
-	mockpeernet "gx/ipfs/QmXZyBQMkqSYigxhJResC6fLWDGFhbphK67eZoqMDUvBmK/go-libp2p/p2p/net/mock"
+	peer "github.com/libp2p/go-libp2p-peer"
+	mockpeernet "github.com/libp2p/go-libp2p/p2p/net/mock"
+	testutil "github.com/libp2p/go-testutil"
 )
 
 type peernet struct {

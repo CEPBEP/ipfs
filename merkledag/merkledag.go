@@ -9,10 +9,10 @@ import (
 	bserv "github.com/ipfs/go-ipfs/blockservice"
 	offline "github.com/ipfs/go-ipfs/exchange/offline"
 
-	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
-	node "gx/ipfs/QmPN7cwmpcc4DWXb4KTB9dNAJgjuPY69h3npsMfhRrQL9c/go-ipld-format"
-	blocks "gx/ipfs/QmSn9Td7xgxm9EV7iEjTckpUWmWApggzPxu7eFGWkkpwin/go-block-format"
-	ipldcbor "gx/ipfs/QmcRu2X6kdDKmCbMpYXKHVgDrhLqVYCACMe1aghUcdHj2z/go-ipld-cbor"
+	blocks "github.com/ipfs/go-block-format"
+	cid "github.com/ipfs/go-cid"
+	ipldcbor "github.com/ipfs/go-ipld-cbor"
+	node "github.com/ipfs/go-ipld-format"
 )
 
 // TODO: We should move these registrations elsewhere. Really, most of the IPLD
@@ -153,13 +153,8 @@ type sesGetter struct {
 
 func (sg *sesGetter) Get(ctx context.Context, c *cid.Cid) (node.Node, error) {
 	blk, err := sg.bs.GetBlock(ctx, c)
-	switch err {
-	case bserv.ErrNotFound:
-		return nil, ErrNotFound
-	default:
+	if err != nil {
 		return nil, err
-	case nil:
-		// noop
 	}
 
 	return node.Decode(blk)

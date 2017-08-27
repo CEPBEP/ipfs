@@ -8,9 +8,9 @@ import (
 	pb "github.com/ipfs/go-ipfs/filestore/pb"
 	dshelp "github.com/ipfs/go-ipfs/thirdparty/ds-help"
 
-	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
-	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
-	dsq "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore/query"
+	cid "github.com/ipfs/go-cid"
+	ds "github.com/ipfs/go-datastore"
+	dsq "github.com/ipfs/go-datastore/query"
 )
 
 // Status is used to identify the state of the block data referenced

@@ -4,14 +4,14 @@ import (
 	"errors"
 
 	context "context"
+	ds "github.com/ipfs/go-datastore"
 	core "github.com/ipfs/go-ipfs/core"
 	repo "github.com/ipfs/go-ipfs/repo"
 	supernode "github.com/ipfs/go-ipfs/routing/supernode"
 	gcproxy "github.com/ipfs/go-ipfs/routing/supernode/proxy"
-	routing "gx/ipfs/QmPR2JzfKd9poHx9XBhzoFeBBC31ZM3W5iUPKJZWyaoZZm/go-libp2p-routing"
-	pstore "gx/ipfs/QmPgDWmTmuzvP7QE5zwo1TmjbJme9pmZHNujB2453jkCTr/go-libp2p-peerstore"
-	"gx/ipfs/QmUwW8jMQDxXhLD2j4EfWqLEMX3MsvyWcWGvJPVDh1aTmu/go-libp2p-host"
-	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
+	"github.com/libp2p/go-libp2p-host"
+	pstore "github.com/libp2p/go-libp2p-peerstore"
+	routing "github.com/libp2p/go-libp2p-routing"
 )
 
 // NB: DHT option is included in the core to avoid 1) because it's a sane

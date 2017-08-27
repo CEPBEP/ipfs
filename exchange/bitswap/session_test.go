@@ -8,8 +8,8 @@ import (
 
 	blocksutil "github.com/ipfs/go-ipfs/blocks/blocksutil"
 
-	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
-	blocks "gx/ipfs/QmSn9Td7xgxm9EV7iEjTckpUWmWApggzPxu7eFGWkkpwin/go-block-format"
+	blocks "github.com/ipfs/go-block-format"
+	cid "github.com/ipfs/go-cid"
 )
 
 func TestBasicSessions(t *testing.T) {

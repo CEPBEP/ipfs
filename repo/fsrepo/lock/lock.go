@@ -8,9 +8,9 @@ import (
 	"strings"
 	"syscall"
 
-	"gx/ipfs/QmSU6eubNdhXjFBJBSksTp8kv8YRub8mGAPv8tVJHmL2EU/go-ipfs-util"
-	logging "gx/ipfs/QmSpJByNKFX1sCsHBEp3R73FL4NF6FnQTEGyNAXHm2GS52/go-log"
-	lock "gx/ipfs/QmWi28zbQG6B1xfaaWx5cYoLn3kBFU6pQ6GWQNRV5P6dNe/lock"
+	"github.com/ipfs/go-ipfs-util"
+	logging "github.com/ipfs/go-log"
+	lock "go4.org/lock"
 )
 
 // LockFile is the filename of the repo lock, relative to config dir

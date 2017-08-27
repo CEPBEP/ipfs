@@ -12,9 +12,9 @@ import (
 	cmds "github.com/ipfs/go-ipfs/commands"
 	files "github.com/ipfs/go-ipfs/commands/files"
 
-	u "gx/ipfs/QmSU6eubNdhXjFBJBSksTp8kv8YRub8mGAPv8tVJHmL2EU/go-ipfs-util"
-	logging "gx/ipfs/QmSpJByNKFX1sCsHBEp3R73FL4NF6FnQTEGyNAXHm2GS52/go-log"
-	osh "gx/ipfs/QmXuBJ7DR6k3rmUEKtvVMhwjmXDuJgXXPUt4LQXKBMsU93/go-os-helper"
+	osh "github.com/Kubuxu/go-os-helper"
+	u "github.com/ipfs/go-ipfs-util"
+	logging "github.com/ipfs/go-log"
 )
 
 var log = logging.Logger("commands/cli")

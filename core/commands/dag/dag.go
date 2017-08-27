@@ -12,8 +12,8 @@ import (
 	path "github.com/ipfs/go-ipfs/path"
 	pin "github.com/ipfs/go-ipfs/pin"
 
-	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
-	mh "gx/ipfs/QmU9a9NV9RdPNwZQDYd5uKsm6N6LJLSvLbywDDYFbaaC6P/go-multihash"
+	cid "github.com/ipfs/go-cid"
+	mh "github.com/multiformats/go-multihash"
 )
 
 var DagCmd = &cmds.Command{
