@@ -1,0 +1,325 @@
+
+# Gopkg.toml example
+#
+# Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
+# for detailed Gopkg.toml documentation.
+#
+# required = ["github.com/user/thing/cmd/thing"]
+# ignored = ["github.com/user/project/pkgX", "bitbucket.org/user/project/pkgA/pkgY"]
+#
+# [[constraint]]
+#   name = "github.com/user/project"
+#   version = "1.0.0"
+#
+# [[constraint]]
+#   name = "github.com/user/project2"
+#   branch = "dev"
+#   source = "github.com/myfork/project2"
+#
+# [[override]]
+#  name = "github.com/x/y"
+#  version = "2.4.0"
+
+
+[[constraint]]
+  revision = "73d29b6d1aee13403f7b7ffd3ead457e20f638b3"
+  name = "bazil.org/fuse"
+  source = "https://github.com/gxed/bazil-fuse"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/Kubuxu/go-os-helper"
+
+[[constraint]]
+  name = "github.com/blang/semver"
+  version = "3.5.1"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/bren2010/proquint"
+
+[[constraint]]
+  name = "github.com/cenkalti/backoff"
+  version = "1.1.0"
+
+[[constraint]]
+  revision = "c1f48d5ce4f292dfb775ef52aaedd15be323510d"
+  name = "gopkg.in/cheggaaa/pb.v1"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/dustin/go-humanize"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/facebookgo/atomicfile"
+
+[[constraint]]
+  name = "github.com/gogo/protobuf"
+  version = "0.4.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/gxed/bbloom"
+
+[[constraint]]
+  name = "github.com/gxed/client_golang"
+  version = "0.7.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/hashicorp/golang-lru"
+
+[[constraint]]
+  name = "github.com/ipfs/dir-index-html"
+  version = "1.0.2"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/ipfs/go-block-format"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/ipfs/go-cid"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/ipfs/go-datastore"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/ipfs/go-ds-flatfs"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/ipfs/go-ds-leveldb"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/ipfs/go-ds-measure"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/ipfs/go-ipfs-util"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/ipfs/go-ipld-cbor"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/ipfs/go-ipld-format"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/ipfs/go-ipld-git"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/ipfs/go-log"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/ipfs/go-metrics-interface"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/ipfs/go-metrics-prometheus"
+
+[[constraint]]
+  name = "github.com/jbenet/go-base58"
+  version = "1.0.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/jbenet/go-is-domain"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-stream-muxer"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/jbenet/goprocess"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-addr-util"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-floodsub"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-libp2p"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-libp2p-circuit"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-libp2p-crypto"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-libp2p-host"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-libp2p-interface-conn"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-libp2p-interface-pnet"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-libp2p-kad-dht"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-libp2p-kbucket"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-libp2p-loggables"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-libp2p-metrics"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-libp2p-net"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-libp2p-netutil"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-libp2p-peer"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-libp2p-peerstore"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-libp2p-pnet"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-libp2p-protocol"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-libp2p-record"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-libp2p-routing"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-libp2p-secio"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-maddr-filter"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/libp2p/go-testutil"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/multiformats/go-multiaddr"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/multiformats/go-multiaddr-net"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/multiformats/go-multibase"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/multiformats/go-multihash"
+
+[[constraint]]
+  name = "github.com/rs/cors"
+  version = "1.2.0"
+
+[[constraint]]
+  name = "github.com/spaolacci/murmur3"
+  version = "1.0.0"
+
+[[constraint]]
+  name = "github.com/steakknife/hamming"
+  version = "0.2.3"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/syndtr/goleveldb"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/whyrusleeping/base32"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/whyrusleeping/go-smux-multiplex"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/whyrusleeping/go-smux-multistream"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/whyrusleeping/go-smux-yamux"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/whyrusleeping/go-sysinfo"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/whyrusleeping/multiaddr-filter"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/whyrusleeping/retry-datastore"
+
+[[constraint]]
+  branch = "master"
+  name = "go4.org"
+
+[[constraint]]
+  name = "gopkg.in/fsnotify.v1"
+  version = "1.4.2"
+
+# Relevant
+
+[[constraint]]
+  branch = "fix/stream-muxer/libp2p"
+  name = "github.com/libp2p/go-libp2p-swarm"
+
+[[override]]
+  name = "github.com/whyrusleeping/go-smux-spdystream"
+  source = "https://github.com/marten-seemann/go-smux-spdystream.git"
+  branch = "remove-serve"
+
+[[override]]
+  name = "github.com/libp2p/go-peerstream"
+  source = "https://github.com/marten-seemann/go-peerstream.git"
+  branch = "remove-serve"
+
+[[override]]
+  revision = "6fafe570892b47db67ae32c4d4eebcdaa206f309"
+  name = "github.com/whyrusleeping/go-smux-multistream"
+  source = "https://github.com/marten-seemann/go-smux-multistream.git"
+

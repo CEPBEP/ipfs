@@ -9,14 +9,14 @@ import (
 	gopath "path"
 	"strings"
 
-	"github.com/cheggaaa/pb"
-
 	cmds "github.com/ipfs/go-ipfs/commands"
 	core "github.com/ipfs/go-ipfs/core"
 	dag "github.com/ipfs/go-ipfs/merkledag"
 	path "github.com/ipfs/go-ipfs/path"
 	tar "github.com/ipfs/go-ipfs/thirdparty/tar"
 	uarchive "github.com/ipfs/go-ipfs/unixfs/archive"
+
+	pb "gopkg.in/cheggaaa/pb.v1"
 )
 
 var ErrInvalidCompressionLevel = errors.New("Compression level must be between 1 and 9")

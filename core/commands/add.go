@@ -18,9 +18,9 @@ import (
 	mfs "github.com/ipfs/go-ipfs/mfs"
 	ft "github.com/ipfs/go-ipfs/unixfs"
 
-	"github.com/cheggaaa/pb"
 	u "github.com/ipfs/go-ipfs-util"
 	mh "github.com/multiformats/go-multihash"
+	pb "gopkg.in/cheggaaa/pb.v1"
 )
 
 // Error indicating the max depth has been exceded.

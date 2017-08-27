@@ -11,13 +11,13 @@ import (
 	ds2 "github.com/ipfs/go-ipfs/thirdparty/datastore2"
 	testutil "github.com/libp2p/go-testutil"
 
-	smux "github.com/jbenet/go-stream-muxer"
 	host "github.com/libp2p/go-libp2p-host"
 	ipnet "github.com/libp2p/go-libp2p-interface-pnet"
 	metrics "github.com/libp2p/go-libp2p-metrics"
 	peer "github.com/libp2p/go-libp2p-peer"
 	pstore "github.com/libp2p/go-libp2p-peerstore"
 	mocknet "github.com/libp2p/go-libp2p/p2p/net/mock"
+	smux "github.com/libp2p/go-stream-muxer"
 )
 
 // NewMockNode constructs an IpfsNode for use in tests.

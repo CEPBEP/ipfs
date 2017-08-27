@@ -13,7 +13,7 @@ import (
 	dshelp "github.com/ipfs/go-ipfs/thirdparty/ds-help"
 	posinfo "github.com/ipfs/go-ipfs/thirdparty/posinfo"
 
-	proto "github.com/golang/protobuf/proto"
+	proto "github.com/gogo/protobuf/proto"
 	cid "github.com/ipfs/go-cid"
 	ds "github.com/ipfs/go-datastore"
 	dsns "github.com/ipfs/go-datastore/namespace"

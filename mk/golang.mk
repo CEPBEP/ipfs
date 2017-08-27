@@ -32,7 +32,7 @@ test_go_race: test_go_expensive
 .PHONY: test_go_race
 
 test_go_expensive: $$(DEPS_GO)
-	$(GOCC) test $(go-flags-with-tags) $(GOTFLAGS) ./...
+	$(GOCC) test $(go-flags-with-tags) $(GOTFLAGS) $(shell $(GOCC) list $(go-tags) ./... | grep -v /vendor/)
 .PHONY: test_go_expensive
 TEST_GO += test_go_expensive
 

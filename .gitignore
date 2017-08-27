@@ -12,6 +12,8 @@
 
 coverage.txt
 
+vendor
+
 .ipfs
 bin/gx
 bin/gx*
