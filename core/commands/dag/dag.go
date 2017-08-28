@@ -11,10 +11,10 @@ import (
 	path "github.com/ipfs/go-ipfs/path"
 
 	ipldcbor "gx/ipfs/QmNrbCt8j9DT5W9Pmjy2SdudT9k8GpaDr4sRuFix3BXhgR/go-ipld-cbor"
-	btc "gx/ipfs/QmW3iy3akabBoGPriRX29Bsg698eMcZgQ17QYaFhpscCy7/go-ipld-btc"
 	zec "gx/ipfs/QmYMG6BMmcMuEdLFtsNocXQE9ZWwCpoxNkZnvht1GHYRpu/go-ipld-zcash"
 	cid "gx/ipfs/QmYhQaCYEcaPPjxJX7YcPcVKkQfRy6sJ7B3XmGFk82XYdQ/go-cid"
 	node "gx/ipfs/Qmb3Hm9QDFmfYuET4pu7Kyg8JV78jFa1nvZx5vnCZsK4ck/go-ipld-format"
+	btc "gx/ipfs/QmcNu6Xb4DX1bis2Zbho7V4yozY3bgLWggp77ZSoYbQ4jj/go-ipld-btc"
 	eth "gx/ipfs/QmdtmRZK1C1EonaNnGTAz5DqPHNuKzPvuJ7Hf8Dg6sZMa4/go-ipld-eth"
 )
 
