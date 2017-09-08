@@ -1,16 +1,7 @@
 #!/bin/sh
 set -e
-user=ipfs
 repo="$IPFS_PATH"
 
-if [ `id -u` -eq 0 ]; then
-  # ensure folder is writable
-  su-exec "$user" test -w "$repo" || chown -R -- "$user" "$repo"
-  # restart script with new privileges
-  exec su-exec "$user" "$0" "$@"
-fi
-
-# 2nd invocation with regular user
 ipfs version
 
 if [ -e "$repo/config" ]; then
