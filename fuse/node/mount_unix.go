@@ -11,6 +11,7 @@ import (
 
 	core "github.com/ipfs/go-ipfs/core"
 	ipns "github.com/ipfs/go-ipfs/fuse/ipns"
+	mfsfuse "github.com/ipfs/go-ipfs/fuse/mfs"
 	mount "github.com/ipfs/go-ipfs/fuse/mount"
 	rofs "github.com/ipfs/go-ipfs/fuse/readonly"
 	logging "gx/ipfs/QmSpJByNKFX1sCsHBEp3R73FL4NF6FnQTEGyNAXHm2GS52/go-log"
@@ -62,6 +63,17 @@ func doMount(node *core.IpfsNode, fsdir, nsdir string) error {
 		}
 		return err
 	}
+
+	mfsfs := mfsfuse.NewFileSystem(node.FilesRoot)
+	mfsmnt, err := mount.NewMount(node.Process(), mfsfs, "/mfs", false)
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		<-node.Process().Closing()
+		mfsmnt.Unmount()
+	}()
 
 	// this sync stuff is so that both can be mounted simultaneously.
 	var fsmount, nsmount mount.Mount
