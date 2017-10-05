@@ -16,6 +16,10 @@ type ipnsPubsubState struct {
 	Enabled bool
 }
 
+type ipnsPubsubCancel struct {
+	Canceled bool
+}
+
 // IpnsPubsubCmd is the subcommand that allows us to manage the IPNS pubsub system
 var IpnsPubsubCmd = &cmds.Command{
 	Helptext: cmds.HelpText{
@@ -121,9 +125,28 @@ var ipnspsCancelCmd = &cmds.Command{
 			return
 		}
 
-		psr.Cancel(req.Arguments()[0])
+		ok = psr.Cancel(req.Arguments()[0])
+		res.SetOutput(&ipnsPubsubCancel{ok})
 	},
 	Arguments: []cmds.Argument{
 		cmds.StringArg("name", true, false, "Name to cancel the subscription for."),
+	},
+	Type: ipnsPubsubCancel{},
+	Marshalers: cmds.MarshalerMap{
+		cmds.Text: func(res cmds.Response) (io.Reader, error) {
+			output, ok := res.Output().(*ipnsPubsubCancel)
+			if !ok {
+				return nil, u.ErrCast()
+			}
+
+			var state string
+			if output.Canceled {
+				state = "canceled"
+			} else {
+				state = "no subscription"
+			}
+
+			return strings.NewReader(state + "\n"), nil
+		},
 	},
 }

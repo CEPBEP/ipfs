@@ -476,9 +476,9 @@
     },
     {
       "author": "whyrusleeping",
-      "hash": "QmWRCn8vruNAzHx8i6SAXinuheRitKEGu8c7m26stKvsYx",
+      "hash": "QmQgLZP9haZheimMHqqAjJh2LhRmNfEoZDfbtkpeMhi9xK",
       "name": "go-testutil",
-      "version": "1.1.11"
+      "version": "1.1.12"
     },
     {
       "author": "whyrusleeping",
@@ -506,15 +506,9 @@
     },
     {
       "author": "whyrusleeping",
-      "hash": "QmPZRCaYeNLMo5GfcRS2rv9ZxVuXXt6MFg9dWLmgsdXKCw",
+      "hash": "QmQkeGXc9ZuQ5upVFpd2EjKvgw9aVh1BbtAgvNGVcebmmX",
       "name": "go-libp2p-blankhost",
-      "version": "0.2.0"
-    },
-    {
-      "author": "whyrusleeping",
-      "hash": "QmQgLZP9haZheimMHqqAjJh2LhRmNfEoZDfbtkpeMhi9xK",
-      "name": "go-testutil",
-      "version": "1.1.12"
+      "version": "0.2.1"
     }
   ],
   "gxVersion": "0.10.0",
