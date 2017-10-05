@@ -8,17 +8,17 @@ import (
 
 	path "github.com/ipfs/go-ipfs/path"
 	mockrouting "github.com/ipfs/go-ipfs/routing/mock"
-	testutil "github.com/ipfs/go-ipfs/thirdparty/testutil"
 
+	routing "gx/ipfs/QmPR2JzfKd9poHx9XBhzoFeBBC31ZM3W5iUPKJZWyaoZZm/go-libp2p-routing"
+	bhost "gx/ipfs/QmPZRCaYeNLMo5GfcRS2rv9ZxVuXXt6MFg9dWLmgsdXKCw/go-libp2p-blankhost"
 	pstore "gx/ipfs/QmPgDWmTmuzvP7QE5zwo1TmjbJme9pmZHNujB2453jkCTr/go-libp2p-peerstore"
-	routing "gx/ipfs/QmPjTrrSfE6TzLv6ya6VWhGcCgPrUAdcgrDcQyRDX2VyW1/go-libp2p-routing"
+	testutil "gx/ipfs/QmQgLZP9haZheimMHqqAjJh2LhRmNfEoZDfbtkpeMhi9xK/go-testutil"
 	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
-	netutil "gx/ipfs/QmViDDJGzv2TKrheoxckReECc72iRgaYsobG2HYUGWuPVF/go-libp2p-netutil"
 	peer "gx/ipfs/QmXYjuNuxVzXKJCfWasQk1RqkhVLDM9jtUKhqc2WPQmFSB/go-libp2p-peer"
-	floodsub "gx/ipfs/QmZdsQf8BiCpAj61nz9NgqVeRUkw9vATvCs7UHFTxoUMDb/floodsub"
-	p2phost "gx/ipfs/QmZy7c24mmkEHpNJndwgsEE3wcVxHd8yB969yTnAJFVw7f/go-libp2p-host"
 	ci "gx/ipfs/QmaPbCnUMBohSGo3KnxEa2bHqyJVVeEEcwtqJAYxerieBo/go-libp2p-crypto"
-	bhost "gx/ipfs/QmbQXcWAa9ZbTH74m6yroexY8QjTS4oivLNEFwjamZCJTU/go-libp2p-blankhost"
+	p2phost "gx/ipfs/QmaSxYRuMq4pkpBBG2CYaRrPx2z7NmMVEs34b9g61biQA6/go-libp2p-host"
+	floodsub "gx/ipfs/Qmdnza7rLi7CMNNwNhNkcs9piX5sf6rxE8FrCsPzYtUEUi/floodsub"
+	netutil "gx/ipfs/QmdzuGp4a9pahgXuBeReHdYGUzdVX3FUCwfmWVo5mQfkTi/go-libp2p-netutil"
 )
 
 func newNetHost(ctx context.Context, t *testing.T) p2phost.Host {

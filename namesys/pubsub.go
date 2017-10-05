@@ -12,20 +12,20 @@ import (
 	path "github.com/ipfs/go-ipfs/path"
 	dshelp "github.com/ipfs/go-ipfs/thirdparty/ds-help"
 
+	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
+	routing "gx/ipfs/QmPR2JzfKd9poHx9XBhzoFeBBC31ZM3W5iUPKJZWyaoZZm/go-libp2p-routing"
 	pstore "gx/ipfs/QmPgDWmTmuzvP7QE5zwo1TmjbJme9pmZHNujB2453jkCTr/go-libp2p-peerstore"
-	routing "gx/ipfs/QmPjTrrSfE6TzLv6ya6VWhGcCgPrUAdcgrDcQyRDX2VyW1/go-libp2p-routing"
 	u "gx/ipfs/QmSU6eubNdhXjFBJBSksTp8kv8YRub8mGAPv8tVJHmL2EU/go-ipfs-util"
-	cid "gx/ipfs/QmTprEaAA2A9bst5XH7exuyi5KzNMK3SEDNN8rBDnKWcUS/go-cid"
 	mh "gx/ipfs/QmU9a9NV9RdPNwZQDYd5uKsm6N6LJLSvLbywDDYFbaaC6P/go-multihash"
 	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
 	dssync "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore/sync"
 	peer "gx/ipfs/QmXYjuNuxVzXKJCfWasQk1RqkhVLDM9jtUKhqc2WPQmFSB/go-libp2p-peer"
 	proto "gx/ipfs/QmZ4Qi3GaRbjcx28Sme5eMH7RQjGkt8wHxt2a65oLaeFEV/gogo-protobuf/proto"
-	floodsub "gx/ipfs/QmZdsQf8BiCpAj61nz9NgqVeRUkw9vATvCs7UHFTxoUMDb/floodsub"
-	p2phost "gx/ipfs/QmZy7c24mmkEHpNJndwgsEE3wcVxHd8yB969yTnAJFVw7f/go-libp2p-host"
 	ci "gx/ipfs/QmaPbCnUMBohSGo3KnxEa2bHqyJVVeEEcwtqJAYxerieBo/go-libp2p-crypto"
+	p2phost "gx/ipfs/QmaSxYRuMq4pkpBBG2CYaRrPx2z7NmMVEs34b9g61biQA6/go-libp2p-host"
 	record "gx/ipfs/QmbxkgUceEcuSZ4ZdBA3x74VUDSSYjHYmmeEqkjxbtZ6Jg/go-libp2p-record"
 	dhtpb "gx/ipfs/QmbxkgUceEcuSZ4ZdBA3x74VUDSSYjHYmmeEqkjxbtZ6Jg/go-libp2p-record/pb"
+	floodsub "gx/ipfs/Qmdnza7rLi7CMNNwNhNkcs9piX5sf6rxE8FrCsPzYtUEUi/floodsub"
 )
 
 // PubsubPublisher is a publisher that distributes IPNS records through pubsub
@@ -210,10 +210,13 @@ func (r *PubsubResolver) resolveOnce(ctx context.Context, name string) (path.Pat
 		return "", errors.New("Cannot resolve own name through pubsub")
 	}
 
-	pubk, err := r.pkf.GetPublicKey(ctx, id)
-	if err != nil {
-		log.Warningf("PubsubResolve: error fetching public key: %s [%s]", err.Error(), xname)
-		return "", err
+	pubk := id.ExtractPublicKey()
+	if pubk == nil {
+		pubk, err = r.pkf.GetPublicKey(ctx, id)
+		if err != nil {
+			log.Warningf("PubsubResolve: error fetching public key: %s [%s]", err.Error(), xname)
+			return "", err
+		}
 	}
 
 	// the topic is /ipns/Qmhash
@@ -271,6 +274,19 @@ func (r *PubsubResolver) resolveOnce(ctx context.Context, name string) (path.Pat
 
 	value, err := path.ParsePath(string(entry.GetValue()))
 	return value, err
+}
+
+// GetSubscriptions retrieves a list of active topic subscriptions
+func (r *PubsubResolver) GetSubscriptions() []string {
+	r.mx.Lock()
+	defer r.mx.Unlock()
+
+	var res []string
+	for sub := range r.subs {
+		res = append(res, sub)
+	}
+
+	return res
 }
 
 // Cancel cancels a topic subscription
@@ -368,7 +384,7 @@ func bootstrapPubsub(ctx context.Context, cr routing.ContentRouting, host p2phos
 	go func() {
 		for {
 			select {
-			case <-time.After(24 * time.Hour):
+			case <-time.After(8 * time.Hour):
 				err := cr.Provide(ctx, rz, true)
 				if err != nil {
 					log.Warningf("bootstrapPubsub: error providing rendezvous for %s: %s", topic, err.Error())

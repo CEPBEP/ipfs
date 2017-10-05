@@ -506,9 +506,15 @@
     },
     {
       "author": "whyrusleeping",
-      "hash": "QmbQXcWAa9ZbTH74m6yroexY8QjTS4oivLNEFwjamZCJTU",
+      "hash": "QmPZRCaYeNLMo5GfcRS2rv9ZxVuXXt6MFg9dWLmgsdXKCw",
       "name": "go-libp2p-blankhost",
-      "version": "0.1.15"
+      "version": "0.2.0"
+    },
+    {
+      "author": "whyrusleeping",
+      "hash": "QmQgLZP9haZheimMHqqAjJh2LhRmNfEoZDfbtkpeMhi9xK",
+      "name": "go-testutil",
+      "version": "1.1.12"
     }
   ],
   "gxVersion": "0.10.0",
