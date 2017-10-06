@@ -132,8 +132,8 @@ func (n *UnixfsNode) FileSize() uint64 {
 	return n.ufmt.FileSize()
 }
 
-func (n *UnixfsNode) SetPosInfo(offset uint64, fullPath string, stat os.FileInfo) {
-	n.posInfo = &pi.PosInfo{offset, fullPath, stat}
+func (n *UnixfsNode) SetPosInfo(offset uint64, fullPath string, stat os.FileInfo, isUrl bool) {
+	n.posInfo = &pi.PosInfo{offset, fullPath, stat, isUrl}
 }
 
 // getDagNode fills out the proper formatting for the unixfs node

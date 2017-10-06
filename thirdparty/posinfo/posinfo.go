@@ -10,6 +10,7 @@ type PosInfo struct {
 	Offset   uint64
 	FullPath string
 	Stat     os.FileInfo // can be nil
+	IsURL    bool
 }
 
 type FilestoreNode struct {
