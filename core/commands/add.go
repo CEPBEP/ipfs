@@ -136,7 +136,7 @@ You can now refer to the added file in a gateway, like so:
 
 		return nil
 	},
-	Run: func(req cmds.Request, re cmds.ResponseEmitter) {
+	Run: func(req cmds.Request, res cmds.Response) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
 			re.SetError(err, cmds.ErrNormal)
@@ -316,8 +316,8 @@ You can now refer to the added file in a gateway, like so:
 			re.SetError(err, cmds.ErrNormal)
 		}
 	},
-	PostRun: map[cmds.EncodingType]func(cmds.Request, cmds.ResponseEmitter) cmds.ResponseEmitter{
-		cmds.CLI: func(req cmds.Request, re cmds.ResponseEmitter) cmds.ResponseEmitter {
+	PostRun: map[cmds.EncodingType]func(cmds.Request,s cmds.Response) cmds.ResponseEmitter{
+		cmds.CLI: func(req cmds.Request, res cmds.Response) cmds.ResponseEmitter {
 			reNext, res := cmds.NewChanResponsePair(req)
 			outChan := make(chan interface{})
 

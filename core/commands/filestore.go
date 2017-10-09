@@ -54,7 +54,7 @@ The output is:
 	Options: []cmds.Option{
 		cmds.BoolOption("file-order", "sort the results based on the path of the backing file"),
 	},
-	Run: func(req cmds.Request, re cmds.ResponseEmitter) {
+	Run: func(req cmds.Request, res cmds.Response) {
 		_, fs, err := getFilestore(req.InvocContext())
 		if err != nil {
 			re.SetError(err, cmds.ErrNormal)
@@ -86,7 +86,7 @@ The output is:
 		}
 	},
 	PostRun: cmds.PostRunMap{
-		cmds.CLI: func(req cmds.Request, re cmds.ResponseEmitter) cmds.ResponseEmitter {
+		cmds.CLI: func(req cmds.Request, res cmds.Response) cmds.ResponseEmitter {
 			reNext, res := cmds.NewChanResponsePair(req)
 
 			go func() {

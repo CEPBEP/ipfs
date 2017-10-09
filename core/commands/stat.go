@@ -79,7 +79,7 @@ Example:
     "ns", "us" (or "µs"), "ms", "s", "m", "h".`).Default("1s"),
 	},
 
-	Run: func(req cmds.Request, re cmds.ResponseEmitter) {
+	Run: func(req cmds.Request, res cmds.Response) {
 		nd, err := req.InvocContext().GetNode()
 		if err != nil {
 			re.SetError(err, cmds.ErrNormal)
@@ -165,7 +165,7 @@ Example:
 	},
 	Type: metrics.Stats{},
 	PostRun: cmds.PostRunMap{
-		cmds.CLI: func(req cmds.Request, re cmds.ResponseEmitter) cmds.ResponseEmitter {
+		cmds.CLI: func(req cmds.Request, res cmds.Response) cmds.ResponseEmitter {
 			reNext, res := cmds.NewChanResponsePair(req)
 
 			go func() {

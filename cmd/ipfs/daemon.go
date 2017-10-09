@@ -182,7 +182,7 @@ func defaultMux(path string) corehttp.ServeOption {
 
 var fileDescriptorCheck = func() error { return nil }
 
-func daemonFunc(req cmds.Request, re cmds.ResponseEmitter) {
+func daemonFunc(req cmds.Request, res cmds.Response) {
 	// Inject metrics before we do anything
 
 	err := mprome.Inject()

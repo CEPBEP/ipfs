@@ -23,7 +23,7 @@ var CatCmd = &cmds.Command{
 	Arguments: []cmds.Argument{
 		cmds.StringArg("ipfs-path", true, true, "The path to the IPFS object(s) to be outputted.").EnableStdin(),
 	},
-	Run: func(req cmds.Request, re cmds.ResponseEmitter) {
+	Run: func(req cmds.Request, res cmds.Response) {
 		node, err := req.InvocContext().GetNode()
 		if err != nil {
 			re.SetError(err, cmds.ErrNormal)
@@ -62,8 +62,8 @@ var CatCmd = &cmds.Command{
 			re.SetError(err, cmds.ErrNormal)
 		}
 	},
-	PostRun: map[cmds.EncodingType]func(cmds.Request, cmds.ResponseEmitter) cmds.ResponseEmitter{
-		cmds.CLI: func(req cmds.Request, re cmds.ResponseEmitter) cmds.ResponseEmitter {
+	PostRun: map[cmds.EncodingType]func(cmds.Request,s cmds.Response) cmds.ResponseEmitter{
+		cmds.CLI: func(req cmds.Request, res cmds.Response) cmds.ResponseEmitter {
 			reNext, res := cmds.NewChanResponsePair(req)
 
 			go func() {

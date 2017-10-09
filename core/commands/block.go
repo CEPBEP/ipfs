@@ -60,7 +60,7 @@ on raw IPFS blocks. It outputs the following to stdout:
 	Arguments: []cmds.Argument{
 		cmds.StringArg("key", true, false, "The base58 multihash of an existing block to stat.").EnableStdin(),
 	},
-	Run: func(req cmds.Request, re cmds.ResponseEmitter) {
+	Run: func(req cmds.Request, res cmds.Response) {
 		b, err := getBlockForKey(req, req.Arguments()[0])
 		if err != nil {
 			re.SetError(err, cmds.ErrNormal)
@@ -100,7 +100,7 @@ It outputs to stdout, and <key> is a base58 encoded multihash.
 	Arguments: []cmds.Argument{
 		cmds.StringArg("key", true, false, "The base58 multihash of an existing block to get.").EnableStdin(),
 	},
-	Run: func(req cmds.Request, re cmds.ResponseEmitter) {
+	Run: func(req cmds.Request, res cmds.Response) {
 		b, err := getBlockForKey(req, req.Arguments()[0])
 		if err != nil {
 			re.SetError(err, cmds.ErrNormal)
@@ -131,7 +131,7 @@ It reads from stdin, and <key> is a base58 encoded multihash.
 		cmds.StringOption("mhtype", "multihash hash function").Default("sha2-256"),
 		cmds.IntOption("mhlen", "multihash hash length").Default(-1),
 	},
-	Run: func(req cmds.Request, re cmds.ResponseEmitter) {
+	Run: func(req cmds.Request, res cmds.Response) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
 			re.SetError(err, cmds.ErrNormal)
@@ -263,7 +263,7 @@ It takes a list of base58 encoded multihashs to remove.
 		cmds.BoolOption("force", "f", "Ignore nonexistent blocks.").Default(false),
 		cmds.BoolOption("quiet", "q", "Write minimal output.").Default(false),
 	},
-	Run: func(req cmds.Request, re cmds.ResponseEmitter) {
+	Run: func(req cmds.Request, res cmds.Response) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
 			re.SetError(err, cmds.ErrNormal)
@@ -298,8 +298,8 @@ It takes a list of base58 encoded multihashs to remove.
 			log.Error(err)
 		}
 	},
-	PostRun: map[cmds.EncodingType]func(cmds.Request, cmds.ResponseEmitter) cmds.ResponseEmitter{
-		cmds.CLI: func(req cmds.Request, re cmds.ResponseEmitter) cmds.ResponseEmitter {
+	PostRun: map[cmds.EncodingType]func(cmds.Request,s cmds.Response) cmds.ResponseEmitter{
+		cmds.CLI: func(req cmds.Request, res cmds.Response) cmds.ResponseEmitter {
 			reNext, res := cmds.NewChanResponsePair(req)
 
 			go func() {

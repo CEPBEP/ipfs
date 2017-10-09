@@ -148,7 +148,7 @@ RepoSize        int Size in bytes that the repo is currently taking.
 Version         string The repo version.
 `,
 	},
-	Run: func(req cmds.Request, re cmds.ResponseEmitter) {
+	Run: func(req cmds.Request, res cmds.Response) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
 			re.SetError(err, cmds.ErrNormal)

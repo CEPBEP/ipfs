@@ -327,7 +327,7 @@ func callCommand(ctx context.Context, req cmds.Request, root *cmds.Command, cmd 
 	encType := cmds.EncodingType(encTypeStr)
 
 	var (
-		re     cmds.ResponseEmitter
+		re    s cmds.Response
 		exitCh <-chan int
 	)
 

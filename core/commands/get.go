@@ -52,7 +52,7 @@ may also specify the level of compression by specifying '-l=<1-9>'.
 		_, err := getCompressOptions(req)
 		return err
 	},
-	Run: func(req cmds.Request, re cmds.ResponseEmitter) {
+	Run: func(req cmds.Request, res cmds.Response) {
 		if len(req.Arguments()) == 0 {
 			re.SetError(errors.New("not enough arugments provided"), cmds.ErrClient)
 			return
@@ -101,8 +101,8 @@ may also specify the level of compression by specifying '-l=<1-9>'.
 
 		re.Emit(reader)
 	},
-	PostRun: map[cmds.EncodingType]func(cmds.Request, cmds.ResponseEmitter) cmds.ResponseEmitter{
-		cmds.CLI: func(req cmds.Request, re cmds.ResponseEmitter) cmds.ResponseEmitter {
+	PostRun: map[cmds.EncodingType]func(cmds.Request,s cmds.Response) cmds.ResponseEmitter{
+		cmds.CLI: func(req cmds.Request, res cmds.Response) cmds.ResponseEmitter {
 			reNext, res := cmds.NewChanResponsePair(req)
 
 			go func() {

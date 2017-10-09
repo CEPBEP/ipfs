@@ -138,7 +138,7 @@ var bitswapStatCmd = &cmds.Command{
 		ShortDescription: ``,
 	},
 	Type: bitswap.Stat{},
-	Run: func(req cmds.Request, re cmds.ResponseEmitter) {
+	Run: func(req cmds.Request, res cmds.Response) {
 		nd, err := req.InvocContext().GetNode()
 		if err != nil {
 			re.SetError(err, cmds.ErrNormal)

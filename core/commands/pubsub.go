@@ -69,7 +69,7 @@ This command outputs data in the following encodings:
 	Options: []cmds.Option{
 		cmds.BoolOption("discover", "try to discover other peers subscribed to the same topic"),
 	},
-	Run: func(req cmds.Request, re cmds.ResponseEmitter) {
+	Run: func(req cmds.Request, res cmds.Response) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
 			re.SetError(err, cmds.ErrNormal)
@@ -198,7 +198,7 @@ To use, the daemon must be run with '--enable-pubsub-experiment'.
 		cmds.StringArg("topic", true, false, "Topic to publish to."),
 		cmds.StringArg("data", true, true, "Payload of message to publish.").EnableStdin(),
 	},
-	Run: func(req cmds.Request, re cmds.ResponseEmitter) {
+	Run: func(req cmds.Request, res cmds.Response) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
 			re.SetError(err, cmds.ErrNormal)
@@ -239,7 +239,7 @@ to be used in a production environment.
 To use, the daemon must be run with '--enable-pubsub-experiment'.
 `,
 	},
-	Run: func(req cmds.Request, re cmds.ResponseEmitter) {
+	Run: func(req cmds.Request, res cmds.Response) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
 			re.SetError(err, cmds.ErrNormal)
@@ -281,7 +281,7 @@ To use, the daemon must be run with '--enable-pubsub-experiment'.
 	Arguments: []cmds.Argument{
 		cmds.StringArg("topic", false, false, "topic to list connected peers of"),
 	},
-	Run: func(req cmds.Request, re cmds.ResponseEmitter) {
+	Run: func(req cmds.Request, res cmds.Response) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
 			re.SetError(err, cmds.ErrNormal)
