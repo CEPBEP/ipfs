@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	cmdkit "gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
+	cmds "gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
 	humanize "gx/ipfs/QmPSBJL4momYnE7DcUyk2DVhD6rH488ZmHBGLbxNdhU44K/go-humanize"
 	cmds "gx/ipfs/QmPhtZyjPYddJ8yGPWreisp47H6iQjt3Lg8sZrzqMP5noy/go-ipfs-cmds"
 	metrics "gx/ipfs/QmQbh3Rb7KM37As3vkHYnEFnzkVXNCP8EYGtHz6g2fXk14/go-libp2p-metrics"
@@ -16,7 +16,7 @@ import (
 )
 
 var StatsCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Query IPFS statistics.",
 		ShortDescription: `'ipfs stats' is a set of commands to help look at statistics
 for your IPFS node.
@@ -33,7 +33,7 @@ for your IPFS node.`,
 }
 
 var statBwCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Print ipfs bandwidth information.",
 		ShortDescription: `'ipfs stats bw' prints bandwidth information for the ipfs daemon.
 It displays: TotalIn, TotalOut, RateIn, RateOut.
@@ -69,11 +69,11 @@ Example:
     RateOut: 0B/s
 `,
 	},
-	Options: []cmdkit.Option{
-		cmdkit.StringOption("peer", "p", "Specify a peer to print bandwidth for."),
-		cmdkit.StringOption("proto", "t", "Specify a protocol to print bandwidth for."),
-		cmdkit.BoolOption("poll", "Print bandwidth at an interval.").Default(false),
-		cmdkit.StringOption("interval", "i", `Time interval to wait between updating output, if 'poll' is true.
+	Options: []cmds.Option{
+		cmds.StringOption("peer", "p", "Specify a peer to print bandwidth for."),
+		cmds.StringOption("proto", "t", "Specify a protocol to print bandwidth for."),
+		cmds.BoolOption("poll", "Print bandwidth at an interval.").Default(false),
+		cmds.StringOption("interval", "i", `Time interval to wait between updating output, if 'poll' is true.
 
     This accepts durations such as "300s", "1.5h" or "2h45m". Valid time units are:
     "ns", "us" (or "µs"), "ms", "s", "m", "h".`).Default("1s"),
@@ -82,34 +82,34 @@ Example:
 	Run: func(req cmds.Request, re cmds.ResponseEmitter) {
 		nd, err := req.InvocContext().GetNode()
 		if err != nil {
-			re.SetError(err, cmdkit.ErrNormal)
+			re.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		// Must be online!
 		if !nd.OnlineMode() {
-			re.SetError(errNotOnline, cmdkit.ErrClient)
+			re.SetError(errNotOnline, cmds.ErrClient)
 			return
 		}
 
 		if nd.Reporter == nil {
-			re.SetError(fmt.Errorf("bandwidth reporter disabled in config"), cmdkit.ErrNormal)
+			re.SetError(fmt.Errorf("bandwidth reporter disabled in config"), cmds.ErrNormal)
 			return
 		}
 
 		pstr, pfound, err := req.Option("peer").String()
 		if err != nil {
-			re.SetError(err, cmdkit.ErrNormal)
+			re.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		tstr, tfound, err := req.Option("proto").String()
 		if err != nil {
-			re.SetError(err, cmdkit.ErrNormal)
+			re.SetError(err, cmds.ErrNormal)
 			return
 		}
 		if pfound && tfound {
-			re.SetError(errors.New("please only specify peer OR protocol"), cmdkit.ErrClient)
+			re.SetError(errors.New("please only specify peer OR protocol"), cmds.ErrClient)
 			return
 		}
 
@@ -117,7 +117,7 @@ Example:
 		if pfound {
 			checkpid, err := peer.IDB58Decode(pstr)
 			if err != nil {
-				re.SetError(err, cmdkit.ErrNormal)
+				re.SetError(err, cmds.ErrNormal)
 				return
 			}
 			pid = checkpid
@@ -125,18 +125,18 @@ Example:
 
 		timeS, _, err := req.Option("interval").String()
 		if err != nil {
-			re.SetError(err, cmdkit.ErrNormal)
+			re.SetError(err, cmds.ErrNormal)
 			return
 		}
 		interval, err := time.ParseDuration(timeS)
 		if err != nil {
-			re.SetError(err, cmdkit.ErrNormal)
+			re.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		doPoll, _, err := req.Option("poll").Bool()
 		if err != nil {
-			re.SetError(err, cmdkit.ErrNormal)
+			re.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -185,10 +185,10 @@ Example:
 							err = res.Error()
 						}
 
-						if e, ok := err.(*cmdkit.Error); ok {
+						if e, ok := err.(*cmds.Error); ok {
 							re.Emit(e)
 						} else if err != io.EOF {
-							re.SetError(err, cmdkit.ErrNormal)
+							re.SetError(err, cmds.ErrNormal)
 						}
 
 						return

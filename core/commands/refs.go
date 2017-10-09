@@ -14,7 +14,7 @@ import (
 	path "github.com/ipfs/go-ipfs/path"
 
 	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
-	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
+	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmds"
 	node "gx/ipfs/QmPN7cwmpcc4DWXb4KTB9dNAJgjuPY69h3npsMfhRrQL9c/go-ipld-format"
 )
 
@@ -43,7 +43,7 @@ func KeyListTextMarshaler(res cmds.Response) (io.Reader, error) {
 }
 
 var RefsCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "List links (references) from an object.",
 		ShortDescription: `
 Lists the hashes of all the links an IPFS or IPNS object(s) contains,
@@ -57,50 +57,50 @@ NOTE: List all references recursively by using the flag '-r'.
 	Subcommands: map[string]*cmds.Command{
 		"local": RefsLocalCmd,
 	},
-	Arguments: []cmdkit.Argument{
-		cmdkit.StringArg("ipfs-path", true, true, "Path to the object(s) to list refs from.").EnableStdin(),
+	Arguments: []cmds.Argument{
+		cmds.StringArg("ipfs-path", true, true, "Path to the object(s) to list refs from.").EnableStdin(),
 	},
-	Options: []cmdkit.Option{
-		cmdkit.StringOption("format", "Emit edges with given format. Available tokens: <src> <dst> <linkname>.").Default("<dst>"),
-		cmdkit.BoolOption("edges", "e", "Emit edge format: `<from> -> <to>`.").Default(false),
-		cmdkit.BoolOption("unique", "u", "Omit duplicate refs from output.").Default(false),
-		cmdkit.BoolOption("recursive", "r", "Recursively list links of child nodes.").Default(false),
+	Options: []cmds.Option{
+		cmds.StringOption("format", "Emit edges with given format. Available tokens: <src> <dst> <linkname>.").Default("<dst>"),
+		cmds.BoolOption("edges", "e", "Emit edge format: `<from> -> <to>`.").Default(false),
+		cmds.BoolOption("unique", "u", "Omit duplicate refs from output.").Default(false),
+		cmds.BoolOption("recursive", "r", "Recursively list links of child nodes.").Default(false),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		ctx := req.Context()
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		unique, _, err := req.Option("unique").Bool()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		recursive, _, err := req.Option("recursive").Bool()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		format, _, err := req.Option("format").String()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		edges, _, err := req.Option("edges").Bool()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 		if edges {
 			if format != "<dst>" {
 				res.SetError(errors.New("using format arguement with edges is not allowed"),
-					cmdkit.ErrClient)
+					cmds.ErrClient)
 				return
 			}
 
@@ -109,7 +109,7 @@ NOTE: List all references recursively by using the flag '-r'.
 
 		objs, err := objectsForPaths(ctx, n, req.Arguments())
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -141,7 +141,7 @@ NOTE: List all references recursively by using the flag '-r'.
 }
 
 var RefsLocalCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "List all local references.",
 		ShortDescription: `
 Displays the hashes of all local objects.
@@ -152,14 +152,14 @@ Displays the hashes of all local objects.
 		ctx := req.Context()
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		// todo: make async
 		allKeys, err := n.Blockstore.AllKeysChan(ctx)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 

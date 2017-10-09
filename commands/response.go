@@ -10,7 +10,7 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
+	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmds"
 )
 
 // ErrorType signfies a category of errors
@@ -78,8 +78,8 @@ type Response interface {
 	Request() Request
 
 	// Set/Return the response Error
-	SetError(err error, code cmdkit.ErrorType)
-	Error() *cmdkit.Error
+	SetError(err error, code cmds.ErrorType)
+	Error() *cmds.Error
 
 	// Sets/Returns the response value
 	SetOutput(interface{})
@@ -107,7 +107,7 @@ type Response interface {
 
 type response struct {
 	req    Request
-	err    *cmdkit.Error
+	err    *cmds.Error
 	value  interface{}
 	out    io.Reader
 	length uint64
@@ -136,13 +136,13 @@ func (r *response) SetLength(l uint64) {
 	r.length = l
 }
 
-func (r *response) Error() *cmdkit.Error {
+func (r *response) Error() *cmds.Error {
 	return r.err
 }
 
-func (r *response) SetError(err error, code cmdkit.ErrorType) {
+func (r *response) SetError(err error, code cmds.ErrorType) {
 	log.Debugf("SerError called. Stack: %s", debug.Stack())
-	r.err = &cmdkit.Error{Message: err.Error(), Code: code}
+	r.err = &cmds.Error{Message: err.Error(), Code: code}
 }
 
 func (r *response) Marshal() (io.Reader, error) {
@@ -150,7 +150,7 @@ func (r *response) Marshal() (io.Reader, error) {
 		return bytes.NewReader([]byte{}), nil
 	}
 
-	enc, found, err := r.req.Option(cmdkit.EncShort).String()
+	enc, found, err := r.req.Option(cmds.EncShort).String()
 	if err != nil {
 		return nil, err
 	}

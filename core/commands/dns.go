@@ -8,11 +8,11 @@ import (
 	e "github.com/ipfs/go-ipfs/core/commands/e"
 	namesys "github.com/ipfs/go-ipfs/namesys"
 
-	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
+	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmds"
 )
 
 var DNSCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Resolve DNS links.",
 		ShortDescription: `
 Multihashes are hard to remember, but domain names are usually easy to
@@ -45,11 +45,11 @@ The resolver can recursively resolve:
 `,
 	},
 
-	Arguments: []cmdkit.Argument{
-		cmdkit.StringArg("domain-name", true, false, "The domain-name name to resolve.").EnableStdin(),
+	Arguments: []cmds.Argument{
+		cmds.StringArg("domain-name", true, false, "The domain-name name to resolve.").EnableStdin(),
 	},
-	Options: []cmdkit.Option{
-		cmdkit.BoolOption("recursive", "r", "Resolve until the result is not a DNS link.").Default(false),
+	Options: []cmds.Option{
+		cmds.BoolOption("recursive", "r", "Resolve until the result is not a DNS link.").Default(false),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 
@@ -63,11 +63,11 @@ The resolver can recursively resolve:
 		}
 		output, err := resolver.ResolveN(req.Context(), name, depth)
 		if err == namesys.ErrResolveFailed {
-			res.SetError(err, cmdkit.ErrNotFound)
+			res.SetError(err, cmds.ErrNotFound)
 			return
 		}
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 		res.SetOutput(&ResolvedPath{output})

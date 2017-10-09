@@ -12,7 +12,7 @@ import (
 	core "github.com/ipfs/go-ipfs/core"
 	e "github.com/ipfs/go-ipfs/core/commands/e"
 
-	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
+	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmds"
 	pstore "gx/ipfs/QmPgDWmTmuzvP7QE5zwo1TmjbJme9pmZHNujB2453jkCTr/go-libp2p-peerstore"
 	identify "gx/ipfs/QmRQ76P5dgvxTujhfPsCRAG83rC15jgb1G9bKLuomuC6dQ/go-libp2p/p2p/protocol/identify"
 	kb "gx/ipfs/QmSAFA8v42u4gpJNy1tb7vW3JiiXiaYDC2b845c2RnNSJL/go-libp2p-kbucket"
@@ -39,7 +39,7 @@ type IdOutput struct {
 }
 
 var IDCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Show ipfs node id info.",
 		ShortDescription: `
 Prints out information about the specified peer.
@@ -57,16 +57,16 @@ EXAMPLE:
     ipfs id Qmece2RkXhsKe5CRooNisBTh4SK119KrXXGmoK6V3kb8aH -f="<addrs>\n"
 `,
 	},
-	Arguments: []cmdkit.Argument{
-		cmdkit.StringArg("peerid", false, false, "Peer.ID of node to look up."),
+	Arguments: []cmds.Argument{
+		cmds.StringArg("peerid", false, false, "Peer.ID of node to look up."),
 	},
-	Options: []cmdkit.Option{
-		cmdkit.StringOption("format", "f", "Optional output format."),
+	Options: []cmds.Option{
+		cmds.StringOption("format", "f", "Optional output format."),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		node, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -74,7 +74,7 @@ EXAMPLE:
 		if len(req.Arguments()) > 0 {
 			id = peer.ID(b58.Decode(req.Arguments()[0]))
 			if len(id) == 0 {
-				res.SetError(cmds.ClientError("Invalid peer id"), cmdkit.ErrClient)
+				res.SetError(cmds.ClientError("Invalid peer id"), cmds.ErrClient)
 				return
 			}
 		} else {
@@ -84,7 +84,7 @@ EXAMPLE:
 		if id == node.Identity {
 			output, err := printSelf(node)
 			if err != nil {
-				res.SetError(err, cmdkit.ErrNormal)
+				res.SetError(err, cmds.ErrNormal)
 				return
 			}
 			res.SetOutput(output)
@@ -93,23 +93,23 @@ EXAMPLE:
 
 		// TODO handle offline mode with polymorphism instead of conditionals
 		if !node.OnlineMode() {
-			res.SetError(errors.New(offlineIdErrorMessage), cmdkit.ErrClient)
+			res.SetError(errors.New(offlineIdErrorMessage), cmds.ErrClient)
 			return
 		}
 
 		p, err := node.Routing.FindPeer(req.Context(), id)
 		if err == kb.ErrLookupFailure {
-			res.SetError(errors.New(offlineIdErrorMessage), cmdkit.ErrClient)
+			res.SetError(errors.New(offlineIdErrorMessage), cmds.ErrClient)
 			return
 		}
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		output, err := printPeer(node.Peerstore, p.ID)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 		res.SetOutput(output)

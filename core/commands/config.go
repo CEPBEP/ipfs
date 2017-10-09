@@ -17,7 +17,7 @@ import (
 	config "github.com/ipfs/go-ipfs/repo/config"
 	fsrepo "github.com/ipfs/go-ipfs/repo/fsrepo"
 
-	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
+	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmds"
 )
 
 type ConfigField struct {
@@ -26,7 +26,7 @@ type ConfigField struct {
 }
 
 var ConfigCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Get and set ipfs config values.",
 		ShortDescription: `
 'ipfs config' controls configuration variables. It works like 'git config'.
@@ -49,13 +49,13 @@ Set the value of the 'Datastore.Path' key:
 `,
 	},
 
-	Arguments: []cmdkit.Argument{
-		cmdkit.StringArg("key", true, false, "The key of the config entry (e.g. \"Addresses.API\")."),
-		cmdkit.StringArg("value", false, false, "The value to set the config entry to."),
+	Arguments: []cmds.Argument{
+		cmds.StringArg("key", true, false, "The key of the config entry (e.g. \"Addresses.API\")."),
+		cmds.StringArg("value", false, false, "The value to set the config entry to."),
 	},
-	Options: []cmdkit.Option{
-		cmdkit.BoolOption("bool", "Set a boolean value.").Default(false),
-		cmdkit.BoolOption("json", "Parse stringified JSON.").Default(false),
+	Options: []cmds.Option{
+		cmds.BoolOption("bool", "Set a boolean value.").Default(false),
+		cmds.BoolOption("json", "Parse stringified JSON.").Default(false),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		args := req.Arguments()
@@ -73,14 +73,14 @@ Set the value of the 'Datastore.Path' key:
 		// This is a temporary fix until we move the private key out of the config file
 		switch strings.ToLower(key) {
 		case "identity", "identity.privkey":
-			res.SetError(fmt.Errorf("cannot show or change private key through API"), cmdkit.ErrNormal)
+			res.SetError(fmt.Errorf("cannot show or change private key through API"), cmds.ErrNormal)
 			return
 		default:
 		}
 
 		r, err := fsrepo.Open(req.InvocContext().ConfigRoot)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 		defer r.Close()
@@ -91,7 +91,7 @@ Set the value of the 'Datastore.Path' key:
 				var jsonVal interface{}
 				if err := json.Unmarshal([]byte(value), &jsonVal); err != nil {
 					err = fmt.Errorf("failed to unmarshal json. %s", err)
-					res.SetError(err, cmdkit.ErrNormal)
+					res.SetError(err, cmds.ErrNormal)
 					return
 				}
 
@@ -105,7 +105,7 @@ Set the value of the 'Datastore.Path' key:
 			output, err = getConfig(r, key)
 		}
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 	},
@@ -146,7 +146,7 @@ Set the value of the 'Datastore.Path' key:
 }
 
 var configShowCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Output config file contents.",
 		ShortDescription: `
 WARNING: Your private key is stored in the config file, and it will be
@@ -157,32 +157,32 @@ included in the output of this command.
 	Run: func(req cmds.Request, res cmds.Response) {
 		fname, err := config.Filename(req.InvocContext().ConfigRoot)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		data, err := ioutil.ReadFile(fname)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		var cfg map[string]interface{}
 		err = json.Unmarshal(data, &cfg)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		err = scrubValue(cfg, []string{config.IdentityTag, config.PrivKeyTag})
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		output, err := config.HumanOutput(cfg)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -232,7 +232,7 @@ func scrubValue(m map[string]interface{}, key []string) error {
 }
 
 var configEditCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Open the config file for editing in $EDITOR.",
 		ShortDescription: `
 To use 'ipfs config edit', you must have the $EDITOR environment
@@ -243,19 +243,19 @@ variable set to your preferred text editor.
 	Run: func(req cmds.Request, res cmds.Response) {
 		filename, err := config.Filename(req.InvocContext().ConfigRoot)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		err = editConfig(filename)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 		}
 	},
 }
 
 var configReplaceCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Replace the config with <file>.",
 		ShortDescription: `
 Make sure to back up the config file first if necessary, as this operation
@@ -263,8 +263,8 @@ can't be undone.
 `,
 	},
 
-	Arguments: []cmdkit.Argument{
-		cmdkit.FileArg("file", true, false, "The file to use as the new config."),
+	Arguments: []cmds.Argument{
+		cmds.FileArg("file", true, false, "The file to use as the new config."),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		// has to be called
@@ -272,21 +272,21 @@ can't be undone.
 
 		r, err := fsrepo.Open(req.InvocContext().ConfigRoot)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 		defer r.Close()
 
 		file, err := req.Files().NextFile()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 		defer file.Close()
 
 		err = replaceConfig(r, file)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 	},

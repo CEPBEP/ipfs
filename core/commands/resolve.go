@@ -10,7 +10,7 @@ import (
 	ns "github.com/ipfs/go-ipfs/namesys"
 	path "github.com/ipfs/go-ipfs/path"
 
-	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
+	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmds"
 )
 
 type ResolvedPath struct {
@@ -18,7 +18,7 @@ type ResolvedPath struct {
 }
 
 var ResolveCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Resolve the value of names to IPFS.",
 		ShortDescription: `
 There are a number of mutable name protocols that can link among
@@ -57,24 +57,24 @@ Resolve the value of an IPFS DAG path:
 `,
 	},
 
-	Arguments: []cmdkit.Argument{
-		cmdkit.StringArg("name", true, false, "The name to resolve.").EnableStdin(),
+	Arguments: []cmds.Argument{
+		cmds.StringArg("name", true, false, "The name to resolve.").EnableStdin(),
 	},
-	Options: []cmdkit.Option{
-		cmdkit.BoolOption("recursive", "r", "Resolve until the result is an IPFS name.").Default(false),
+	Options: []cmds.Option{
+		cmds.BoolOption("recursive", "r", "Resolve until the result is an IPFS name.").Default(false),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		if !n.OnlineMode() {
 			err := n.SetupOfflineRouting()
 			if err != nil {
-				res.SetError(err, cmdkit.ErrNormal)
+				res.SetError(err, cmds.ErrNormal)
 				return
 			}
 		}
@@ -87,7 +87,7 @@ Resolve the value of an IPFS DAG path:
 			p, err := n.Namesys.ResolveN(req.Context(), name, 1)
 			// ErrResolveRecursion is fine
 			if err != nil && err != ns.ErrResolveRecursion {
-				res.SetError(err, cmdkit.ErrNormal)
+				res.SetError(err, cmds.ErrNormal)
 				return
 			}
 			res.SetOutput(&ResolvedPath{p})
@@ -97,13 +97,13 @@ Resolve the value of an IPFS DAG path:
 		// else, ipfs path or ipns with recursive flag
 		p, err := path.ParsePath(name)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		node, err := core.Resolve(req.Context(), n.Namesys, n.Resolver, p)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 

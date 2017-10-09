@@ -13,11 +13,11 @@ import (
 	nodeMount "github.com/ipfs/go-ipfs/fuse/node"
 	config "github.com/ipfs/go-ipfs/repo/config"
 
-	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
+	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmds"
 )
 
 var MountCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Mounts IPFS to the filesystem (read-only).",
 		ShortDescription: `
 Mount IPFS at a read-only mountpoint on the OS (default: /ipfs and /ipns).
@@ -73,32 +73,32 @@ baz
 baz
 `,
 	},
-	Options: []cmdkit.Option{
-		cmdkit.StringOption("ipfs-path", "f", "The path where IPFS should be mounted."),
-		cmdkit.StringOption("ipns-path", "n", "The path where IPNS should be mounted."),
+	Options: []cmds.Option{
+		cmds.StringOption("ipfs-path", "f", "The path where IPFS should be mounted."),
+		cmds.StringOption("ipns-path", "n", "The path where IPNS should be mounted."),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		cfg, err := req.InvocContext().GetConfig()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		node, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		// error if we aren't running node in online mode
 		if node.LocalMode() {
-			res.SetError(errNotOnline, cmdkit.ErrClient)
+			res.SetError(errNotOnline, cmds.ErrClient)
 			return
 		}
 
 		fsdir, found, err := req.Option("f").String()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 		if !found {
@@ -108,7 +108,7 @@ baz
 		// get default mount points
 		nsdir, found, err := req.Option("n").String()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 		if !found {
@@ -117,7 +117,7 @@ baz
 
 		err = nodeMount.Mount(node, fsdir, nsdir)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 

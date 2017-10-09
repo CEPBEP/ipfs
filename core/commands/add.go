@@ -17,8 +17,8 @@ import (
 	mfs "github.com/ipfs/go-ipfs/mfs"
 	ft "github.com/ipfs/go-ipfs/unixfs"
 
-	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
-	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit/files"
+	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmds"
+	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmds/files"
 	"gx/ipfs/QmPhtZyjPYddJ8yGPWreisp47H6iQjt3Lg8sZrzqMP5noy/go-ipfs-cmds"
 	mh "gx/ipfs/QmU9a9NV9RdPNwZQDYd5uKsm6N6LJLSvLbywDDYFbaaC6P/go-multihash"
 	"gx/ipfs/QmeWjRodbcZFKe5tMN7poEx3izym6osrLSnTLf9UjJZBbs/pb"
@@ -48,7 +48,7 @@ const (
 const adderOutChanSize = 8
 
 var AddCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Add a file or directory to ipfs.",
 		ShortDescription: `
 Adds contents of <path> to ipfs. Use -r to add directories (recursively).
@@ -75,26 +75,26 @@ You can now refer to the added file in a gateway, like so:
 `,
 	},
 
-	Arguments: []cmdkit.Argument{
-		cmdkit.FileArg("path", true, true, "The path to a file to be added to ipfs.").EnableRecursive().EnableStdin(),
+	Arguments: []cmds.Argument{
+		cmds.FileArg("path", true, true, "The path to a file to be added to ipfs.").EnableRecursive().EnableStdin(),
 	},
-	Options: []cmdkit.Option{
-		cmdkit.OptionRecursivePath, // a builtin option that allows recursive paths (-r, --recursive)
-		cmdkit.BoolOption(quietOptionName, "q", "Write minimal output."),
-		cmdkit.BoolOption(quieterOptionName, "Q", "Write only final hash."),
-		cmdkit.BoolOption(silentOptionName, "Write no output."),
-		cmdkit.BoolOption(progressOptionName, "p", "Stream progress data."),
-		cmdkit.BoolOption(trickleOptionName, "t", "Use trickle-dag format for dag generation."),
-		cmdkit.BoolOption(onlyHashOptionName, "n", "Only chunk and hash - do not write to disk."),
-		cmdkit.BoolOption(wrapOptionName, "w", "Wrap files with a directory object."),
-		cmdkit.BoolOption(hiddenOptionName, "H", "Include files that are hidden. Only takes effect on recursive add."),
-		cmdkit.StringOption(chunkerOptionName, "s", "Chunking algorithm to use."),
-		cmdkit.BoolOption(pinOptionName, "Pin this object when adding.").Default(true),
-		cmdkit.BoolOption(rawLeavesOptionName, "Use raw blocks for leaf nodes. (experimental)"),
-		cmdkit.BoolOption(noCopyOptionName, "Add the file using filestore. (experimental)"),
-		cmdkit.BoolOption(fstoreCacheOptionName, "Check the filestore for pre-existing blocks. (experimental)"),
-		cmdkit.IntOption(cidVersionOptionName, "Cid version. Non-zero value will change default of 'raw-leaves' to true. (experimental)").Default(0),
-		cmdkit.StringOption(hashOptionName, "Hash function to use. Will set Cid version to 1 if used. (experimental)").Default("sha2-256"),
+	Options: []cmds.Option{
+		cmds.OptionRecursivePath, // a builtin option that allows recursive paths (-r, --recursive)
+		cmds.BoolOption(quietOptionName, "q", "Write minimal output."),
+		cmds.BoolOption(quieterOptionName, "Q", "Write only final hash."),
+		cmds.BoolOption(silentOptionName, "Write no output."),
+		cmds.BoolOption(progressOptionName, "p", "Stream progress data."),
+		cmds.BoolOption(trickleOptionName, "t", "Use trickle-dag format for dag generation."),
+		cmds.BoolOption(onlyHashOptionName, "n", "Only chunk and hash - do not write to disk."),
+		cmds.BoolOption(wrapOptionName, "w", "Wrap files with a directory object."),
+		cmds.BoolOption(hiddenOptionName, "H", "Include files that are hidden. Only takes effect on recursive add."),
+		cmds.StringOption(chunkerOptionName, "s", "Chunking algorithm to use."),
+		cmds.BoolOption(pinOptionName, "Pin this object when adding.").Default(true),
+		cmds.BoolOption(rawLeavesOptionName, "Use raw blocks for leaf nodes. (experimental)"),
+		cmds.BoolOption(noCopyOptionName, "Add the file using filestore. (experimental)"),
+		cmds.BoolOption(fstoreCacheOptionName, "Check the filestore for pre-existing blocks. (experimental)"),
+		cmds.IntOption(cidVersionOptionName, "Cid version. Non-zero value will change default of 'raw-leaves' to true. (experimental)").Default(0),
+		cmds.StringOption(hashOptionName, "Hash function to use. Will set Cid version to 1 if used. (experimental)").Default("sha2-256"),
 	},
 	PreRun: func(req cmds.Request) error {
 		quiet, _, _ := req.Option(quietOptionName).Bool()
@@ -139,20 +139,20 @@ You can now refer to the added file in a gateway, like so:
 	Run: func(req cmds.Request, re cmds.ResponseEmitter) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
-			re.SetError(err, cmdkit.ErrNormal)
+			re.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		cfg, err := n.Repo.Config()
 		if err != nil {
-			re.SetError(err, cmdkit.ErrNormal)
+			re.SetError(err, cmds.ErrNormal)
 			return
 		}
 		// check if repo will exceed storage limit if added
 		// TODO: this doesn't handle the case if the hashed file is already in blocks (deduplicated)
 		// TODO: conditional GC is disabled due to it is somehow not possible to pass the size to the daemon
 		//if err := corerepo.ConditionalGC(req.Context(), n, uint64(size)); err != nil {
-		//	res.SetError(err, cmdkit.ErrNormal)
+		//	res.SetError(err, cmds.ErrNormal)
 		//	return
 		//}
 
@@ -172,7 +172,7 @@ You can now refer to the added file in a gateway, like so:
 
 		if nocopy && !cfg.Experimental.FilestoreEnabled {
 			re.SetError(errors.New("filestore is not enabled, see https://git.io/vy4XN"),
-				cmdkit.ErrClient)
+				cmds.ErrClient)
 			return
 		}
 
@@ -181,7 +181,7 @@ You can now refer to the added file in a gateway, like so:
 		}
 
 		if nocopy && !rawblks {
-			re.SetError(fmt.Errorf("nocopy option requires '--raw-leaves' to be enabled as well"), cmdkit.ErrNormal)
+			re.SetError(fmt.Errorf("nocopy option requires '--raw-leaves' to be enabled as well"), cmds.ErrNormal)
 			return
 		}
 
@@ -195,13 +195,13 @@ You can now refer to the added file in a gateway, like so:
 
 		prefix, err := dag.PrefixForCidVersion(cidVer)
 		if err != nil {
-			re.SetError(err, cmdkit.ErrNormal)
+			re.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		hashFunCode, ok := mh.Names[strings.ToLower(hashFunStr)]
 		if !ok {
-			re.SetError(fmt.Errorf("unrecognized hash function: %s", strings.ToLower(hashFunStr)), cmdkit.ErrNormal)
+			re.SetError(fmt.Errorf("unrecognized hash function: %s", strings.ToLower(hashFunStr)), cmds.ErrNormal)
 			return
 		}
 
@@ -215,7 +215,7 @@ You can now refer to the added file in a gateway, like so:
 				NilRepo: true,
 			})
 			if err != nil {
-				re.SetError(err, cmdkit.ErrNormal)
+				re.SetError(err, cmds.ErrNormal)
 				return
 			}
 			n = nilnode
@@ -239,7 +239,7 @@ You can now refer to the added file in a gateway, like so:
 
 		fileAdder, err := coreunix.NewAdder(req.Context(), n.Pinning, n.Blockstore, dserv)
 		if err != nil {
-			re.SetError(err, cmdkit.ErrNormal)
+			re.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -259,7 +259,7 @@ You can now refer to the added file in a gateway, like so:
 			md := dagtest.Mock()
 			mr, err := mfs.NewRoot(req.Context(), md, ft.EmptyDirNode(), nil)
 			if err != nil {
-				re.SetError(err, cmdkit.ErrNormal)
+				re.SetError(err, cmds.ErrNormal)
 				return
 			}
 
@@ -313,7 +313,7 @@ You can now refer to the added file in a gateway, like so:
 		}
 		err = <-errCh
 		if err != nil {
-			re.SetError(err, cmdkit.ErrNormal)
+			re.SetError(err, cmds.ErrNormal)
 		}
 	},
 	PostRun: map[cmds.EncodingType]func(cmds.Request, cmds.ResponseEmitter) cmds.ResponseEmitter{
@@ -406,7 +406,7 @@ You can now refer to the added file in a gateway, like so:
 							bar.ShowTimeLeft = true
 						}
 					case <-req.Context().Done():
-						re.SetError(req.Context().Err(), cmdkit.ErrNormal)
+						re.SetError(req.Context().Err(), cmds.ErrNormal)
 						return
 					}
 				}
@@ -436,10 +436,10 @@ You can now refer to the added file in a gateway, like so:
 							err = res.Error()
 						}
 
-						if e, ok := err.(*cmdkit.Error); ok {
+						if e, ok := err.(*cmds.Error); ok {
 							re.Emit(e)
 						} else if err != io.EOF {
-							re.SetError(err, cmdkit.ErrNormal)
+							re.SetError(err, cmds.ErrNormal)
 						}
 
 						return

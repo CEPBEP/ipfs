@@ -11,7 +11,7 @@ import (
 	cmds "github.com/ipfs/go-ipfs/commands"
 	core "github.com/ipfs/go-ipfs/core"
 
-	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
+	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmds"
 	pstore "gx/ipfs/QmPgDWmTmuzvP7QE5zwo1TmjbJme9pmZHNujB2453jkCTr/go-libp2p-peerstore"
 	u "gx/ipfs/QmSU6eubNdhXjFBJBSksTp8kv8YRub8mGAPv8tVJHmL2EU/go-ipfs-util"
 	ma "gx/ipfs/QmXY77cVe7rVRQXZZQRioukUM7aRW3BTcAgJe12MCtb3Ji/go-multiaddr"
@@ -27,7 +27,7 @@ type PingResult struct {
 }
 
 var PingCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Send echo request packets to IPFS hosts.",
 		ShortDescription: `
 'ipfs ping' is a tool to test sending data to other nodes. It finds nodes
@@ -35,11 +35,11 @@ via the routing system, sends pings, waits for pongs, and prints out round-
 trip latency information.
 		`,
 	},
-	Arguments: []cmdkit.Argument{
-		cmdkit.StringArg("peer ID", true, true, "ID of peer to be pinged.").EnableStdin(),
+	Arguments: []cmds.Argument{
+		cmds.StringArg("peer ID", true, true, "ID of peer to be pinged.").EnableStdin(),
 	},
-	Options: []cmdkit.Option{
-		cmdkit.IntOption("count", "n", "Number of ping messages to send.").Default(10),
+	Options: []cmds.Option{
+		cmds.IntOption("count", "n", "Number of ping messages to send.").Default(10),
 	},
 	Marshalers: cmds.MarshalerMap{
 		cmds.Text: func(res cmds.Response) (io.Reader, error) {
@@ -68,19 +68,19 @@ trip latency information.
 		ctx := req.Context()
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		// Must be online!
 		if !n.OnlineMode() {
-			res.SetError(errNotOnline, cmdkit.ErrClient)
+			res.SetError(errNotOnline, cmds.ErrClient)
 			return
 		}
 
 		addr, peerID, err := ParsePeerParam(req.Arguments()[0])
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -90,7 +90,7 @@ trip latency information.
 
 		numPings, _, err := req.Option("count").Int()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 

@@ -15,7 +15,7 @@ import (
 	unixfs "github.com/ipfs/go-ipfs/unixfs"
 	uio "github.com/ipfs/go-ipfs/unixfs/io"
 	unixfspb "github.com/ipfs/go-ipfs/unixfs/pb"
-	cmdkit "gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
+	cmds "gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
 )
 
 type LsLink struct {
@@ -37,7 +37,7 @@ type LsOutput struct {
 }
 
 var LsCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "List directory contents for Unix filesystem objects.",
 		ShortDescription: `
 Displays the contents of an IPFS or IPNS object(s) at the given path.
@@ -71,13 +71,13 @@ possible, please use 'ipfs ls' instead.
 `,
 	},
 
-	Arguments: []cmdkit.Argument{
-		cmdkit.StringArg("ipfs-path", true, true, "The path to the IPFS object(s) to list links from.").EnableStdin(),
+	Arguments: []cmds.Argument{
+		cmds.StringArg("ipfs-path", true, true, "The path to the IPFS object(s) to list links from.").EnableStdin(),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		node, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -98,7 +98,7 @@ possible, please use 'ipfs ls' instead.
 
 			merkleNode, err := core.Resolve(ctx, node.Namesys, resolver, path.Path(fpath))
 			if err != nil {
-				res.SetError(err, cmdkit.ErrNormal)
+				res.SetError(err, cmds.ErrNormal)
 				return
 			}
 
@@ -114,13 +114,13 @@ possible, please use 'ipfs ls' instead.
 
 			ndpb, ok := merkleNode.(*merkledag.ProtoNode)
 			if !ok {
-				res.SetError(merkledag.ErrNotProtobuf, cmdkit.ErrNormal)
+				res.SetError(merkledag.ErrNotProtobuf, cmds.ErrNormal)
 				return
 			}
 
 			unixFSNode, err := unixfs.FromBytes(ndpb.Data())
 			if err != nil {
-				res.SetError(err, cmdkit.ErrNormal)
+				res.SetError(err, cmds.ErrNormal)
 				return
 			}
 
@@ -141,18 +141,18 @@ possible, please use 'ipfs ls' instead.
 				for i, link := range merkleNode.Links() {
 					linkNode, err := link.GetNode(ctx, node.DAG)
 					if err != nil {
-						res.SetError(err, cmdkit.ErrNormal)
+						res.SetError(err, cmds.ErrNormal)
 						return
 					}
 					lnpb, ok := linkNode.(*merkledag.ProtoNode)
 					if !ok {
-						res.SetError(merkledag.ErrNotProtobuf, cmdkit.ErrNormal)
+						res.SetError(merkledag.ErrNotProtobuf, cmds.ErrNormal)
 						return
 					}
 
 					d, err := unixfs.FromBytes(lnpb.Data())
 					if err != nil {
-						res.SetError(err, cmdkit.ErrNormal)
+						res.SetError(err, cmds.ErrNormal)
 						return
 					}
 					t := d.GetType()
@@ -169,10 +169,10 @@ possible, please use 'ipfs ls' instead.
 					links[i] = lsLink
 				}
 			case unixfspb.Data_Symlink:
-				res.SetError(fmt.Errorf("cannot list symlinks yet"), cmdkit.ErrNormal)
+				res.SetError(fmt.Errorf("cannot list symlinks yet"), cmds.ErrNormal)
 				return
 			default:
-				res.SetError(fmt.Errorf("unrecognized type: %s", t), cmdkit.ErrImplementation)
+				res.SetError(fmt.Errorf("unrecognized type: %s", t), cmds.ErrImplementation)
 				return
 			}
 		}

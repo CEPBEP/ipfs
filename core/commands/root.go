@@ -11,7 +11,7 @@ import (
 	ocmd "github.com/ipfs/go-ipfs/core/commands/object"
 	unixfs "github.com/ipfs/go-ipfs/core/commands/unixfs"
 
-	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
+	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmds"
 	"gx/ipfs/QmPhtZyjPYddJ8yGPWreisp47H6iQjt3Lg8sZrzqMP5noy/go-ipfs-cmds"
 	logging "gx/ipfs/QmSpJByNKFX1sCsHBEp3R73FL4NF6FnQTEGyNAXHm2GS52/go-log"
 )
@@ -23,7 +23,7 @@ const (
 )
 
 var Root = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline:  "Global p2p merkle-dag filesystem.",
 		Synopsis: "ipfs [--config=<config> | -c] [--debug=<debug> | -D] [--help=<help>] [-h=<h>] [--local=<local> | -L] [--api=<api>] <command> ...",
 		Subcommands: `
@@ -83,13 +83,13 @@ The CLI will exit with one of the following values:
 1     Failed executions.
 `,
 	},
-	Options: []cmdkit.Option{
-		cmdkit.StringOption("config", "c", "Path to the configuration file to use."),
-		cmdkit.BoolOption("debug", "D", "Operate in debug mode.").Default(false),
-		cmdkit.BoolOption("help", "Show the full command help text.").Default(false),
-		cmdkit.BoolOption("h", "Show a short version of the command help text.").Default(false),
-		cmdkit.BoolOption("local", "L", "Run the command locally, instead of using the daemon.").Default(false),
-		cmdkit.StringOption(ApiOption, "Use a specific API instance (defaults to /ip4/127.0.0.1/tcp/5001)"),
+	Options: []cmds.Option{
+		cmds.StringOption("config", "c", "Path to the configuration file to use."),
+		cmds.BoolOption("debug", "D", "Operate in debug mode.").Default(false),
+		cmds.BoolOption("help", "Show the full command help text.").Default(false),
+		cmds.BoolOption("h", "Show a short version of the command help text.").Default(false),
+		cmds.BoolOption("local", "L", "Run the command locally, instead of using the daemon.").Default(false),
+		cmds.StringOption(ApiOption, "Use a specific API instance (defaults to /ip4/127.0.0.1/tcp/5001)"),
 	},
 }
 

@@ -10,7 +10,7 @@ import (
 
 	"github.com/ipfs/go-ipfs/commands"
 
-	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
+	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmds"
 )
 
 type kvs map[string]interface{}
@@ -70,9 +70,9 @@ func TestSameWords(t *testing.T) {
 func TestOptionParsing(t *testing.T) {
 	subCmd := &commands.Command{}
 	cmd := &commands.Command{
-		Options: []cmdkit.Option{
-			cmdkit.StringOption("string", "s", "a string"),
-			cmdkit.BoolOption("bool", "b", "a bool"),
+		Options: []cmds.Option{
+			cmds.StringOption("string", "s", "a string"),
+			cmds.BoolOption("bool", "b", "a bool"),
 		},
 		Subcommands: map[string]*commands.Command{
 			"test": subCmd,
@@ -147,58 +147,58 @@ func TestArgumentParsing(t *testing.T) {
 		Subcommands: map[string]*commands.Command{
 			"noarg": {},
 			"onearg": {
-				Arguments: []cmdkit.Argument{
-					cmdkit.StringArg("a", true, false, "some arg"),
+				Arguments: []cmds.Argument{
+					cmds.StringArg("a", true, false, "some arg"),
 				},
 			},
 			"twoargs": {
-				Arguments: []cmdkit.Argument{
-					cmdkit.StringArg("a", true, false, "some arg"),
-					cmdkit.StringArg("b", true, false, "another arg"),
+				Arguments: []cmds.Argument{
+					cmds.StringArg("a", true, false, "some arg"),
+					cmds.StringArg("b", true, false, "another arg"),
 				},
 			},
 			"variadic": {
-				Arguments: []cmdkit.Argument{
-					cmdkit.StringArg("a", true, true, "some arg"),
+				Arguments: []cmds.Argument{
+					cmds.StringArg("a", true, true, "some arg"),
 				},
 			},
 			"optional": {
-				Arguments: []cmdkit.Argument{
-					cmdkit.StringArg("b", false, true, "another arg"),
+				Arguments: []cmds.Argument{
+					cmds.StringArg("b", false, true, "another arg"),
 				},
 			},
 			"optionalsecond": {
-				Arguments: []cmdkit.Argument{
-					cmdkit.StringArg("a", true, false, "some arg"),
-					cmdkit.StringArg("b", false, false, "another arg"),
+				Arguments: []cmds.Argument{
+					cmds.StringArg("a", true, false, "some arg"),
+					cmds.StringArg("b", false, false, "another arg"),
 				},
 			},
 			"reversedoptional": {
-				Arguments: []cmdkit.Argument{
-					cmdkit.StringArg("a", false, false, "some arg"),
-					cmdkit.StringArg("b", true, false, "another arg"),
+				Arguments: []cmds.Argument{
+					cmds.StringArg("a", false, false, "some arg"),
+					cmds.StringArg("b", true, false, "another arg"),
 				},
 			},
 			"stdinenabled": {
-				Arguments: []cmdkit.Argument{
-					cmdkit.StringArg("a", true, true, "some arg").EnableStdin(),
+				Arguments: []cmds.Argument{
+					cmds.StringArg("a", true, true, "some arg").EnableStdin(),
 				},
 			},
 			"stdinenabled2args": &commands.Command{
-				Arguments: []cmdkit.Argument{
-					cmdkit.StringArg("a", true, false, "some arg"),
-					cmdkit.StringArg("b", true, true, "another arg").EnableStdin(),
+				Arguments: []cmds.Argument{
+					cmds.StringArg("a", true, false, "some arg"),
+					cmds.StringArg("b", true, true, "another arg").EnableStdin(),
 				},
 			},
 			"stdinenablednotvariadic": &commands.Command{
-				Arguments: []cmdkit.Argument{
-					cmdkit.StringArg("a", true, false, "some arg").EnableStdin(),
+				Arguments: []cmds.Argument{
+					cmds.StringArg("a", true, false, "some arg").EnableStdin(),
 				},
 			},
 			"stdinenablednotvariadic2args": &commands.Command{
-				Arguments: []cmdkit.Argument{
-					cmdkit.StringArg("a", true, false, "some arg"),
-					cmdkit.StringArg("b", true, false, "another arg").EnableStdin(),
+				Arguments: []cmds.Argument{
+					cmds.StringArg("a", true, false, "some arg"),
+					cmds.StringArg("b", true, false, "another arg").EnableStdin(),
 				},
 			},
 		},

@@ -10,7 +10,7 @@ import (
 	e "github.com/ipfs/go-ipfs/core/commands/e"
 	dagutils "github.com/ipfs/go-ipfs/merkledag/utils"
 	path "github.com/ipfs/go-ipfs/path"
-	cmdkit "gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
+	cmds "gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
 )
 
 type Changes struct {
@@ -18,7 +18,7 @@ type Changes struct {
 }
 
 var ObjectDiffCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Display the diff between two ipfs objects.",
 		ShortDescription: `
 'ipfs object diff' is a command used to show the differences between
@@ -44,17 +44,17 @@ Example:
    Changed "bar" from QmNgd5cz2jNftnAHBhcRUGdtiaMzb5Rhjqd4etondHHST8 to QmRfFVsjSXkhFxrfWnLpMae2M4GBVsry6VAuYYcji5MiZb.
 `,
 	},
-	Arguments: []cmdkit.Argument{
-		cmdkit.StringArg("obj_a", true, false, "Object to diff against."),
-		cmdkit.StringArg("obj_b", true, false, "Object to diff."),
+	Arguments: []cmds.Argument{
+		cmds.StringArg("obj_a", true, false, "Object to diff against."),
+		cmds.StringArg("obj_b", true, false, "Object to diff."),
 	},
-	Options: []cmdkit.Option{
-		cmdkit.BoolOption("verbose", "v", "Print extra information."),
+	Options: []cmds.Option{
+		cmds.BoolOption("verbose", "v", "Print extra information."),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		node, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -63,13 +63,13 @@ Example:
 
 		pa, err := path.ParsePath(a)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		pb, err := path.ParsePath(b)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -77,19 +77,19 @@ Example:
 
 		obj_a, err := core.Resolve(ctx, node.Namesys, node.Resolver, pa)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		obj_b, err := core.Resolve(ctx, node.Namesys, node.Resolver, pb)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		changes, err := dagutils.Diff(ctx, node.DAG, obj_a, obj_b)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 

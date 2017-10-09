@@ -3,7 +3,7 @@ package commands
 import (
 	"testing"
 
-	cmdkit "gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
+	cmds "gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
 )
 
 func noop(req Request, res Response) {
@@ -11,9 +11,9 @@ func noop(req Request, res Response) {
 
 func TestOptionValidation(t *testing.T) {
 	cmd := Command{
-		Options: []cmdkit.Option{
-			cmdkit.IntOption("b", "beep", "enables beeper"),
-			cmdkit.StringOption("B", "boop", "password for booper"),
+		Options: []cmds.Option{
+			cmds.IntOption("b", "beep", "enables beeper"),
+			cmds.StringOption("B", "boop", "password for booper"),
 		},
 		Run: noop,
 	}
@@ -58,7 +58,7 @@ func TestOptionValidation(t *testing.T) {
 	}
 
 	req, _ = NewRequest(nil, nil, nil, nil, nil, opts)
-	req.SetOption(cmdkit.EncShort, "json")
+	req.SetOption(cmds.EncShort, "json")
 	res = cmd.Call(req)
 	if res.Error() != nil {
 		t.Error("Should have passed")
@@ -95,15 +95,15 @@ func TestOptionValidation(t *testing.T) {
 
 func TestRegistration(t *testing.T) {
 	cmdA := &Command{
-		Options: []cmdkit.Option{
-			cmdkit.IntOption("beep", "number of beeps"),
+		Options: []cmds.Option{
+			cmds.IntOption("beep", "number of beeps"),
 		},
 		Run: noop,
 	}
 
 	cmdB := &Command{
-		Options: []cmdkit.Option{
-			cmdkit.IntOption("beep", "number of beeps"),
+		Options: []cmds.Option{
+			cmds.IntOption("beep", "number of beeps"),
 		},
 		Run: noop,
 		Subcommands: map[string]*Command{
@@ -112,8 +112,8 @@ func TestRegistration(t *testing.T) {
 	}
 
 	cmdC := &Command{
-		Options: []cmdkit.Option{
-			cmdkit.StringOption("encoding", "data encoding type"),
+		Options: []cmds.Option{
+			cmds.StringOption("encoding", "data encoding type"),
 		},
 		Run: noop,
 	}
@@ -177,12 +177,12 @@ func TestWalking(t *testing.T) {
 
 func TestHelpProcessing(t *testing.T) {
 	cmdB := &Command{
-		Helptext: cmdkit.HelpText{
+		Helptext: cmds.HelpText{
 			ShortDescription: "This is other short",
 		},
 	}
 	cmdA := &Command{
-		Helptext: cmdkit.HelpText{
+		Helptext: cmds.HelpText{
 			ShortDescription: "This is short",
 		},
 		Subcommands: map[string]*Command{

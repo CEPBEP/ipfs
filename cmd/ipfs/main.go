@@ -25,7 +25,7 @@ import (
 	config "github.com/ipfs/go-ipfs/repo/config"
 	fsrepo "github.com/ipfs/go-ipfs/repo/fsrepo"
 
-	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
+	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmds"
 	"gx/ipfs/QmPhtZyjPYddJ8yGPWreisp47H6iQjt3Lg8sZrzqMP5noy/go-ipfs-cmds"
 	"gx/ipfs/QmPhtZyjPYddJ8yGPWreisp47H6iQjt3Lg8sZrzqMP5noy/go-ipfs-cmds/cli"
 	"gx/ipfs/QmPhtZyjPYddJ8yGPWreisp47H6iQjt3Lg8sZrzqMP5noy/go-ipfs-cmds/http"
@@ -366,7 +366,7 @@ func callCommand(ctx context.Context, req cmds.Request, root *cmds.Command, cmd 
 		go func() {
 			err = cmds.Copy(re, res)
 			if err != nil {
-				re.SetError(err, cmdkit.ErrNormal|cmdkit.ErrFatal)
+				re.SetError(err, cmds.ErrNormal|cmdkit.ErrFatal)
 			}
 		}()
 	} else {
@@ -386,7 +386,7 @@ func callCommand(ctx context.Context, req cmds.Request, root *cmds.Command, cmd 
 		go func() {
 			err := root.Call(req, re)
 			if err != nil {
-				re.SetError(err, cmdkit.ErrNormal)
+				re.SetError(err, cmds.ErrNormal)
 			}
 		}()
 	}
@@ -483,8 +483,8 @@ func commandShouldRunOnDaemon(details cmdDetails, req cmds.Request, root *cmds.C
 }
 
 func isClientError(err error) bool {
-	if e, ok := err.(*cmdkit.Error); ok {
-		return e.Code == cmdkit.ErrClient
+	if e, ok := err.(*cmds.Error); ok {
+		return e.Code == cmds.ErrClient
 	}
 
 	return false

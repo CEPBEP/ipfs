@@ -19,7 +19,7 @@ import (
 	path "github.com/ipfs/go-ipfs/path"
 	pin "github.com/ipfs/go-ipfs/pin"
 	ft "github.com/ipfs/go-ipfs/unixfs"
-	cmdkit "gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
+	cmds "gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
 
 	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
 	node "gx/ipfs/QmPN7cwmpcc4DWXb4KTB9dNAJgjuPY69h3npsMfhRrQL9c/go-ipld-format"
@@ -46,7 +46,7 @@ type Object struct {
 }
 
 var ObjectCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Interact with IPFS objects.",
 		ShortDescription: `
 'ipfs object' is a plumbing command used to manipulate DAG objects
@@ -66,7 +66,7 @@ directly.`,
 }
 
 var ObjectDataCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Output the raw bytes of an IPFS object.",
 		ShortDescription: `
 'ipfs object data' is a plumbing command for retrieving the raw bytes stored
@@ -81,31 +81,31 @@ is the raw data of the object.
 `,
 	},
 
-	Arguments: []cmdkit.Argument{
-		cmdkit.StringArg("key", true, false, "Key of the object to retrieve, in base58-encoded multihash format.").EnableStdin(),
+	Arguments: []cmds.Argument{
+		cmds.StringArg("key", true, false, "Key of the object to retrieve, in base58-encoded multihash format.").EnableStdin(),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		fpath, err := path.ParsePath(req.Arguments()[0])
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		node, err := core.Resolve(req.Context(), n.Namesys, n.Resolver, fpath)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		pbnode, ok := node.(*dag.ProtoNode)
 		if !ok {
-			res.SetError(dag.ErrNotProtobuf, cmdkit.ErrNormal)
+			res.SetError(dag.ErrNotProtobuf, cmds.ErrNormal)
 			return
 		}
 
@@ -114,7 +114,7 @@ is the raw data of the object.
 }
 
 var ObjectLinksCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Output the links pointed to by the specified object.",
 		ShortDescription: `
 'ipfs object links' is a plumbing command for retrieving the links from
@@ -123,35 +123,35 @@ multihash.
 `,
 	},
 
-	Arguments: []cmdkit.Argument{
-		cmdkit.StringArg("key", true, false, "Key of the object to retrieve, in base58-encoded multihash format.").EnableStdin(),
+	Arguments: []cmds.Argument{
+		cmds.StringArg("key", true, false, "Key of the object to retrieve, in base58-encoded multihash format.").EnableStdin(),
 	},
-	Options: []cmdkit.Option{
-		cmdkit.BoolOption("headers", "v", "Print table headers (Hash, Size, Name).").Default(false),
+	Options: []cmds.Option{
+		cmds.BoolOption("headers", "v", "Print table headers (Hash, Size, Name).").Default(false),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		// get options early -> exit early in case of error
 		if _, _, err := req.Option("headers").Bool(); err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		fpath := path.Path(req.Arguments()[0])
 		node, err := core.Resolve(req.Context(), n.Namesys, n.Resolver, fpath)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		output, err := getOutput(node)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 		res.SetOutput(output)
@@ -185,7 +185,7 @@ multihash.
 }
 
 var ObjectGetCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Get and serialize the DAG node named by <key>.",
 		ShortDescription: `
 'ipfs object get' is a plumbing command for retrieving DAG nodes.
@@ -204,13 +204,13 @@ This command outputs data in the following encodings:
 (Specified by the "--encoding" or "--enc" flag)`,
 	},
 
-	Arguments: []cmdkit.Argument{
-		cmdkit.StringArg("key", true, false, "Key of the object to retrieve, in base58-encoded multihash format.").EnableStdin(),
+	Arguments: []cmds.Argument{
+		cmds.StringArg("key", true, false, "Key of the object to retrieve, in base58-encoded multihash format.").EnableStdin(),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -218,13 +218,13 @@ This command outputs data in the following encodings:
 
 		object, err := core.Resolve(req.Context(), n.Namesys, n.Resolver, fpath)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		pbo, ok := object.(*dag.ProtoNode)
 		if !ok {
-			res.SetError(dag.ErrNotProtobuf, cmdkit.ErrNormal)
+			res.SetError(dag.ErrNotProtobuf, cmds.ErrNormal)
 			return
 		}
 
@@ -272,7 +272,7 @@ This command outputs data in the following encodings:
 }
 
 var ObjectStatCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Get stats for the DAG node named by <key>.",
 		ShortDescription: `
 'ipfs object stat' is a plumbing command to print DAG node statistics.
@@ -286,13 +286,13 @@ var ObjectStatCmd = &cmds.Command{
 `,
 	},
 
-	Arguments: []cmdkit.Argument{
-		cmdkit.StringArg("key", true, false, "Key of the object to retrieve, in base58-encoded multihash format.").EnableStdin(),
+	Arguments: []cmds.Argument{
+		cmds.StringArg("key", true, false, "Key of the object to retrieve, in base58-encoded multihash format.").EnableStdin(),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -300,13 +300,13 @@ var ObjectStatCmd = &cmds.Command{
 
 		object, err := core.Resolve(req.Context(), n.Namesys, n.Resolver, fpath)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		ns, err := object.Stat()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -341,7 +341,7 @@ var ObjectStatCmd = &cmds.Command{
 }
 
 var ObjectPutCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Store input as a DAG object, print its key.",
 		ShortDescription: `
 'ipfs object put' is a plumbing command for storing DAG nodes.
@@ -378,42 +378,42 @@ And then run:
 `,
 	},
 
-	Arguments: []cmdkit.Argument{
-		cmdkit.FileArg("data", true, false, "Data to be stored as a DAG object.").EnableStdin(),
+	Arguments: []cmds.Argument{
+		cmds.FileArg("data", true, false, "Data to be stored as a DAG object.").EnableStdin(),
 	},
-	Options: []cmdkit.Option{
-		cmdkit.StringOption("inputenc", "Encoding type of input data. One of: {\"protobuf\", \"json\"}.").Default("json"),
-		cmdkit.StringOption("datafieldenc", "Encoding type of the data field, either \"text\" or \"base64\".").Default("text"),
-		cmdkit.BoolOption("pin", "Pin this object when adding.").Default(false),
+	Options: []cmds.Option{
+		cmds.StringOption("inputenc", "Encoding type of input data. One of: {\"protobuf\", \"json\"}.").Default("json"),
+		cmds.StringOption("datafieldenc", "Encoding type of the data field, either \"text\" or \"base64\".").Default("text"),
+		cmds.BoolOption("pin", "Pin this object when adding.").Default(false),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		input, err := req.Files().NextFile()
 		if err != nil && err != io.EOF {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		inputenc, _, err := req.Option("inputenc").String()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		datafieldenc, _, err := req.Option("datafieldenc").String()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		dopin, _, err := req.Option("pin").Bool()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -423,9 +423,9 @@ And then run:
 
 		objectCid, err := objectPut(n, input, inputenc, datafieldenc)
 		if err != nil {
-			errType := cmdkit.ErrNormal
+			errType := cmds.ErrNormal
 			if err == ErrUnknownObjectEnc {
-				errType = cmdkit.ErrClient
+				errType = cmds.ErrClient
 			}
 			res.SetError(err, errType)
 			return
@@ -435,7 +435,7 @@ And then run:
 			n.Pinning.PinWithMode(objectCid, pin.Recursive)
 			err = n.Pinning.Flush()
 			if err != nil {
-				res.SetError(err, cmdkit.ErrNormal)
+				res.SetError(err, cmds.ErrNormal)
 				return
 			}
 		}
@@ -460,7 +460,7 @@ And then run:
 }
 
 var ObjectNewCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Create a new object from an ipfs template.",
 		ShortDescription: `
 'ipfs object new' is a plumbing command for creating new DAG nodes.
@@ -475,13 +475,13 @@ Available templates:
 	* unixfs-dir
 `,
 	},
-	Arguments: []cmdkit.Argument{
-		cmdkit.StringArg("template", false, false, "Template to use. Optional."),
+	Arguments: []cmds.Argument{
+		cmds.StringArg("template", false, false, "Template to use. Optional."),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -491,14 +491,14 @@ Available templates:
 			var err error
 			node, err = nodeFromTemplate(template)
 			if err != nil {
-				res.SetError(err, cmdkit.ErrNormal)
+				res.SetError(err, cmds.ErrNormal)
 				return
 			}
 		}
 
 		k, err := n.DAG.Add(node)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 		res.SetOutput(&Object{Hash: k.String()})

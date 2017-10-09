@@ -14,7 +14,7 @@ import (
 	oldcmds "github.com/ipfs/go-ipfs/commands"
 	e "github.com/ipfs/go-ipfs/core/commands/e"
 
-	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
+	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmds"
 	cmds "gx/ipfs/QmPhtZyjPYddJ8yGPWreisp47H6iQjt3Lg8sZrzqMP5noy/go-ipfs-cmds"
 )
 
@@ -62,12 +62,12 @@ const (
 // and returns a command that lists the subcommands in that root
 func CommandsCmd(root *cmds.Command) *cmds.Command {
 	return &cmds.Command{
-		Helptext: cmdkit.HelpText{
+		Helptext: cmds.HelpText{
 			Tagline:          "List all available commands.",
 			ShortDescription: `Lists all available commands (and subcommands) and exits.`,
 		},
-		Options: []cmdkit.Option{
-			cmdkit.BoolOption(flagsOptionName, "f", "Show command flags").Default(false),
+		Options: []cmds.Option{
+			cmds.BoolOption(flagsOptionName, "f", "Show command flags").Default(false),
 		},
 		Run: func(req cmds.Request, re cmds.ResponseEmitter) {
 			rootCmd := cmd2outputCmd("ipfs", root)

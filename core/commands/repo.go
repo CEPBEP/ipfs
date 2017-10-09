@@ -18,7 +18,7 @@ import (
 	lockfile "github.com/ipfs/go-ipfs/repo/fsrepo/lock"
 
 	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
-	cmdkit "gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
+	cmds "gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
 	cmds "gx/ipfs/QmPhtZyjPYddJ8yGPWreisp47H6iQjt3Lg8sZrzqMP5noy/go-ipfs-cmds"
 )
 
@@ -27,7 +27,7 @@ type RepoVersion struct {
 }
 
 var RepoCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Manipulate the IPFS repo.",
 		ShortDescription: `
 'ipfs repo' is a plumbing command used to manipulate the repo.
@@ -52,7 +52,7 @@ type GcResult struct {
 }
 
 var repoGcCmd = &oldcmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Perform a garbage collection sweep on the repo.",
 		ShortDescription: `
 'ipfs repo gc' is a plumbing command that will sweep the local
@@ -60,14 +60,14 @@ set of stored objects and remove ones that are not pinned in
 order to reclaim hard disk space.
 `,
 	},
-	Options: []cmdkit.Option{
-		cmdkit.BoolOption("stream-errors", "Stream errors.").Default(false),
-		cmdkit.BoolOption("quiet", "q", "Write minimal output.").Default(false),
+	Options: []cmds.Option{
+		cmds.BoolOption("stream-errors", "Stream errors.").Default(false),
+		cmds.BoolOption("quiet", "q", "Write minimal output.").Default(false),
 	},
 	Run: func(req oldcmds.Request, res oldcmds.Response) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -92,14 +92,14 @@ order to reclaim hard disk space.
 					}
 				}
 				if errs {
-					res.SetError(fmt.Errorf("encountered errors during gc run"), cmdkit.ErrNormal)
+					res.SetError(fmt.Errorf("encountered errors during gc run"), cmds.ErrNormal)
 				}
 			} else {
 				err := corerepo.CollectResult(req.Context(), gcOutChan, func(k *cid.Cid) {
 					outChan <- &GcResult{Key: k}
 				})
 				if err != nil {
-					res.SetError(err, cmdkit.ErrNormal)
+					res.SetError(err, cmds.ErrNormal)
 				}
 			}
 		}()
@@ -137,7 +137,7 @@ order to reclaim hard disk space.
 }
 
 var repoStatCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Get stats for the currently used repo.",
 		ShortDescription: `
 'ipfs repo stat' is a plumbing command that will scan the local
@@ -151,20 +151,20 @@ Version         string The repo version.
 	Run: func(req cmds.Request, re cmds.ResponseEmitter) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
-			re.SetError(err, cmdkit.ErrNormal)
+			re.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		stat, err := corerepo.RepoStat(n, req.Context())
 		if err != nil {
-			re.SetError(err, cmdkit.ErrNormal)
+			re.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		re.Emit(stat)
 	},
-	Options: []cmdkit.Option{
-		cmdkit.BoolOption("human", "Output RepoSize in MiB.").Default(false),
+	Options: []cmds.Option{
+		cmds.BoolOption("human", "Output RepoSize in MiB.").Default(false),
 	},
 	Type: corerepo.Stat{},
 	Encoders: cmds.EncoderMap{
@@ -207,7 +207,7 @@ Version         string The repo version.
 }
 
 var RepoFsckCmd = &oldcmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Remove repo lockfiles.",
 		ShortDescription: `
 'ipfs repo fsck' is a plumbing command that will remove repo and level db
@@ -220,7 +220,7 @@ daemons are running.
 
 		dsPath, err := config.DataStorePath(configRoot)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -234,17 +234,17 @@ daemons are running.
 
 		err = os.Remove(repoLockFile)
 		if err != nil && !os.IsNotExist(err) {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 		err = os.Remove(dsLockFile)
 		if err != nil && !os.IsNotExist(err) {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 		err = os.Remove(apiFile)
 		if err != nil && !os.IsNotExist(err) {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -262,13 +262,13 @@ type VerifyProgress struct {
 }
 
 var repoVerifyCmd = &oldcmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Verify all blocks in repo are not corrupted.",
 	},
 	Run: func(req oldcmds.Request, res oldcmds.Response) {
 		nd, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -302,7 +302,7 @@ var repoVerifyCmd = &oldcmds.Command{
 		if fails == 0 {
 			out <- &VerifyProgress{Msg: "verify complete, all blocks validated."}
 		} else {
-			res.SetError(fmt.Errorf("verify complete, some blocks were corrupt"), cmdkit.ErrNormal)
+			res.SetError(fmt.Errorf("verify complete, some blocks were corrupt"), cmds.ErrNormal)
 		}
 	},
 	Type: &VerifyProgress{},
@@ -339,15 +339,15 @@ var repoVerifyCmd = &oldcmds.Command{
 }
 
 var repoVersionCmd = &oldcmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Show the repo version.",
 		ShortDescription: `
 'ipfs repo version' returns the current repo version.
 `,
 	},
 
-	Options: []cmdkit.Option{
-		cmdkit.BoolOption("quiet", "q", "Write minimal output."),
+	Options: []cmds.Option{
+		cmds.BoolOption("quiet", "q", "Write minimal output."),
 	},
 	Run: func(req oldcmds.Request, res oldcmds.Response) {
 		res.SetOutput(&RepoVersion{

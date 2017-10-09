@@ -12,13 +12,13 @@ import (
 	cmds "github.com/ipfs/go-ipfs/commands"
 	e "github.com/ipfs/go-ipfs/core/commands/e"
 
-	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
+	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmds"
 	peer "gx/ipfs/QmXYjuNuxVzXKJCfWasQk1RqkhVLDM9jtUKhqc2WPQmFSB/go-libp2p-peer"
 	ci "gx/ipfs/QmaPbCnUMBohSGo3KnxEa2bHqyJVVeEEcwtqJAYxerieBo/go-libp2p-crypto"
 )
 
 var KeyCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Create and list IPNS name keypairs",
 		ShortDescription: `
 'ipfs key gen' generates a new keypair for usage with IPNS and 'ipfs name publish'.
@@ -59,43 +59,43 @@ type KeyRenameOutput struct {
 }
 
 var keyGenCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Create a new keypair",
 	},
-	Options: []cmdkit.Option{
-		cmdkit.StringOption("type", "t", "type of the key to create [rsa, ed25519]"),
-		cmdkit.IntOption("size", "s", "size of the key to generate"),
+	Options: []cmds.Option{
+		cmds.StringOption("type", "t", "type of the key to create [rsa, ed25519]"),
+		cmds.IntOption("size", "s", "size of the key to generate"),
 	},
-	Arguments: []cmdkit.Argument{
-		cmdkit.StringArg("name", true, false, "name of key to create"),
+	Arguments: []cmds.Argument{
+		cmds.StringArg("name", true, false, "name of key to create"),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		typ, f, err := req.Option("type").String()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		if !f {
-			res.SetError(fmt.Errorf("please specify a key type with --type"), cmdkit.ErrNormal)
+			res.SetError(fmt.Errorf("please specify a key type with --type"), cmds.ErrNormal)
 			return
 		}
 
 		size, sizefound, err := req.Option("size").Int()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		name := req.Arguments()[0]
 		if name == "self" {
-			res.SetError(fmt.Errorf("cannot create key with name 'self'"), cmdkit.ErrNormal)
+			res.SetError(fmt.Errorf("cannot create key with name 'self'"), cmds.ErrNormal)
 			return
 		}
 
@@ -105,13 +105,13 @@ var keyGenCmd = &cmds.Command{
 		switch typ {
 		case "rsa":
 			if !sizefound {
-				res.SetError(fmt.Errorf("please specify a key size with --size"), cmdkit.ErrNormal)
+				res.SetError(fmt.Errorf("please specify a key size with --size"), cmds.ErrNormal)
 				return
 			}
 
 			priv, pub, err := ci.GenerateKeyPairWithReader(ci.RSA, size, rand.Reader)
 			if err != nil {
-				res.SetError(err, cmdkit.ErrNormal)
+				res.SetError(err, cmds.ErrNormal)
 				return
 			}
 
@@ -120,26 +120,26 @@ var keyGenCmd = &cmds.Command{
 		case "ed25519":
 			priv, pub, err := ci.GenerateEd25519Key(rand.Reader)
 			if err != nil {
-				res.SetError(err, cmdkit.ErrNormal)
+				res.SetError(err, cmds.ErrNormal)
 				return
 			}
 
 			sk = priv
 			pk = pub
 		default:
-			res.SetError(fmt.Errorf("unrecognized key type: %s", typ), cmdkit.ErrNormal)
+			res.SetError(fmt.Errorf("unrecognized key type: %s", typ), cmds.ErrNormal)
 			return
 		}
 
 		err = n.Repo.Keystore().Put(name, sk)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		pid, err := peer.IDFromPublicKey(pk)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -167,22 +167,22 @@ var keyGenCmd = &cmds.Command{
 }
 
 var keyListCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "List all local keypairs",
 	},
-	Options: []cmdkit.Option{
-		cmdkit.BoolOption("l", "Show extra information about keys."),
+	Options: []cmds.Option{
+		cmds.BoolOption("l", "Show extra information about keys."),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		keys, err := n.Repo.Keystore().List()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -195,7 +195,7 @@ var keyListCmd = &cmds.Command{
 		for _, key := range keys {
 			privKey, err := n.Repo.Keystore().Get(key)
 			if err != nil {
-				res.SetError(err, cmdkit.ErrNormal)
+				res.SetError(err, cmds.ErrNormal)
 				return
 			}
 
@@ -203,7 +203,7 @@ var keyListCmd = &cmds.Command{
 
 			pid, err := peer.IDFromPublicKey(pubKey)
 			if err != nil {
-				res.SetError(err, cmdkit.ErrNormal)
+				res.SetError(err, cmds.ErrNormal)
 				return
 			}
 
@@ -219,20 +219,20 @@ var keyListCmd = &cmds.Command{
 }
 
 var keyRenameCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Rename a keypair",
 	},
-	Arguments: []cmdkit.Argument{
-		cmdkit.StringArg("name", true, false, "name of key to rename"),
-		cmdkit.StringArg("newName", true, false, "new name of the key"),
+	Arguments: []cmds.Argument{
+		cmds.StringArg("name", true, false, "name of key to rename"),
+		cmds.StringArg("newName", true, false, "new name of the key"),
 	},
-	Options: []cmdkit.Option{
-		cmdkit.BoolOption("force", "f", "Allow to overwrite an existing key."),
+	Options: []cmds.Option{
+		cmds.BoolOption("force", "f", "Allow to overwrite an existing key."),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -242,18 +242,18 @@ var keyRenameCmd = &cmds.Command{
 		newName := req.Arguments()[1]
 
 		if name == "self" {
-			res.SetError(fmt.Errorf("cannot rename key with name 'self'"), cmdkit.ErrNormal)
+			res.SetError(fmt.Errorf("cannot rename key with name 'self'"), cmds.ErrNormal)
 			return
 		}
 
 		if newName == "self" {
-			res.SetError(fmt.Errorf("cannot overwrite key with name 'self'"), cmdkit.ErrNormal)
+			res.SetError(fmt.Errorf("cannot overwrite key with name 'self'"), cmds.ErrNormal)
 			return
 		}
 
 		oldKey, err := ks.Get(name)
 		if err != nil {
-			res.SetError(fmt.Errorf("no key named %s was found", name), cmdkit.ErrNormal)
+			res.SetError(fmt.Errorf("no key named %s was found", name), cmds.ErrNormal)
 			return
 		}
 
@@ -261,7 +261,7 @@ var keyRenameCmd = &cmds.Command{
 
 		pid, err := peer.IDFromPublicKey(pubKey)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -270,7 +270,7 @@ var keyRenameCmd = &cmds.Command{
 		if force {
 			exist, err := ks.Has(newName)
 			if err != nil {
-				res.SetError(err, cmdkit.ErrNormal)
+				res.SetError(err, cmds.ErrNormal)
 				return
 			}
 
@@ -278,7 +278,7 @@ var keyRenameCmd = &cmds.Command{
 				overwrite = true
 				err := ks.Delete(newName)
 				if err != nil {
-					res.SetError(err, cmdkit.ErrNormal)
+					res.SetError(err, cmds.ErrNormal)
 					return
 				}
 			}
@@ -286,13 +286,13 @@ var keyRenameCmd = &cmds.Command{
 
 		err = ks.Put(newName, oldKey)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
 		err = ks.Delete(name)
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -324,19 +324,19 @@ var keyRenameCmd = &cmds.Command{
 }
 
 var keyRmCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Remove a keypair",
 	},
-	Arguments: []cmdkit.Argument{
-		cmdkit.StringArg("name", true, true, "names of keys to remove").EnableStdin(),
+	Arguments: []cmds.Argument{
+		cmds.StringArg("name", true, true, "names of keys to remove").EnableStdin(),
 	},
-	Options: []cmdkit.Option{
-		cmdkit.BoolOption("l", "Show extra information about keys."),
+	Options: []cmds.Option{
+		cmds.BoolOption("l", "Show extra information about keys."),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
@@ -345,13 +345,13 @@ var keyRmCmd = &cmds.Command{
 		list := make([]KeyOutput, 0, len(names))
 		for _, name := range names {
 			if name == "self" {
-				res.SetError(fmt.Errorf("cannot remove key with name 'self'"), cmdkit.ErrNormal)
+				res.SetError(fmt.Errorf("cannot remove key with name 'self'"), cmds.ErrNormal)
 				return
 			}
 
 			removed, err := n.Repo.Keystore().Get(name)
 			if err != nil {
-				res.SetError(fmt.Errorf("no key named %s was found", name), cmdkit.ErrNormal)
+				res.SetError(fmt.Errorf("no key named %s was found", name), cmds.ErrNormal)
 				return
 			}
 
@@ -359,7 +359,7 @@ var keyRmCmd = &cmds.Command{
 
 			pid, err := peer.IDFromPublicKey(pubKey)
 			if err != nil {
-				res.SetError(err, cmdkit.ErrNormal)
+				res.SetError(err, cmds.ErrNormal)
 				return
 			}
 
@@ -369,7 +369,7 @@ var keyRmCmd = &cmds.Command{
 		for _, name := range names {
 			err = n.Repo.Keystore().Delete(name)
 			if err != nil {
-				res.SetError(err, cmdkit.ErrNormal)
+				res.SetError(err, cmds.ErrNormal)
 				return
 			}
 		}

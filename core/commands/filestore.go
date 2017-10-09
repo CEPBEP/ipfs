@@ -12,12 +12,12 @@ import (
 	"github.com/ipfs/go-ipfs/filestore"
 
 	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
-	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmdkit"
+	"gx/ipfs/QmPMeikDc7tQEDvaS66j1bVPQ2jBkvFwz3Qom5eA5i4xip/go-ipfs-cmds"
 	cmds "gx/ipfs/QmPhtZyjPYddJ8yGPWreisp47H6iQjt3Lg8sZrzqMP5noy/go-ipfs-cmds"
 )
 
 var FileStoreCmd = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Interact with filestore objects.",
 	},
 	Subcommands: map[string]*cmds.Command{
@@ -35,7 +35,7 @@ type lsEncoder struct {
 }
 
 var lsFileStore = &cmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "List objects in filestore.",
 		LongDescription: `
 List objects in the filestore.
@@ -48,16 +48,16 @@ The output is:
 <hash> <size> <path> <offset>
 `,
 	},
-	Arguments: []cmdkit.Argument{
-		cmdkit.StringArg("obj", false, true, "Cid of objects to list."),
+	Arguments: []cmds.Argument{
+		cmds.StringArg("obj", false, true, "Cid of objects to list."),
 	},
-	Options: []cmdkit.Option{
-		cmdkit.BoolOption("file-order", "sort the results based on the path of the backing file"),
+	Options: []cmds.Option{
+		cmds.BoolOption("file-order", "sort the results based on the path of the backing file"),
 	},
 	Run: func(req cmds.Request, re cmds.ResponseEmitter) {
 		_, fs, err := getFilestore(req.InvocContext())
 		if err != nil {
-			re.SetError(err, cmdkit.ErrNormal)
+			re.SetError(err, cmds.ErrNormal)
 			return
 		}
 		args := req.Arguments()
@@ -74,7 +74,7 @@ The output is:
 			fileOrder, _, _ := req.Option("file-order").Bool()
 			next, err := filestore.ListAll(fs, fileOrder)
 			if err != nil {
-				re.SetError(err, cmdkit.ErrNormal)
+				re.SetError(err, cmds.ErrNormal)
 				return
 			}
 
@@ -125,11 +125,11 @@ The output is:
 					re.SetError(e.Message, e.Code)
 
 				} else {
-					re.SetError(err, cmdkit.ErrNormal)
+					re.SetError(err, cmds.ErrNormal)
 				}
 
 				if errors {
-					re.SetError("errors while displaying some entries", cmdkit.ErrNormal)
+					re.SetError("errors while displaying some entries", cmds.ErrNormal)
 				}
 			}()
 
@@ -140,7 +140,7 @@ The output is:
 }
 
 var verifyFileStore = &oldCmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "Verify objects in filestore.",
 		LongDescription: `
 Verify objects in the filestore.
@@ -163,16 +163,16 @@ ERROR:    internal error, most likely due to a corrupt database
 For ERROR entries the error will also be printed to stderr.
 `,
 	},
-	Arguments: []cmdkit.Argument{
-		cmdkit.StringArg("obj", false, true, "Cid of objects to verify."),
+	Arguments: []cmds.Argument{
+		cmds.StringArg("obj", false, true, "Cid of objects to verify."),
 	},
-	Options: []cmdkit.Option{
-		cmdkit.BoolOption("file-order", "verify the objects based on the order of the backing file"),
+	Options: []cmds.Option{
+		cmds.BoolOption("file-order", "verify the objects based on the order of the backing file"),
 	},
 	Run: func(req oldCmds.Request, res oldCmds.Response) {
 		_, fs, err := getFilestore(req.InvocContext())
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 		args := req.Arguments()
@@ -185,7 +185,7 @@ For ERROR entries the error will also be printed to stderr.
 			fileOrder, _, _ := req.Option("file-order").Bool()
 			next, err := filestore.VerifyAll(fs, fileOrder)
 			if err != nil {
-				res.SetError(err, cmdkit.ErrNormal)
+				res.SetError(err, cmds.ErrNormal)
 				return
 			}
 			out := listResToChan(req.Context(), next)
@@ -215,18 +215,18 @@ For ERROR entries the error will also be printed to stderr.
 }
 
 var dupsFileStore = &oldCmds.Command{
-	Helptext: cmdkit.HelpText{
+	Helptext: cmds.HelpText{
 		Tagline: "List blocks that are both in the filestore and standard block storage.",
 	},
 	Run: func(req oldCmds.Request, res oldCmds.Response) {
 		_, fs, err := getFilestore(req.InvocContext())
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 		ch, err := fs.FileManager().AllKeysChan(req.Context())
 		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
+			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
