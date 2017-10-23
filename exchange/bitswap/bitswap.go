@@ -16,7 +16,6 @@ import (
 	bsmsg "github.com/ipfs/go-ipfs/exchange/bitswap/message"
 	bsnet "github.com/ipfs/go-ipfs/exchange/bitswap/network"
 	notifications "github.com/ipfs/go-ipfs/exchange/bitswap/notifications"
-	flags "github.com/ipfs/go-ipfs/flags"
 	"github.com/ipfs/go-ipfs/thirdparty/delay"
 
 	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
@@ -37,28 +36,17 @@ const (
 	// TODO: if a 'non-nice' strategy is implemented, consider increasing this value
 	maxProvidersPerRequest = 3
 	providerRequestTimeout = time.Second * 10
-	provideTimeout         = time.Second * 15
 	sizeBatchRequestChan   = 32
 	// kMaxPriority is the max priority as defined by the bitswap protocol
 	kMaxPriority = math.MaxInt32
+
+	self = peer.ID("")
 )
 
 var (
-	HasBlockBufferSize    = 256
-	provideKeysBufferSize = 2048
-	provideWorkerMax      = 512
-
 	// the 1<<18+15 is to observe old file chunks that are 1<<18 + 14 in size
 	metricsBuckets = []float64{1 << 6, 1 << 10, 1 << 14, 1 << 18, 1<<18 + 15, 1 << 22}
 )
-
-func init() {
-	if flags.LowMemMode {
-		HasBlockBufferSize = 64
-		provideKeysBufferSize = 512
-		provideWorkerMax = 16
-	}
-}
 
 var rebroadcastDelay = delay.Fixed(time.Minute)
 
@@ -96,8 +84,6 @@ func New(parent context.Context, p peer.ID, network bsnet.BitSwapNetwork,
 		network:       network,
 		findKeys:      make(chan *blockRequest, sizeBatchRequestChan),
 		process:       px,
-		newBlocks:     make(chan *cid.Cid, HasBlockBufferSize),
-		provideKeys:   make(chan *cid.Cid, provideKeysBufferSize),
 		wm:            NewWantManager(ctx, network),
 		counters:      new(counters),
 
@@ -143,12 +129,6 @@ type Bitswap struct {
 
 	// findKeys sends keys to a worker to find and connect to providers for them
 	findKeys chan *blockRequest
-	// newBlocks is a channel for newly added blocks to be provided to the
-	// network.  blocks pushed down this channel get buffered and fed to the
-	// provideKeys channel later on to avoid too much network activity
-	newBlocks chan *cid.Cid
-	// provideKeys directly feeds provide workers
-	provideKeys chan *cid.Cid
 
 	process process.Process
 
@@ -298,7 +278,8 @@ func (bs *Bitswap) CancelWants(cids []*cid.Cid, ses uint64) {
 // HasBlock announces the existance of a block to this bitswap service. The
 // service will potentially notify its peers.
 func (bs *Bitswap) HasBlock(blk blocks.Block) error {
-	return bs.receiveBlockFrom(blk, "")
+	//TODO: call provide here?
+	return bs.receiveBlockFrom(blk, self)
 }
 
 // TODO: Some of this stuff really only needs to be done when adding a block
@@ -333,13 +314,6 @@ func (bs *Bitswap) receiveBlockFrom(blk blocks.Block, from peer.ID) error {
 	}
 
 	bs.engine.AddBlock(blk)
-
-	select {
-	case bs.newBlocks <- blk.Cid():
-		// send block off to be reprovided
-	case <-bs.process.Closing():
-		return bs.process.Close()
-	}
 	return nil
 }
 
@@ -394,6 +368,9 @@ func (bs *Bitswap) ReceiveMessage(ctx context.Context, p peer.ID, incoming bsmsg
 
 			if err := bs.receiveBlockFrom(b, p); err != nil {
 				log.Warningf("ReceiveMessage recvBlockFrom error: %s", err)
+			}
+			if err := bs.network.Provide(ctx, b.Cid()); err != nil {
+				log.Warningf("ReceiveMessage Provide error: %s", err)
 			}
 			log.Event(ctx, "Bitswap.GetBlockRequest.End", b.Cid())
 		}(block)

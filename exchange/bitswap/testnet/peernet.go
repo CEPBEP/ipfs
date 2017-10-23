@@ -4,6 +4,7 @@ import (
 	"context"
 
 	bsnet "github.com/ipfs/go-ipfs/exchange/bitswap/network"
+	pr "github.com/ipfs/go-ipfs/exchange/providers"
 	mockrouting "github.com/ipfs/go-ipfs/routing/mock"
 	testutil "gx/ipfs/QmQgLZP9haZheimMHqqAjJh2LhRmNfEoZDfbtkpeMhi9xK/go-testutil"
 	mockpeernet "gx/ipfs/QmTzs3Gp2rU3HuNayjBVG7qBgbaKWE8bgtwJ7faRxAe9UP/go-libp2p/p2p/net/mock"
@@ -26,7 +27,9 @@ func (pn *peernet) Adapter(p testutil.Identity) bsnet.BitSwapNetwork {
 		panic(err.Error())
 	}
 	routing := pn.routingserver.ClientWithDatastore(context.TODO(), p, ds.NewMapDatastore())
-	return bsnet.NewFromIpfsHost(client, routing)
+	provider := pr.NewProviders(context.TODO(), routing)
+
+	return bsnet.NewFromIpfsHost(client, routing, provider)
 }
 
 func (pn *peernet) HasPeer(p peer.ID) bool {

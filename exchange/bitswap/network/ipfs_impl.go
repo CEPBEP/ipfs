@@ -7,6 +7,7 @@ import (
 	"time"
 
 	bsmsg "github.com/ipfs/go-ipfs/exchange/bitswap/message"
+	provider "github.com/ipfs/go-ipfs/exchange/providers"
 
 	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
 	routing "gx/ipfs/QmPR2JzfKd9poHx9XBhzoFeBBC31ZM3W5iUPKJZWyaoZZm/go-libp2p-routing"
@@ -25,10 +26,11 @@ var log = logging.Logger("bitswap_network")
 var sendMessageTimeout = time.Minute * 10
 
 // NewFromIpfsHost returns a BitSwapNetwork supported by underlying IPFS host
-func NewFromIpfsHost(host host.Host, r routing.ContentRouting) BitSwapNetwork {
+func NewFromIpfsHost(host host.Host, r routing.ContentRouting, p provider.Interface) BitSwapNetwork {
 	bitswapNetwork := impl{
-		host:    host,
-		routing: r,
+		host:     host,
+		routing:  r,
+		provider: p,
 	}
 	host.SetStreamHandler(ProtocolBitswap, bitswapNetwork.handleNewStream)
 	host.SetStreamHandler(ProtocolBitswapOne, bitswapNetwork.handleNewStream)
@@ -42,8 +44,9 @@ func NewFromIpfsHost(host host.Host, r routing.ContentRouting) BitSwapNetwork {
 // impl transforms the ipfs network interface, which sends and receives
 // NetMessage objects, into the bitswap network interface.
 type impl struct {
-	host    host.Host
-	routing routing.ContentRouting
+	host     host.Host
+	routing  routing.ContentRouting
+	provider provider.Interface
 
 	// inbound messages from the network are forwarded to the receiver
 	receiver Receiver
@@ -137,6 +140,7 @@ func (bsnet *impl) ConnectTo(ctx context.Context, p peer.ID) error {
 }
 
 // FindProvidersAsync returns a channel of providers for the given key
+// TODO: move this and other FindProvider stuff out to exch.provider
 func (bsnet *impl) FindProvidersAsync(ctx context.Context, k *cid.Cid, max int) <-chan peer.ID {
 
 	// Since routing queries are expensive, give bitswap the peers to which we
@@ -174,7 +178,7 @@ func (bsnet *impl) FindProvidersAsync(ctx context.Context, k *cid.Cid, max int) 
 
 // Provide provides the key to the network
 func (bsnet *impl) Provide(ctx context.Context, k *cid.Cid) error {
-	return bsnet.routing.Provide(ctx, k, true)
+	return bsnet.provider.Provide(k)
 }
 
 // handleNewStream receives a new stream from the network.
