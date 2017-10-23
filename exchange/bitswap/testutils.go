@@ -6,14 +6,16 @@ import (
 
 	blockstore "github.com/ipfs/go-ipfs/blocks/blockstore"
 	tn "github.com/ipfs/go-ipfs/exchange/bitswap/testnet"
+	offline "github.com/ipfs/go-ipfs/exchange/offline"
+	providers "github.com/ipfs/go-ipfs/exchange/providers"
 	datastore2 "github.com/ipfs/go-ipfs/thirdparty/datastore2"
 	delay "github.com/ipfs/go-ipfs/thirdparty/delay"
-	testutil "gx/ipfs/QmeDA8gNhvRTsbrjEieay5wezupJDiky8xvCzDABbsGzmp/go-testutil"
 
 	peer "gx/ipfs/QmWNY7dV54ZDYmTA1ykVdwNCqC11mpU4zSUp6XDpLTH9eG/go-libp2p-peer"
 	p2ptestutil "gx/ipfs/QmZTcPxK6VqrwY94JpKZPvEqAZ6tEr1rLrpcqJbbRZbg2V/go-libp2p-netutil"
 	ds "gx/ipfs/QmdHG8MAuARdGHxx4rPQASLcvhz24fzjSQq7AJRAQEorq5/go-datastore"
 	ds_sync "gx/ipfs/QmdHG8MAuARdGHxx4rPQASLcvhz24fzjSQq7AJRAQEorq5/go-datastore/sync"
+	testutil "gx/ipfs/QmeDA8gNhvRTsbrjEieay5wezupJDiky8xvCzDABbsGzmp/go-testutil"
 )
 
 // WARNING: this uses RandTestBogusIdentity DO NOT USE for NON TESTS!
@@ -68,6 +70,7 @@ func (g *SessionGenerator) Instances(n int) []Instance {
 type Instance struct {
 	Peer       peer.ID
 	Exchange   *Bitswap
+	Providers  providers.Interface
 	blockstore blockstore.Blockstore
 
 	blockstoreDelay delay.D
@@ -106,6 +109,7 @@ func MkSession(ctx context.Context, net tn.Network, p testutil.Identity) Instanc
 	return Instance{
 		Peer:            p.ID(),
 		Exchange:        bs,
+		Providers:       offline.Providers(), //TODO: make sure this is correct
 		blockstore:      bstore,
 		blockstoreDelay: bsdelay,
 	}

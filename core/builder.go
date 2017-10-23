@@ -215,6 +215,7 @@ func setupNode(ctx context.Context, n *IpfsNode, cfg *BuildCfg) error {
 		}
 	} else {
 		n.Exchange = offline.Exchange(n.Blockstore)
+		n.Providers = offline.Providers()
 	}
 
 	n.Blocks = bserv.New(n.Blockstore, n.Exchange)
