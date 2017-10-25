@@ -59,6 +59,12 @@ represent it.
 
 		c := node.Cid()
 
+		err = nd.Providers.Provide(c)
+		if err != nil {
+			res.SetError(err, cmds.ErrNormal)
+			return
+		}
+
 		fi.FileName()
 		res.SetOutput(&coreunix.AddedObject{
 			Name: fi.FileName(),

@@ -78,7 +78,7 @@ func NewRoot(parent context.Context, ds dag.DAGService, node *dag.ProtoNode, pf 
 	root := &Root{
 		node:  node,
 		repub: repub,
-		dserv: ds,
+		dserv: ds, //TODO: look into node providing here
 	}
 
 	pbn, err := ft.FromBytes(node.Data())

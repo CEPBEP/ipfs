@@ -193,6 +193,7 @@ func (db *DagBuilderHelper) SetPosInfo(node *UnixfsNode, offset uint64) {
 	}
 }
 
+//TODO: Check if provide is needed here
 func (db *DagBuilderHelper) Add(node *UnixfsNode) (node.Node, error) {
 	dn, err := node.GetDagNode()
 	if err != nil {

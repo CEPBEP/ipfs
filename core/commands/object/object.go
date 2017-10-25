@@ -509,6 +509,13 @@ Available templates:
 			res.SetError(err, cmdkit.ErrNormal)
 			return
 		}
+
+		err = n.Providers.Provide(k)
+		if err != nil {
+			res.SetError(err, cmds.ErrNormal)
+			return
+		}
+
 		res.SetOutput(&Object{Hash: k.String()})
 	},
 	Marshalers: cmds.MarshalerMap{
@@ -602,7 +609,12 @@ func objectPut(n *core.IpfsNode, input io.Reader, encoding string, dataFieldEnco
 		return nil, err
 	}
 
-	_, err = n.DAG.Add(dagnode)
+	c, err := n.DAG.Add(dagnode)
+	if err != nil {
+		return nil, err
+	}
+
+	err = n.Providers.Provide(c)
 	if err != nil {
 		return nil, err
 	}

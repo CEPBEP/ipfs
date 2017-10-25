@@ -110,7 +110,7 @@ func (n *UnixfsNode) AddChild(child *UnixfsNode, db *DagBuilderHelper) error {
 		return err
 	}
 
-	_, err = db.batch.Add(childnode)
+	_, err = db.batch.Add(childnode) //TODO: do we need to provide here?
 
 	return err
 }

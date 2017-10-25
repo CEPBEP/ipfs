@@ -184,7 +184,7 @@ func (ds *HamtShard) Node() (node.Node, error) {
 
 	out.SetData(data)
 
-	_, err = ds.dserv.Add(out)
+	_, err = ds.dserv.Add(out) //TODO: do we need to provide here?
 	if err != nil {
 		return nil, err
 	}
@@ -221,7 +221,7 @@ func (ds *HamtShard) Label() string {
 // Set sets 'name' = nd in the HAMT
 func (ds *HamtShard) Set(ctx context.Context, name string, nd node.Node) error {
 	hv := &hashBits{b: hash([]byte(name))}
-	_, err := ds.dserv.Add(nd)
+	_, err := ds.dserv.Add(nd) //TODO: do we need to provide here?
 	if err != nil {
 		return err
 	}
@@ -335,7 +335,7 @@ func (ds *HamtShard) Link() (*node.Link, error) {
 		return nil, err
 	}
 
-	_, err = ds.dserv.Add(nd)
+	_, err = ds.dserv.Add(nd) //TODO: do we need to provide here?
 	if err != nil {
 		return nil, err
 	}
