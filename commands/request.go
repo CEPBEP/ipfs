@@ -272,8 +272,7 @@ func getContext(base context.Context, req Request) (context.Context, error) {
 		tctx, _ := context.WithTimeout(base, duration)
 		ctx = tctx
 	} else {
-		cctx, _ := context.WithCancel(base)
-		ctx = cctx
+		ctx = base
 	}
 	return ctx, nil
 }
