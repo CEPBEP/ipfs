@@ -74,12 +74,13 @@ type AddedObject struct {
 	Size  string `json:",omitempty"`
 }
 
-func NewAdder(ctx context.Context, p pin.Pinner, bs bstore.GCBlockstore, ds dag.DAGService) (*Adder, error) {
+func NewAdder(ctx context.Context, p pin.Pinner, bs bstore.GCBlockstore, ds dag.DAGService, pr providers.Interface) (*Adder, error) {
 	return &Adder{
 		ctx:        ctx,
 		pinning:    p,
 		blockstore: bs,
 		dagService: ds,
+		provide:    pr,
 		Progress:   false,
 		Hidden:     true,
 		Pin:        true,
@@ -314,7 +315,7 @@ func Add(n *core.IpfsNode, r io.Reader) (string, error) {
 func AddWithContext(ctx context.Context, n *core.IpfsNode, r io.Reader) (string, error) {
 	defer n.Blockstore.PinLock().Unlock()
 
-	fileAdder, err := NewAdder(ctx, n.Pinning, n.Blockstore, n.DAG)
+	fileAdder, err := NewAdder(ctx, n.Pinning, n.Blockstore, n.DAG, n.Providers)
 	if err != nil {
 		return "", err
 	}
@@ -342,7 +343,7 @@ func AddR(n *core.IpfsNode, root string) (key string, err error) {
 	}
 	defer f.Close()
 
-	fileAdder, err := NewAdder(n.Context(), n.Pinning, n.Blockstore, n.DAG)
+	fileAdder, err := NewAdder(n.Context(), n.Pinning, n.Blockstore, n.DAG, n.Providers)
 	if err != nil {
 		return "", err
 	}
@@ -366,7 +367,7 @@ func AddR(n *core.IpfsNode, root string) (key string, err error) {
 // the directory, and and error if any.
 func AddWrapped(n *core.IpfsNode, r io.Reader, filename string) (string, node.Node, error) {
 	file := files.NewReaderFile(filename, filename, ioutil.NopCloser(r), nil)
-	fileAdder, err := NewAdder(n.Context(), n.Pinning, n.Blockstore, n.DAG)
+	fileAdder, err := NewAdder(n.Context(), n.Pinning, n.Blockstore, n.DAG, n.Providers)
 	if err != nil {
 		return "", nil, err
 	}
