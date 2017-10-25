@@ -60,7 +60,7 @@ func TestAddGCLive(t *testing.T) {
 	}
 
 	out := make(chan interface{})
-	adder, err := NewAdder(context.Background(), node.Pinning, node.Blockstore, node.DAG)
+	adder, err := NewAdder(context.Background(), node.Pinning, node.Blockstore, node.DAG, node.Providers)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -171,7 +171,7 @@ func testAddWPosInfo(t *testing.T, rawLeaves bool) {
 	bs := &testBlockstore{GCBlockstore: node.Blockstore, expectedPath: "/tmp/foo.txt", t: t}
 	bserv := blockservice.New(bs, node.Exchange)
 	dserv := dag.NewDAGService(bserv)
-	adder, err := NewAdder(context.Background(), node.Pinning, bs, dserv)
+	adder, err := NewAdder(context.Background(), node.Pinning, bs, dserv, node.Providers)
 	if err != nil {
 		t.Fatal(err)
 	}
