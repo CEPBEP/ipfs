@@ -4,7 +4,7 @@ import (
 	"context"
 
 	bsnet "github.com/ipfs/go-ipfs/exchange/bitswap/network"
-	pr "github.com/ipfs/go-ipfs/exchange/providers"
+	pr "github.com/ipfs/go-ipfs/providers"
 	mockrouting "github.com/ipfs/go-ipfs/routing/mock"
 	testutil "gx/ipfs/QmQgLZP9haZheimMHqqAjJh2LhRmNfEoZDfbtkpeMhi9xK/go-testutil"
 	mockpeernet "gx/ipfs/QmTzs3Gp2rU3HuNayjBVG7qBgbaKWE8bgtwJ7faRxAe9UP/go-libp2p/p2p/net/mock"

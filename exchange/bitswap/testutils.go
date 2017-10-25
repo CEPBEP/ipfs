@@ -7,7 +7,7 @@ import (
 	blockstore "github.com/ipfs/go-ipfs/blocks/blockstore"
 	tn "github.com/ipfs/go-ipfs/exchange/bitswap/testnet"
 	offline "github.com/ipfs/go-ipfs/exchange/offline"
-	providers "github.com/ipfs/go-ipfs/exchange/providers"
+	providers "github.com/ipfs/go-ipfs/providers"
 	datastore2 "github.com/ipfs/go-ipfs/thirdparty/datastore2"
 	delay "github.com/ipfs/go-ipfs/thirdparty/delay"
 
