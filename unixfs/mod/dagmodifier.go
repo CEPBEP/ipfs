@@ -128,7 +128,7 @@ func (dm *DagModifier) expandSparse(size int64) error {
 	if err != nil {
 		return err
 	}
-	_, err = dm.dagserv.Add(nnode)
+	_, err = dm.dagserv.Add(nnode) //TODO: do we need to provide here?
 	return err
 }
 
@@ -216,7 +216,7 @@ func (dm *DagModifier) Sync() error {
 			return err
 		}
 
-		_, err = dm.dagserv.Add(dm.curNode)
+		_, err = dm.dagserv.Add(dm.curNode) //TODO: do we need to provide here?
 		if err != nil {
 			return err
 		}
@@ -255,7 +255,7 @@ func (dm *DagModifier) modifyDag(n node.Node, offset uint64, data io.Reader) (*c
 			nd := new(mdag.ProtoNode)
 			nd.SetData(b)
 			nd.SetPrefix(&nd0.Prefix)
-			k, err := dm.dagserv.Add(nd)
+			k, err := dm.dagserv.Add(nd) //TODO: do we need to provide here?
 			if err != nil {
 				return nil, false, err
 			}
@@ -290,7 +290,7 @@ func (dm *DagModifier) modifyDag(n node.Node, offset uint64, data io.Reader) (*c
 			if err != nil {
 				return nil, false, err
 			}
-			k, err := dm.dagserv.Add(nd)
+			k, err := dm.dagserv.Add(nd) //TODO: do we need to provide here?
 			if err != nil {
 				return nil, false, err
 			}
@@ -349,7 +349,7 @@ func (dm *DagModifier) modifyDag(n node.Node, offset uint64, data io.Reader) (*c
 		cur += bs
 	}
 
-	k, err := dm.dagserv.Add(node)
+	k, err := dm.dagserv.Add(node) //TODO: do we need to provide here?
 	return k, done, err
 }
 
@@ -501,7 +501,7 @@ func (dm *DagModifier) Truncate(size int64) error {
 		return err
 	}
 
-	_, err = dm.dagserv.Add(nnode)
+	_, err = dm.dagserv.Add(nnode) //TODO: do we need to provide here?
 	if err != nil {
 		return err
 	}
@@ -564,7 +564,7 @@ func dagTruncate(ctx context.Context, n node.Node, size uint64, ds mdag.DAGServi
 		ndata.AddBlockSize(childsize)
 	}
 
-	_, err := ds.Add(modified)
+	_, err := ds.Add(modified) //TODO: do we need to provide here?
 	if err != nil {
 		return nil, err
 	}

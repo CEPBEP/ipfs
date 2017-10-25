@@ -14,6 +14,7 @@ import (
 	bserv "github.com/ipfs/go-ipfs/blockservice"
 	core "github.com/ipfs/go-ipfs/core"
 	"github.com/ipfs/go-ipfs/exchange/offline"
+	"github.com/ipfs/go-ipfs/exchange/providers"
 	balanced "github.com/ipfs/go-ipfs/importer/balanced"
 	"github.com/ipfs/go-ipfs/importer/chunk"
 	ihelper "github.com/ipfs/go-ipfs/importer/helpers"
@@ -94,6 +95,7 @@ type Adder struct {
 	pinning    pin.Pinner
 	blockstore bstore.GCBlockstore
 	dagService dag.DAGService
+	provide    providers.Interface
 	Out        chan interface{}
 	Progress   bool
 	Hidden     bool
@@ -191,6 +193,11 @@ func (adder *Adder) PinRoot() error {
 	}
 
 	rnk, err := adder.dagService.Add(root)
+	if err != nil {
+		return err
+	}
+
+	err = adder.provide.Provide(rnk)
 	if err != nil {
 		return err
 	}
@@ -463,7 +470,12 @@ func (adder *Adder) addFile(file files.File) error {
 
 		dagnode := dag.NodeWithData(sdata)
 		dagnode.SetPrefix(adder.Prefix)
-		_, err = adder.dagService.Add(dagnode)
+		ci, err := adder.dagService.Add(dagnode)
+		if err != nil {
+			return err
+		}
+
+		err = adder.provide.Provide(ci)
 		if err != nil {
 			return err
 		}

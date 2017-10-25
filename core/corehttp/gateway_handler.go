@@ -515,6 +515,11 @@ func (i *gatewayHandler) putHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := i.node.Providers.Provide(newcid); err != nil {
+		webError(w, "putHandler: Could not provide newnode: ", err, http.StatusInternalServerError)
+		return
+	}
+
 	i.addUserHeaders(w) // ok, _now_ write user's headers.
 	w.Header().Set("IPFS-Hash", newcid.String())
 	http.Redirect(w, r, gopath.Join(ipfsPathPrefix, newcid.String(), newPath), http.StatusCreated)
@@ -566,8 +571,14 @@ func (i *gatewayHandler) deleteHandler(w http.ResponseWriter, r *http.Request) {
 
 	var newnode *dag.ProtoNode = pbnd
 	for j := len(pathNodes) - 2; j >= 0; j-- {
-		if _, err := i.node.DAG.Add(newnode); err != nil {
+		c, err := i.node.DAG.Add(newnode)
+		if err != nil {
 			webError(w, "Could not add node", err, http.StatusInternalServerError)
+			return
+		}
+
+		if err := i.node.Providers.Provide(c); err != nil {
+			webError(w, "Could not provide node", err, http.StatusInternalServerError)
 			return
 		}
 
@@ -584,13 +595,16 @@ func (i *gatewayHandler) deleteHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if _, err := i.node.DAG.Add(newnode); err != nil {
+	ncid, err := i.node.DAG.Add(newnode)
+	if err != nil {
 		webError(w, "Could not add root node", err, http.StatusInternalServerError)
 		return
 	}
 
-	// Redirect to new path
-	ncid := newnode.Cid()
+	if err := i.node.Providers.Provide(ncid); err != nil {
+		webError(w, "Could not provide node", err, http.StatusInternalServerError)
+		return
+	}
 
 	i.addUserHeaders(w) // ok, _now_ write user's headers.
 	w.Header().Set("IPFS-Hash", ncid.String())
