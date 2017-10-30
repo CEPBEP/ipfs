@@ -1,4 +1,4 @@
-package corehttp
+package coremetrics
 
 import (
 	"context"

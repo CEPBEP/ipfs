@@ -15,13 +15,13 @@ import (
 	"github.com/ipfs/go-ipfs/core"
 	commands "github.com/ipfs/go-ipfs/core/commands"
 	corehttp "github.com/ipfs/go-ipfs/core/corehttp"
+	coremetrics "github.com/ipfs/go-ipfs/core/coremetrics"
 	corerepo "github.com/ipfs/go-ipfs/core/corerepo"
 	nodeMount "github.com/ipfs/go-ipfs/fuse/node"
 	fsrepo "github.com/ipfs/go-ipfs/repo/fsrepo"
 	migrate "github.com/ipfs/go-ipfs/repo/fsrepo/migrations"
 
 	mprome "gx/ipfs/QmSk46nSD78YiuNojYMS8NW6hSCjH95JajqqzzoychZgef/go-metrics-prometheus"
-	"gx/ipfs/QmX3QZ5jHEPidwUrymXV1iSCSUhdGxj15sm2gP4jKMef7B/client_golang/prometheus"
 	"gx/ipfs/QmX3U3YXCQ6UYBxq2LVWF8dARS1hPUTEYLrSx654Qyxyw6/go-multiaddr-net"
 	ma "gx/ipfs/QmXY77cVe7rVRQXZZQRioukUM7aRW3BTcAgJe12MCtb3Ji/go-multiaddr"
 	iconn "gx/ipfs/QmfQAY7YU4fQi3sjGLs1hwkM2Aq7dxgDyoMjaKN4WBWvcB/go-libp2p-interface-conn"
@@ -390,7 +390,7 @@ func daemonFunc(req cmds.Request, res cmds.Response) {
 	}
 
 	// initialize metrics collector
-	prometheus.MustRegister(&corehttp.IpfsNodeCollector{Node: node})
+	coremetrics.MustRegister(node.PeerHost, node.Peerstore)
 
 	fmt.Printf("Daemon is ready\n")
 	// collect long-running errors and block for shutdown
@@ -444,14 +444,21 @@ func serveHTTPApi(req cmds.Request) (error, <-chan error) {
 	}
 
 	var opts = []corehttp.ServeOption{
-		corehttp.MetricsCollectionOption("api"),
+		func(_ *core.IpfsNode, _ net.Listener, mux *http.ServeMux) (*http.ServeMux, error) {
+			childMux := http.NewServeMux()
+			mux.HandleFunc("/", coremetrics.CollectorHandler("api", childMux))
+			return childMux, nil
+		},
 		corehttp.CommandsOption(*req.InvocContext()),
 		corehttp.WebUIOption,
 		gatewayOpt,
 		corehttp.VersionOption(),
 		defaultMux("/debug/vars"),
 		defaultMux("/debug/pprof/"),
-		corehttp.MetricsScrapingOption("/debug/metrics/prometheus"),
+		func(_ *core.IpfsNode, _ net.Listener, mux *http.ServeMux) (*http.ServeMux, error) {
+			mux.Handle("/debug/metrics/prometheus", coremetrics.ScrapingHandler())
+			return mux, nil
+		},
 		corehttp.LogOption(),
 	}
 
@@ -541,7 +548,11 @@ func serveHTTPGateway(req cmds.Request) (error, <-chan error) {
 	}
 
 	var opts = []corehttp.ServeOption{
-		corehttp.MetricsCollectionOption("gateway"),
+		func(_ *core.IpfsNode, _ net.Listener, mux *http.ServeMux) (*http.ServeMux, error) {
+			childMux := http.NewServeMux()
+			mux.HandleFunc("/", coremetrics.CollectorHandler("gateway", childMux))
+			return childMux, nil
+		},
 		corehttp.CommandsROOption(*req.InvocContext()),
 		corehttp.VersionOption(),
 		corehttp.IPNSHostnameOption(),
