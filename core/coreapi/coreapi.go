@@ -24,8 +24,17 @@ func (api *CoreAPI) Unixfs() coreiface.UnixfsAPI {
 	return (*UnixfsAPI)(api)
 }
 
+<<<<<<< Updated upstream
 func (api *CoreAPI) ResolveNode(ctx context.Context, p coreiface.Path) (coreiface.Node, error) {
 	p, err := api.ResolvePath(ctx, p)
+=======
+func (api *CoreAPI) Object() coreiface.ObjectAPI {
+	return (*ObjectAPI)(api)
+}
+
+func resolve(ctx context.Context, n *core.IpfsNode, p string) (ipld.Node, error) {
+	pp, err := path.ParsePath(p)
+>>>>>>> Stashed changes
 	if err != nil {
 		return nil, err
 	}

@@ -405,6 +405,7 @@ func (i *gatewayHandler) putHandler(w http.ResponseWriter, r *http.Request) {
 	if rsegs[len(rsegs)-1] == "QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn" {
 		newnode = ft.EmptyDirNode()
 	} else {
+		// here
 		putNode, err := i.newDagFromReader(r.Body)
 		if err != nil {
 			webError(w, "putHandler: Could not create DAG from request", err, http.StatusInternalServerError)
@@ -419,6 +420,7 @@ func (i *gatewayHandler) putHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var newcid *cid.Cid
+	// here
 	rnode, err := core.Resolve(ctx, i.node.Namesys, i.node.Resolver, rootPath)
 	switch ev := err.(type) {
 	case path.ErrNoLink:
@@ -431,6 +433,7 @@ func (i *gatewayHandler) putHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// here
 		rnode, err := i.node.DAG.Get(ctx, c)
 		if err != nil {
 			webError(w, "putHandler: Could not create DAG from request", err, http.StatusInternalServerError)
@@ -443,6 +446,7 @@ func (i *gatewayHandler) putHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// here
 		e := dagutils.NewDagEditor(pbnd, i.node.DAG)
 		err = e.InsertNodeAtPath(ctx, newPath, newnode, ft.EmptyDirNode)
 		if err != nil {
@@ -474,6 +478,7 @@ func (i *gatewayHandler) putHandler(w http.ResponseWriter, r *http.Request) {
 		// object set-data case
 		pbnd.SetData(pbnewnode.Data())
 
+		// here
 		newcid, err = i.node.DAG.Add(pbnd)
 		if err != nil {
 			nnk := newnode.Cid()

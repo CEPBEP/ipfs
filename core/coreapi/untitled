@@ -1,0 +1,53 @@
+package coreapi
+
+import (
+  core "github.com/ipfs/go-ipfs/core"
+  coreiface "github.com/ipfs/interface-ipfs-core/go"
+
+  cid "github.com/ipld/go-cid"
+)
+
+type path struct {
+  string string
+  segments []string
+  cids []*cid.Cid
+}
+
+func (p *path) Root() *cid.Cid {
+  if !p.Resolved() {
+    return nil
+  }
+
+  return cids[0]
+}
+
+func (p *path) Cid() *cid.Cid {
+  if !p.Resolved() {
+    return nil
+  }
+
+  return cids[len(cids) - 1]
+}
+
+func (p *path) Segments() []string {
+  return p.segments
+}
+
+func (p *path) SegmentCids() []*cid.Cid {
+  return p.cids
+}
+
+func (p *path) Resolved() bool {
+  return len(p.cids) == 0
+}
+
+var _ coreiface.Path = (*path)(nil)
+
+// replace path.Path with coreiface.Path everywhere
+// FooWithOpts()
+// FooAsync()
+// custom tls client
+// custom http client
+// turn relevant error responses into error objects, return the rest as-is
+// timeouts
+// circuit breaker

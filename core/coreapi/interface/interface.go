@@ -1,3 +1,6 @@
+// Package iface provides the interfaces of the IPFS Core API.
+//
+// TODO: package should be named coreapi instead.
 package iface
 
 import (
@@ -21,13 +24,9 @@ type Path interface {
 type Node ipld.Node
 type Link ipld.Link
 
-type Reader interface {
-	io.ReadSeeker
-	io.Closer
-}
-
 type CoreAPI interface {
 	Unixfs() UnixfsAPI
+	Object() ObjectAPI
 	ResolvePath(context.Context, Path) (Path, error)
 	ResolveNode(context.Context, Path) (Node, error)
 }
@@ -38,18 +37,23 @@ type UnixfsAPI interface {
 	Ls(context.Context, Path) ([]*Link, error)
 }
 
-// type ObjectAPI interface {
-// 	New() (cid.Cid, Object)
-// 	Get(string) (Object, error)
-// 	Links(string) ([]*Link, error)
-// 	Data(string) (Reader, error)
-// 	Stat(string) (ObjectStat, error)
-// 	Put(Object) (cid.Cid, error)
-// 	SetData(string, Reader) (cid.Cid, error)
-// 	AppendData(string, Data) (cid.Cid, error)
-// 	AddLink(string, string, string) (cid.Cid, error)
-// 	RmLink(string, string) (cid.Cid, error)
-// }
+type Reader interface {
+	io.ReadSeeker
+	io.Closer
+}
+
+type ObjectAPI interface {
+	Get(context.Context, *cid.Cid) (*Object, error)
+	Put(context.Context, Object) (*cid.Cid, error)
+	AddLink(ctx context.Context, root *cid.Cid, path string, target *cid.Cid) (*cid.Cid, error)
+	RmLink(ctx context.Context, root *cid.Cid, path string) (*cid.Cid, error)
+	// New() (cid.Cid, Object)
+	// Links(string) ([]*Link, error)
+	// Data(string) (Reader, error)
+	// Stat(string) (ObjectStat, error)
+	// SetData(string, Reader) (cid.Cid, error)
+	// AppendData(string, Data) (cid.Cid, error)
+}
 
 // type ObjectStat struct {
 // 	Cid            cid.Cid
@@ -60,5 +64,8 @@ type UnixfsAPI interface {
 // 	CumulativeSize int
 // }
 
+// ErrIsDir is returned by Cat() if the Path which was passed resolves to a unixfs directory.
 var ErrIsDir = errors.New("object is a directory")
+
+// ErrOffline is returned if the IPFS node backing this Core API instance was started with --offline.
 var ErrOffline = errors.New("can't resolve, ipfs node is offline")
