@@ -173,7 +173,7 @@ test_expect_success "'ipfs init --profile=lowpower' succeeds" '
 '
 
 test_expect_success "'ipfs config Discovery.Routing' looks good" '
-	ipfs config Discovery.Routing > actual_config &&
+	ipfs config Routing.Type > actual_config &&
 	test $(cat actual_config) = "dhtclient"
 '
 

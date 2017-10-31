@@ -1,5 +1,7 @@
 package config
 
+import "time"
+
 // ConfigProfiles is a map holding configuration transformers
 var ConfigProfiles = map[string]func(*Config) error{
 	"server": func(c *Config) error {
@@ -54,8 +56,12 @@ var ConfigProfiles = map[string]func(*Config) error{
 		return nil
 	},
 	"lowpower": func(c *Config) error {
-		c.Discovery.Routing = "dhtclient"
+		c.Routing.Type = "dhtclient"
 		c.Reprovider.Interval = "0"
+
+		c.Swarm.ConnMgr.LowWater = 20
+		c.Swarm.ConnMgr.HighWater = 40
+		c.Swarm.ConnMgr.GracePeriod = time.Minute.String()
 		return nil
 	},
 }

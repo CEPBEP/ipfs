@@ -312,7 +312,7 @@ func daemonFunc(req cmds.Request, re cmds.ResponseEmitter) {
 			return
 		}
 
-		routingOption = cfg.Discovery.Routing
+		routingOption = cfg.Routing.Type
 		if routingOption == "" {
 			routingOption = routingOptionDHTKwd
 		}
