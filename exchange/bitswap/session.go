@@ -15,7 +15,7 @@ import (
 	peer "gx/ipfs/QmXYjuNuxVzXKJCfWasQk1RqkhVLDM9jtUKhqc2WPQmFSB/go-libp2p-peer"
 )
 
-const activeWantsLimit = 16
+const activeWantsLimit = 128
 
 // Session holds state for an individual bitswap transfer operation.
 // This allows bitswap to make smarter decisions about who to send wantlist
