@@ -437,7 +437,7 @@ func (p *ProgressTracker) Value() int {
 
 // FetchGraphConcurrency is total number of concurrent fetches that
 // 'fetchNodes' will start at a time
-var FetchGraphConcurrency = 8
+var FetchGraphConcurrency = 128
 
 func EnumerateChildrenAsync(ctx context.Context, getLinks GetLinks, c *cid.Cid, visit func(*cid.Cid) bool) error {
 	feed := make(chan *cid.Cid)
