@@ -39,8 +39,6 @@ const (
 	sizeBatchRequestChan   = 32
 	// kMaxPriority is the max priority as defined by the bitswap protocol
 	kMaxPriority = math.MaxInt32
-
-	self = peer.ID("")
 )
 
 var (
@@ -279,7 +277,7 @@ func (bs *Bitswap) CancelWants(cids []*cid.Cid, ses uint64) {
 // service will potentially notify its peers.
 func (bs *Bitswap) HasBlock(blk blocks.Block) error {
 	//TODO: call provide here?
-	return bs.receiveBlockFrom(blk, self)
+	return bs.receiveBlockFrom(blk, "")
 }
 
 // TODO: Some of this stuff really only needs to be done when adding a block
