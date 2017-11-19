@@ -66,7 +66,7 @@ test_expect_success 'cancel subscriptions to the publisher topic' '
 '
 
 test_expect_success 'check subscriptions' '
-    echo -n "" > expected &&
+    rm -f expected && touch expected &&
     ipfsi 1 name pubsub subs > subs1 &&
     ipfsi 2 name pubsub subs > subs2 &&
     test_cmp expected subs1 &&
