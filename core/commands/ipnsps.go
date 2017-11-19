@@ -7,9 +7,10 @@ import (
 	"strings"
 
 	cmds "github.com/ipfs/go-ipfs/commands"
+	e "github.com/ipfs/go-ipfs/core/commands/e"
 	ns "github.com/ipfs/go-ipfs/namesys"
 
-	u "gx/ipfs/QmSU6eubNdhXjFBJBSksTp8kv8YRub8mGAPv8tVJHmL2EU/go-ipfs-util"
+	cmdkit "gx/ipfs/QmSNbH2A1evCCbJSDC6u3RV3GGDhgu6pRGbXHvrN89tMKf/go-ipfs-cmdkit"
 )
 
 type ipnsPubsubState struct {
@@ -22,7 +23,7 @@ type ipnsPubsubCancel struct {
 
 // IpnsPubsubCmd is the subcommand that allows us to manage the IPNS pubsub system
 var IpnsPubsubCmd = &cmds.Command{
-	Helptext: cmds.HelpText{
+	Helptext: cmdkit.HelpText{
 		Tagline: "IPNS pubsub management",
 		ShortDescription: `
 Manage and inspect the state of the IPNS pubsub resolver.
@@ -38,13 +39,13 @@ Note: this command is experimental and subject to change as the system is refine
 }
 
 var ipnspsStateCmd = &cmds.Command{
-	Helptext: cmds.HelpText{
+	Helptext: cmdkit.HelpText{
 		Tagline: "Query the state of IPNS pubsub",
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdkit.ErrNormal)
 			return
 		}
 
@@ -54,9 +55,14 @@ var ipnspsStateCmd = &cmds.Command{
 	Type: ipnsPubsubState{},
 	Marshalers: cmds.MarshalerMap{
 		cmds.Text: func(res cmds.Response) (io.Reader, error) {
-			output, ok := res.Output().(*ipnsPubsubState)
+			v, err := unwrapOutput(res.Output())
+			if err != nil {
+				return nil, err
+			}
+
+			output, ok := v.(*ipnsPubsubState)
 			if !ok {
-				return nil, u.ErrCast()
+				return nil, e.TypeErr(output, v)
 			}
 
 			var state string
@@ -72,25 +78,25 @@ var ipnspsStateCmd = &cmds.Command{
 }
 
 var ipnspsSubsCmd = &cmds.Command{
-	Helptext: cmds.HelpText{
+	Helptext: cmdkit.HelpText{
 		Tagline: "Show current name subscriptions",
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdkit.ErrNormal)
 			return
 		}
 
 		r, ok := n.Namesys.GetResolver("pubsub")
 		if !ok {
-			res.SetError(errors.New("IPNS pubsub subsystem is not enabled"), cmds.ErrClient)
+			res.SetError(errors.New("IPNS pubsub subsystem is not enabled"), cmdkit.ErrClient)
 			return
 		}
 
 		psr, ok := r.(*ns.PubsubResolver)
 		if !ok {
-			res.SetError(fmt.Errorf("unexpected resolver type: %v", r), cmds.ErrNormal)
+			res.SetError(fmt.Errorf("unexpected resolver type: %v", r), cmdkit.ErrNormal)
 			return
 		}
 
@@ -103,40 +109,45 @@ var ipnspsSubsCmd = &cmds.Command{
 }
 
 var ipnspsCancelCmd = &cmds.Command{
-	Helptext: cmds.HelpText{
+	Helptext: cmdkit.HelpText{
 		Tagline: "Cancel a name subscription",
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdkit.ErrNormal)
 			return
 		}
 
 		r, ok := n.Namesys.GetResolver("pubsub")
 		if !ok {
-			res.SetError(errors.New("IPNS pubsub subsystem is not enabled"), cmds.ErrClient)
+			res.SetError(errors.New("IPNS pubsub subsystem is not enabled"), cmdkit.ErrClient)
 			return
 		}
 
 		psr, ok := r.(*ns.PubsubResolver)
 		if !ok {
-			res.SetError(fmt.Errorf("unexpected resolver type: %v", r), cmds.ErrNormal)
+			res.SetError(fmt.Errorf("unexpected resolver type: %v", r), cmdkit.ErrNormal)
 			return
 		}
 
 		ok = psr.Cancel(req.Arguments()[0])
 		res.SetOutput(&ipnsPubsubCancel{ok})
 	},
-	Arguments: []cmds.Argument{
-		cmds.StringArg("name", true, false, "Name to cancel the subscription for."),
+	Arguments: []cmdkit.Argument{
+		cmdkit.StringArg("name", true, false, "Name to cancel the subscription for."),
 	},
 	Type: ipnsPubsubCancel{},
 	Marshalers: cmds.MarshalerMap{
 		cmds.Text: func(res cmds.Response) (io.Reader, error) {
-			output, ok := res.Output().(*ipnsPubsubCancel)
+			v, err := unwrapOutput(res.Output())
+			if err != nil {
+				return nil, err
+			}
+
+			output, ok := v.(*ipnsPubsubCancel)
 			if !ok {
-				return nil, u.ErrCast()
+				return nil, e.TypeErr(output, v)
 			}
 
 			var state string
