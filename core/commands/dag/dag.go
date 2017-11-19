@@ -139,7 +139,7 @@ into an object of the specified format.
 
 				cids.ForEach(func(c *cid.Cid) error {
 					n.Pinning.PinWithMode(c, pin.Recursive)
-					return n.Providers.Provide(c)
+					return nil
 				})
 
 				err := n.Pinning.Flush()
@@ -148,7 +148,9 @@ into an object of the specified format.
 				}
 			}
 
-			return nil
+			return cids.ForEach(func(c *cid.Cid) error {
+				return n.Providers.Provide(c)
+			})
 		}
 
 		go func() {
