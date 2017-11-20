@@ -11,7 +11,7 @@ import (
 	cmds "github.com/ipfs/go-ipfs/commands"
 	core "github.com/ipfs/go-ipfs/core"
 
-	"gx/ipfs/QmUyfy4QSr3NXym4etEiRyxBLqqAeKHJuRdi8AACxg63fZ/go-ipfs-cmdkit"
+	"gx/ipfs/QmVyK9pkXc5aPCtfxyvRTLrieon1CD31QmcmUxozBc32bh/go-ipfs-cmdkit"
 	ma "gx/ipfs/QmXY77cVe7rVRQXZZQRioukUM7aRW3BTcAgJe12MCtb3Ji/go-multiaddr"
 )
 

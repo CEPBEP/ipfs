@@ -8,7 +8,7 @@ import (
 	e "github.com/ipfs/go-ipfs/core/commands/e"
 	namesys "github.com/ipfs/go-ipfs/namesys"
 
-	"gx/ipfs/QmUyfy4QSr3NXym4etEiRyxBLqqAeKHJuRdi8AACxg63fZ/go-ipfs-cmdkit"
+	"gx/ipfs/QmVyK9pkXc5aPCtfxyvRTLrieon1CD31QmcmUxozBc32bh/go-ipfs-cmdkit"
 )
 
 var DNSCmd = &cmds.Command{

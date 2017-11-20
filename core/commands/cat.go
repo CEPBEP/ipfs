@@ -8,8 +8,8 @@ import (
 	core "github.com/ipfs/go-ipfs/core"
 	coreunix "github.com/ipfs/go-ipfs/core/coreunix"
 
-	"gx/ipfs/QmUyfy4QSr3NXym4etEiRyxBLqqAeKHJuRdi8AACxg63fZ/go-ipfs-cmdkit"
-	cmds "gx/ipfs/QmamUWYjFeYYzFDFPTvnmGkozJigsoDWUA4zoifTRFTnwK/go-ipfs-cmds"
+	"gx/ipfs/QmVyK9pkXc5aPCtfxyvRTLrieon1CD31QmcmUxozBc32bh/go-ipfs-cmdkit"
+	cmds "gx/ipfs/QmbiDinMY27VPE3hoJJuK7A6C1epPz4cy7vmR9d4FmpzMK/go-ipfs-cmds"
 )
 
 const progressBarMinSize = 1024 * 1024 * 8 // show progress bar for outputs > 8MiB
@@ -23,8 +23,8 @@ var CatCmd = &cmds.Command{
 	Arguments: []cmdkit.Argument{
 		cmdkit.StringArg("ipfs-path", true, true, "The path to the IPFS object(s) to be outputted.").EnableStdin(),
 	},
-	Run: func(req cmds.Request, res cmds.ResponseEmitter) {
-		node, err := req.InvocContext().GetNode()
+	Run: func(req *cmds.Request, res cmds.ResponseEmitter, env interface{}) {
+		node, err := GetNode(env)
 		if err != nil {
 			res.SetError(err, cmdkit.ErrNormal)
 			return
@@ -37,14 +37,20 @@ var CatCmd = &cmds.Command{
 			}
 		}
 
-		readers, length, err := cat(req.Context(), node, req.Arguments())
+		err = req.ParseBodyArgs()
+		if err != nil && err.Error() != "all arguments covered by positional arguments" {
+			res.SetError(err, cmdkit.ErrNormal)
+			return
+		}
+
+		readers, length, err := cat(req.Context, node, req.Arguments)
 		if err != nil {
 			res.SetError(err, cmdkit.ErrNormal)
 			return
 		}
 
 		/*
-			if err := corerepo.ConditionalGC(req.Context(), node, length); err != nil {
+			if err := corerepo.ConditionalGC(req.Context, node, length); err != nil {
 				re.SetError(err, cmdkit.ErrNormal)
 				return
 			}
@@ -62,8 +68,8 @@ var CatCmd = &cmds.Command{
 			res.SetError(err, cmdkit.ErrNormal)
 		}
 	},
-	PostRun: map[cmds.EncodingType]func(cmds.Request, cmds.ResponseEmitter) cmds.ResponseEmitter{
-		cmds.CLI: func(req cmds.Request, re cmds.ResponseEmitter) cmds.ResponseEmitter {
+	PostRun: map[cmds.EncodingType]func(*cmds.Request, cmds.ResponseEmitter) cmds.ResponseEmitter{
+		cmds.CLI: func(req *cmds.Request, re cmds.ResponseEmitter) cmds.ResponseEmitter {
 			reNext, res := cmds.NewChanResponsePair(req)
 
 			go func() {

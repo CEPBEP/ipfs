@@ -7,12 +7,13 @@ import (
 	"strconv"
 	"strings"
 
+	oldcmds "github.com/ipfs/go-ipfs/commands"
 	core "github.com/ipfs/go-ipfs/core"
 	corecommands "github.com/ipfs/go-ipfs/core/commands"
 	config "github.com/ipfs/go-ipfs/repo/config"
 
-	cmds "gx/ipfs/QmamUWYjFeYYzFDFPTvnmGkozJigsoDWUA4zoifTRFTnwK/go-ipfs-cmds"
-	cmdsHttp "gx/ipfs/QmamUWYjFeYYzFDFPTvnmGkozJigsoDWUA4zoifTRFTnwK/go-ipfs-cmds/http"
+	cmds "gx/ipfs/QmbiDinMY27VPE3hoJJuK7A6C1epPz4cy7vmR9d4FmpzMK/go-ipfs-cmds"
+	cmdsHttp "gx/ipfs/QmbiDinMY27VPE3hoJJuK7A6C1epPz4cy7vmR9d4FmpzMK/go-ipfs-cmds/http"
 )
 
 const originEnvKey = "API_ORIGIN"
@@ -100,7 +101,7 @@ func patchCORSVars(c *cmdsHttp.ServerConfig, addr net.Addr) {
 	c.SetAllowedOrigins(origins...)
 }
 
-func commandsOption(cctx cmds.Context, command *cmds.Command) ServeOption {
+func commandsOption(cctx oldcmds.Context, command *cmds.Command) ServeOption {
 	return func(n *core.IpfsNode, l net.Listener, mux *http.ServeMux) (*http.ServeMux, error) {
 
 		cfg := cmdsHttp.NewServerConfig()
@@ -115,16 +116,16 @@ func commandsOption(cctx cmds.Context, command *cmds.Command) ServeOption {
 		addCORSDefaults(cfg)
 		patchCORSVars(cfg, l.Addr())
 
-		cmdHandler := cmdsHttp.NewHandler(cctx, command, cfg)
+		cmdHandler := cmdsHttp.NewHandler(&cctx, command, cfg)
 		mux.Handle(cmdsHttp.ApiPath+"/", cmdHandler)
 		return mux, nil
 	}
 }
 
-func CommandsOption(cctx cmds.Context) ServeOption {
+func CommandsOption(cctx oldcmds.Context) ServeOption {
 	return commandsOption(cctx, corecommands.Root)
 }
 
-func CommandsROOption(cctx cmds.Context) ServeOption {
+func CommandsROOption(cctx oldcmds.Context) ServeOption {
 	return commandsOption(cctx, corecommands.RootRO)
 }

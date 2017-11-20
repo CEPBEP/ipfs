@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"gx/ipfs/QmUyfy4QSr3NXym4etEiRyxBLqqAeKHJuRdi8AACxg63fZ/go-ipfs-cmdkit"
+	"gx/ipfs/QmVyK9pkXc5aPCtfxyvRTLrieon1CD31QmcmUxozBc32bh/go-ipfs-cmdkit"
 )
 
 // ErrorType signfies a category of errors

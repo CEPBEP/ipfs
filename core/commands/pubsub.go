@@ -14,9 +14,9 @@ import (
 	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
 	pstore "gx/ipfs/QmPgDWmTmuzvP7QE5zwo1TmjbJme9pmZHNujB2453jkCTr/go-libp2p-peerstore"
 	blocks "gx/ipfs/QmSn9Td7xgxm9EV7iEjTckpUWmWApggzPxu7eFGWkkpwin/go-block-format"
-	cmdkit "gx/ipfs/QmUyfy4QSr3NXym4etEiRyxBLqqAeKHJuRdi8AACxg63fZ/go-ipfs-cmdkit"
 	floodsub "gx/ipfs/QmVNv1WV6XxzQV4MBuiLX5729wMazaf8TNzm2Sq6ejyHh7/go-libp2p-floodsub"
-	cmds "gx/ipfs/QmamUWYjFeYYzFDFPTvnmGkozJigsoDWUA4zoifTRFTnwK/go-ipfs-cmds"
+	cmdkit "gx/ipfs/QmVyK9pkXc5aPCtfxyvRTLrieon1CD31QmcmUxozBc32bh/go-ipfs-cmdkit"
+	cmds "gx/ipfs/QmbiDinMY27VPE3hoJJuK7A6C1epPz4cy7vmR9d4FmpzMK/go-ipfs-cmds"
 )
 
 var PubsubCmd = &cmds.Command{
@@ -70,8 +70,8 @@ This command outputs data in the following encodings:
 	Options: []cmdkit.Option{
 		cmdkit.BoolOption("discover", "try to discover other peers subscribed to the same topic"),
 	},
-	Run: func(req cmds.Request, res cmds.ResponseEmitter) {
-		n, err := req.InvocContext().GetNode()
+	Run: func(req *cmds.Request, res cmds.ResponseEmitter, env interface{}) {
+		n, err := GetNode(env)
 		if err != nil {
 			res.SetError(err, cmdkit.ErrNormal)
 			return
@@ -88,7 +88,7 @@ This command outputs data in the following encodings:
 			return
 		}
 
-		topic := req.Arguments()[0]
+		topic := req.Arguments[0]
 		sub, err := n.Floodsub.Subscribe(topic)
 		if err != nil {
 			res.SetError(err, cmdkit.ErrNormal)
@@ -96,7 +96,7 @@ This command outputs data in the following encodings:
 		}
 		defer sub.Cancel()
 
-		discover, _, _ := req.Option("discover").Bool()
+		discover, _ := req.Options["discover"].(bool)
 		if discover {
 			go func() {
 				blk := blocks.NewBlock([]byte("floodsub:" + topic))
@@ -106,7 +106,7 @@ This command outputs data in the following encodings:
 					return
 				}
 
-				connectToPubSubPeers(req.Context(), n, cid)
+				connectToPubSubPeers(req.Context, n, cid)
 			}()
 		}
 
@@ -115,7 +115,7 @@ This command outputs data in the following encodings:
 		}
 
 		for {
-			msg, err := sub.Next(req.Context())
+			msg, err := sub.Next(req.Context)
 			if err == io.EOF || err == context.Canceled {
 				return
 			} else if err != nil {
@@ -127,7 +127,7 @@ This command outputs data in the following encodings:
 		}
 	},
 	Encoders: cmds.EncoderMap{
-		cmds.Text: cmds.MakeEncoder(func(req cmds.Request, w io.Writer, v interface{}) error {
+		cmds.Text: cmds.MakeEncoder(func(req *cmds.Request, w io.Writer, v interface{}) error {
 			m, ok := v.(*floodsub.Message)
 			if !ok {
 				return fmt.Errorf("unexpected type: %T", v)
@@ -136,7 +136,7 @@ This command outputs data in the following encodings:
 			_, err := w.Write(m.Data)
 			return err
 		}),
-		"ndpayload": cmds.MakeEncoder(func(req cmds.Request, w io.Writer, v interface{}) error {
+		"ndpayload": cmds.MakeEncoder(func(req *cmds.Request, w io.Writer, v interface{}) error {
 			m, ok := v.(*floodsub.Message)
 			if !ok {
 				return fmt.Errorf("unexpected type: %T", v)
@@ -146,7 +146,7 @@ This command outputs data in the following encodings:
 			_, err := w.Write(m.Data)
 			return err
 		}),
-		"lenpayload": cmds.MakeEncoder(func(req cmds.Request, w io.Writer, v interface{}) error {
+		"lenpayload": cmds.MakeEncoder(func(req *cmds.Request, w io.Writer, v interface{}) error {
 			m, ok := v.(*floodsub.Message)
 			if !ok {
 				return fmt.Errorf("unexpected type: %T", v)
@@ -203,8 +203,8 @@ To use, the daemon must be run with '--enable-pubsub-experiment'.
 		cmdkit.StringArg("topic", true, false, "Topic to publish to."),
 		cmdkit.StringArg("data", true, true, "Payload of message to publish.").EnableStdin(),
 	},
-	Run: func(req cmds.Request, res cmds.ResponseEmitter) {
-		n, err := req.InvocContext().GetNode()
+	Run: func(req *cmds.Request, res cmds.ResponseEmitter, env interface{}) {
+		n, err := GetNode(env)
 		if err != nil {
 			res.SetError(err, cmdkit.ErrNormal)
 			return
@@ -221,9 +221,9 @@ To use, the daemon must be run with '--enable-pubsub-experiment'.
 			return
 		}
 
-		topic := req.Arguments()[0]
+		topic := req.Arguments[0]
 
-		for _, data := range req.Arguments()[1:] {
+		for _, data := range req.Arguments[1:] {
 			if err := n.Floodsub.Publish(topic, []byte(data)); err != nil {
 				res.SetError(err, cmdkit.ErrNormal)
 				return
@@ -244,8 +244,8 @@ to be used in a production environment.
 To use, the daemon must be run with '--enable-pubsub-experiment'.
 `,
 	},
-	Run: func(req cmds.Request, res cmds.ResponseEmitter) {
-		n, err := req.InvocContext().GetNode()
+	Run: func(req *cmds.Request, res cmds.ResponseEmitter, env interface{}) {
+		n, err := GetNode(env)
 		if err != nil {
 			res.SetError(err, cmdkit.ErrNormal)
 			return
@@ -286,8 +286,8 @@ To use, the daemon must be run with '--enable-pubsub-experiment'.
 	Arguments: []cmdkit.Argument{
 		cmdkit.StringArg("topic", false, false, "topic to list connected peers of"),
 	},
-	Run: func(req cmds.Request, res cmds.ResponseEmitter) {
-		n, err := req.InvocContext().GetNode()
+	Run: func(req *cmds.Request, res cmds.ResponseEmitter, env interface{}) {
+		n, err := GetNode(env)
 		if err != nil {
 			res.SetError(err, cmdkit.ErrNormal)
 			return
@@ -305,8 +305,8 @@ To use, the daemon must be run with '--enable-pubsub-experiment'.
 		}
 
 		var topic string
-		if len(req.Arguments()) == 1 {
-			topic = req.Arguments()[0]
+		if len(req.Arguments) == 1 {
+			topic = req.Arguments[0]
 		}
 
 		for _, peer := range n.Floodsub.ListPeers(topic) {

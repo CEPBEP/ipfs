@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 
-	oldcmds "github.com/ipfs/go-ipfs/commands"
 	commands "github.com/ipfs/go-ipfs/core/commands"
 
-	cmds "gx/ipfs/QmamUWYjFeYYzFDFPTvnmGkozJigsoDWUA4zoifTRFTnwK/go-ipfs-cmds"
+	cmds "gx/ipfs/QmbiDinMY27VPE3hoJJuK7A6C1epPz4cy7vmR9d4FmpzMK/go-ipfs-cmds"
+	lgc "gx/ipfs/QmbiDinMY27VPE3hoJJuK7A6C1epPz4cy7vmR9d4FmpzMK/go-ipfs-cmds/legacy"
 )
 
 // This is the CLI root, used for executing commands accessible to CLI clients.
@@ -24,7 +24,7 @@ var commandsClientCmd = commands.CommandsCmd(Root)
 // They can override subcommands in commands.Root by defining a subcommand with the same name.
 var localCommands = map[string]*cmds.Command{
 	"daemon":   daemonCmd,
-	"init":     cmds.NewCommand(initCmd),
+	"init":     lgc.NewCommand(initCmd),
 	"commands": commandsClientCmd,
 }
 var localMap = make(map[*cmds.Command]bool)
@@ -33,14 +33,7 @@ func init() {
 	// setting here instead of in literal to prevent initialization loop
 	// (some commands make references to Root)
 	Root.Subcommands = localCommands
-	Root.OldSubcommands = map[string]*oldcmds.Command{}
 
-	// copy all subcommands from commands.Root into this root (if they aren't already present)
-	for k, v := range commands.Root.OldSubcommands {
-		if _, found := Root.OldSubcommands[k]; !found {
-			Root.OldSubcommands[k] = v
-		}
-	}
 	for k, v := range commands.Root.Subcommands {
 		if _, found := Root.Subcommands[k]; !found {
 			Root.Subcommands[k] = v

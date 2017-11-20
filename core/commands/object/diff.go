@@ -10,7 +10,7 @@ import (
 	e "github.com/ipfs/go-ipfs/core/commands/e"
 	dagutils "github.com/ipfs/go-ipfs/merkledag/utils"
 	path "github.com/ipfs/go-ipfs/path"
-	cmdkit "gx/ipfs/QmUyfy4QSr3NXym4etEiRyxBLqqAeKHJuRdi8AACxg63fZ/go-ipfs-cmdkit"
+	cmdkit "gx/ipfs/QmVyK9pkXc5aPCtfxyvRTLrieon1CD31QmcmUxozBc32bh/go-ipfs-cmdkit"
 )
 
 type Changes struct {

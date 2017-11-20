@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -18,9 +19,9 @@ import (
 	ft "github.com/ipfs/go-ipfs/unixfs"
 
 	mh "gx/ipfs/QmU9a9NV9RdPNwZQDYd5uKsm6N6LJLSvLbywDDYFbaaC6P/go-multihash"
-	"gx/ipfs/QmUyfy4QSr3NXym4etEiRyxBLqqAeKHJuRdi8AACxg63fZ/go-ipfs-cmdkit"
-	"gx/ipfs/QmUyfy4QSr3NXym4etEiRyxBLqqAeKHJuRdi8AACxg63fZ/go-ipfs-cmdkit/files"
-	"gx/ipfs/QmamUWYjFeYYzFDFPTvnmGkozJigsoDWUA4zoifTRFTnwK/go-ipfs-cmds"
+	"gx/ipfs/QmVyK9pkXc5aPCtfxyvRTLrieon1CD31QmcmUxozBc32bh/go-ipfs-cmdkit"
+	"gx/ipfs/QmVyK9pkXc5aPCtfxyvRTLrieon1CD31QmcmUxozBc32bh/go-ipfs-cmdkit/files"
+	"gx/ipfs/QmbiDinMY27VPE3hoJJuK7A6C1epPz4cy7vmR9d4FmpzMK/go-ipfs-cmds"
 	"gx/ipfs/QmeWjRodbcZFKe5tMN7poEx3izym6osrLSnTLf9UjJZBbs/pb"
 )
 
@@ -120,24 +121,24 @@ You can now check what blocks have been created by:
 		cmdkit.IntOption(cidVersionOptionName, "Cid version. Non-zero value will change default of 'raw-leaves' to true. (experimental)").WithDefault(0),
 		cmdkit.StringOption(hashOptionName, "Hash function to use. Will set Cid version to 1 if used. (experimental)").WithDefault("sha2-256"),
 	},
-	PreRun: func(req cmds.Request) error {
-		quiet, _, _ := req.Option(quietOptionName).Bool()
-		quieter, _, _ := req.Option(quieterOptionName).Bool()
+	PreRun: func(req *cmds.Request, env interface{}) error {
+		quiet, _ := req.Options[quietOptionName].(bool)
+		quieter, _ := req.Options[quieterOptionName].(bool)
 		quiet = quiet || quieter
 
-		silent, _, _ := req.Option(silentOptionName).Bool()
+		silent, _ := req.Options[silentOptionName].(bool)
 
 		if quiet || silent {
 			return nil
 		}
 
 		// ipfs cli progress bar defaults to true unless quiet or silent is used
-		_, found, _ := req.Option(progressOptionName).Bool()
+		_, found := req.Options[progressOptionName].(bool)
 		if !found {
-			req.SetOption(progressOptionName, true)
+			req.Options[progressOptionName] = true
 		}
 
-		sizeFile, ok := req.Files().(files.SizeFile)
+		sizeFile, ok := req.Files.(files.SizeFile)
 		if !ok {
 			// we don't need to error, the progress bar just won't know how big the files are
 			log.Warning("cannot determine size of input file")
@@ -145,7 +146,7 @@ You can now check what blocks have been created by:
 		}
 
 		sizeCh := make(chan int64, 1)
-		req.Values()["size"] = sizeCh
+		req.Context = context.WithValue(req.Context, "size", sizeCh)
 
 		go func() {
 			size, err := sizeFile.Size()
@@ -160,8 +161,9 @@ You can now check what blocks have been created by:
 
 		return nil
 	},
-	Run: func(req cmds.Request, res cmds.ResponseEmitter) {
-		n, err := req.InvocContext().GetNode()
+	Run: func(req *cmds.Request, res cmds.ResponseEmitter, env interface{}) {
+		fmt.Printf("%#v\n", req)
+		n, err := GetNode(env)
 		if err != nil {
 			res.SetError(err, cmdkit.ErrNormal)
 			return
@@ -180,19 +182,19 @@ You can now check what blocks have been created by:
 		//	return
 		//}
 
-		progress, _, _ := req.Option(progressOptionName).Bool()
-		trickle, _, _ := req.Option(trickleOptionName).Bool()
-		wrap, _, _ := req.Option(wrapOptionName).Bool()
-		hash, _, _ := req.Option(onlyHashOptionName).Bool()
-		hidden, _, _ := req.Option(hiddenOptionName).Bool()
-		silent, _, _ := req.Option(silentOptionName).Bool()
-		chunker, _, _ := req.Option(chunkerOptionName).String()
-		dopin, _, _ := req.Option(pinOptionName).Bool()
-		rawblks, rbset, _ := req.Option(rawLeavesOptionName).Bool()
-		nocopy, _, _ := req.Option(noCopyOptionName).Bool()
-		fscache, _, _ := req.Option(fstoreCacheOptionName).Bool()
-		cidVer, _, _ := req.Option(cidVersionOptionName).Int()
-		hashFunStr, hfset, _ := req.Option(hashOptionName).String()
+		progress, _ := req.Options[progressOptionName].(bool)
+		trickle, _ := req.Options[trickleOptionName].(bool)
+		wrap, _ := req.Options[wrapOptionName].(bool)
+		hash, _ := req.Options[onlyHashOptionName].(bool)
+		hidden, _ := req.Options[hiddenOptionName].(bool)
+		silent, _ := req.Options[silentOptionName].(bool)
+		chunker, _ := req.Options[chunkerOptionName].(string)
+		dopin, _ := req.Options[pinOptionName].(bool)
+		rawblks, rbset := req.Options[rawLeavesOptionName].(bool)
+		nocopy, _ := req.Options[noCopyOptionName].(bool)
+		fscache, _ := req.Options[fstoreCacheOptionName].(bool)
+		cidVer, _ := req.Options[cidVersionOptionName].(int)
+		hashFunStr, hfset := req.Options[hashOptionName].(string)
 
 		if nocopy && !cfg.Experimental.FilestoreEnabled {
 			res.SetError(errors.New("filestore is not enabled, see https://git.io/vy4XN"),
@@ -209,12 +211,8 @@ You can now check what blocks have been created by:
 			return
 		}
 
-		if hfset && cidVer == 0 {
+		if hfset && hashFunStr != "sha2-256" && cidVer == 0 {
 			cidVer = 1
-		}
-
-		if cidVer >= 1 && !rbset {
-			rawblks = true
 		}
 
 		prefix, err := dag.PrefixForCidVersion(cidVer)
@@ -251,7 +249,7 @@ You can now check what blocks have been created by:
 		}
 
 		exch := n.Exchange
-		local, _, _ := req.Option("local").Bool()
+		local, _ := req.Options["local"].(bool)
 		if local {
 			exch = offline.Exchange(addblockstore)
 		}
@@ -261,7 +259,7 @@ You can now check what blocks have been created by:
 
 		outChan := make(chan interface{}, adderOutChanSize)
 
-		fileAdder, err := coreunix.NewAdder(req.Context(), n.Pinning, n.Blockstore, dserv)
+		fileAdder, err := coreunix.NewAdder(req.Context, n.Pinning, n.Blockstore, dserv)
 		if err != nil {
 			res.SetError(err, cmdkit.ErrNormal)
 			return
@@ -281,7 +279,7 @@ You can now check what blocks have been created by:
 
 		if hash {
 			md := dagtest.Mock()
-			mr, err := mfs.NewRoot(req.Context(), md, ft.EmptyDirNode(), nil)
+			mr, err := mfs.NewRoot(req.Context, md, ft.EmptyDirNode(), nil)
 			if err != nil {
 				res.SetError(err, cmdkit.ErrNormal)
 				return
@@ -325,7 +323,7 @@ You can now check what blocks have been created by:
 			var err error
 			defer func() { errCh <- err }()
 			defer close(outChan)
-			err = addAllAndPin(req.Files())
+			err = addAllAndPin(req.Files)
 		}()
 
 		defer res.Close()
@@ -342,19 +340,17 @@ You can now check what blocks have been created by:
 	},
 	PostRun: map[cmds.EncodingType]func(cmds.Request, cmds.ResponseEmitter) cmds.ResponseEmitter{
 		cmds.CLI: func(req cmds.Request, re cmds.ResponseEmitter) cmds.ResponseEmitter {
-			ctx := req.Context()
-
 			reNext, res := cmds.NewChanResponsePair(req)
 			outChan := make(chan interface{})
 
 			progressBar := func(wait chan struct{}) {
 				defer close(wait)
 
-				quiet, _, _ := req.Option(quietOptionName).Bool()
-				quieter, _, _ := req.Option(quieterOptionName).Bool()
+				quiet, _ := req.Options[quietOptionName].(bool)
+				quieter, _ := req.Options[quieterOptionName].(bool)
 				quiet = quiet || quieter
 
-				progress, _, _ := req.Option(progressOptionName).Bool()
+				progress, _ := req.Options[progressOptionName].(bool)
 
 				var bar *pb.ProgressBar
 				if progress {
@@ -367,10 +363,7 @@ You can now check what blocks have been created by:
 				}
 
 				var sizeChan chan int64
-				s, found := req.Values()["size"]
-				if found {
-					sizeChan = s.(chan int64)
-				}
+				sizeChan, _ = req.Context.Value("size").(chan int64)
 
 				lastFile := ""
 				lastHash := ""
@@ -431,6 +424,9 @@ You can now check what blocks have been created by:
 							bar.ShowBar = true
 							bar.ShowTimeLeft = true
 						}
+					case <-req.Context.Done():
+						re.SetError(req.Context.Err(), cmdkit.ErrNormal)
+						return
 					}
 				}
 			}

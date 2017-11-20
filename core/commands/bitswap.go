@@ -12,9 +12,10 @@ import (
 
 	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
 	"gx/ipfs/QmPSBJL4momYnE7DcUyk2DVhD6rH488ZmHBGLbxNdhU44K/go-humanize"
-	cmdkit "gx/ipfs/QmUyfy4QSr3NXym4etEiRyxBLqqAeKHJuRdi8AACxg63fZ/go-ipfs-cmdkit"
+	cmdkit "gx/ipfs/QmVyK9pkXc5aPCtfxyvRTLrieon1CD31QmcmUxozBc32bh/go-ipfs-cmdkit"
 	peer "gx/ipfs/QmXYjuNuxVzXKJCfWasQk1RqkhVLDM9jtUKhqc2WPQmFSB/go-libp2p-peer"
-	cmds "gx/ipfs/QmamUWYjFeYYzFDFPTvnmGkozJigsoDWUA4zoifTRFTnwK/go-ipfs-cmds"
+	cmds "gx/ipfs/QmbiDinMY27VPE3hoJJuK7A6C1epPz4cy7vmR9d4FmpzMK/go-ipfs-cmds"
+	lgc "gx/ipfs/QmbiDinMY27VPE3hoJJuK7A6C1epPz4cy7vmR9d4FmpzMK/go-ipfs-cmds/legacy"
 )
 
 var BitswapCmd = &cmds.Command{
@@ -24,13 +25,11 @@ var BitswapCmd = &cmds.Command{
 	},
 
 	Subcommands: map[string]*cmds.Command{
-		"stat": bitswapStatCmd,
-	},
-	OldSubcommands: map[string]*oldcmds.Command{
-		"wantlist":  showWantlistCmd,
-		"unwant":    unwantCmd,
-		"ledger":    ledgerCmd,
-		"reprovide": reprovideCmd,
+		"stat":      bitswapStatCmd,
+		"wantlist":  lgc.NewCommand(showWantlistCmd),
+		"unwant":    lgc.NewCommand(unwantCmd),
+		"ledger":    lgc.NewCommand(ledgerCmd),
+		"reprovide": lgc.NewCommand(reprovideCmd),
 	},
 }
 
@@ -140,8 +139,8 @@ var bitswapStatCmd = &cmds.Command{
 		ShortDescription: ``,
 	},
 	Type: bitswap.Stat{},
-	Run: func(req cmds.Request, res cmds.ResponseEmitter) {
-		nd, err := req.InvocContext().GetNode()
+	Run: func(req *cmds.Request, res cmds.ResponseEmitter, env interface{}) {
+		nd, err := GetNode(env)
 		if err != nil {
 			res.SetError(err, cmdkit.ErrNormal)
 			return
@@ -167,7 +166,7 @@ var bitswapStatCmd = &cmds.Command{
 		cmds.EmitOnce(res, st)
 	},
 	Encoders: cmds.EncoderMap{
-		cmds.Text: cmds.MakeEncoder(func(req cmds.Request, w io.Writer, v interface{}) error {
+		cmds.Text: cmds.MakeEncoder(func(req *cmds.Request, w io.Writer, v interface{}) error {
 			out, ok := v.(*bitswap.Stat)
 			if !ok {
 				return e.TypeErr(out, v)

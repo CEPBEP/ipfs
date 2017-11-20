@@ -18,8 +18,9 @@ import (
 	lockfile "github.com/ipfs/go-ipfs/repo/fsrepo/lock"
 
 	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
-	cmdkit "gx/ipfs/QmUyfy4QSr3NXym4etEiRyxBLqqAeKHJuRdi8AACxg63fZ/go-ipfs-cmdkit"
-	cmds "gx/ipfs/QmamUWYjFeYYzFDFPTvnmGkozJigsoDWUA4zoifTRFTnwK/go-ipfs-cmds"
+	cmdkit "gx/ipfs/QmVyK9pkXc5aPCtfxyvRTLrieon1CD31QmcmUxozBc32bh/go-ipfs-cmdkit"
+	cmds "gx/ipfs/QmbiDinMY27VPE3hoJJuK7A6C1epPz4cy7vmR9d4FmpzMK/go-ipfs-cmds"
+	lgc "gx/ipfs/QmbiDinMY27VPE3hoJJuK7A6C1epPz4cy7vmR9d4FmpzMK/go-ipfs-cmds/legacy"
 )
 
 type RepoVersion struct {
@@ -35,13 +36,11 @@ var RepoCmd = &cmds.Command{
 	},
 
 	Subcommands: map[string]*cmds.Command{
-		"stat": repoStatCmd,
-	},
-	OldSubcommands: map[string]*oldcmds.Command{
-		"gc":      repoGcCmd,
-		"fsck":    RepoFsckCmd,
-		"version": repoVersionCmd,
-		"verify":  repoVerifyCmd,
+		"stat":    repoStatCmd,
+		"gc":      lgc.NewCommand(repoGcCmd),
+		"fsck":    lgc.NewCommand(RepoFsckCmd),
+		"version": lgc.NewCommand(repoVersionCmd),
+		"verify":  lgc.NewCommand(repoVerifyCmd),
 	},
 }
 
@@ -160,14 +159,14 @@ RepoSize        int Size in bytes that the repo is currently taking.
 Version         string The repo version.
 `,
 	},
-	Run: func(req cmds.Request, res cmds.ResponseEmitter) {
-		n, err := req.InvocContext().GetNode()
+	Run: func(req *cmds.Request, res cmds.ResponseEmitter, env interface{}) {
+		n, err := GetNode(env)
 		if err != nil {
 			res.SetError(err, cmdkit.ErrNormal)
 			return
 		}
 
-		stat, err := corerepo.RepoStat(n, req.Context())
+		stat, err := corerepo.RepoStat(n, req.Context)
 		if err != nil {
 			res.SetError(err, cmdkit.ErrNormal)
 			return
@@ -180,16 +179,13 @@ Version         string The repo version.
 	},
 	Type: corerepo.Stat{},
 	Encoders: cmds.EncoderMap{
-		cmds.Text: cmds.MakeEncoder(func(req cmds.Request, w io.Writer, v interface{}) error {
+		cmds.Text: cmds.MakeEncoder(func(req *cmds.Request, w io.Writer, v interface{}) error {
 			stat, ok := v.(*corerepo.Stat)
 			if !ok {
 				return e.TypeErr(stat, v)
 			}
 
-			human, _, err := req.Option("human").Bool()
-			if err != nil {
-				return err
-			}
+			human, _ := req.Options["human"].(bool)
 
 			wtr := tabwriter.NewWriter(w, 0, 0, 1, ' ', 0)
 
