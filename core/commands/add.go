@@ -283,7 +283,7 @@ You can now check what blocks have been created by:
 
 		if hash {
 			md := dagtest.Mock()
-			mr, err := mfs.NewRoot(req.Context(), md, ft.EmptyDirNode(), nil)
+			mr, err := mfs.NewRoot(req.Context(), md, offline.Providers(), ft.EmptyDirNode(), nil)
 			if err != nil {
 				res.SetError(err, cmdkit.ErrNormal)
 				return

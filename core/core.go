@@ -758,7 +758,7 @@ func (n *IpfsNode) loadFilesRoot() error {
 		return err
 	}
 
-	mr, err := mfs.NewRoot(n.Context(), n.DAG, nd, pf)
+	mr, err := mfs.NewRoot(n.Context(), n.DAG, n.Providers, nd, pf)
 	if err != nil {
 		return err
 	}

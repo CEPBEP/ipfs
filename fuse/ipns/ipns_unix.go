@@ -111,7 +111,7 @@ func loadRoot(ctx context.Context, rt *keyRoot, ipfs *core.IpfsNode, name string
 		return nil, dag.ErrNotProtobuf
 	}
 
-	root, err := mfs.NewRoot(ctx, ipfs.DAG, pbnode, ipnsPubFunc(ipfs, rt.k))
+	root, err := mfs.NewRoot(ctx, ipfs.DAG, ipfs.Providers, pbnode, ipnsPubFunc(ipfs, rt.k))
 	if err != nil {
 		return nil, err
 	}

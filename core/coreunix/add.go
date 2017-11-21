@@ -121,7 +121,7 @@ func (adder *Adder) mfsRoot() (*mfs.Root, error) {
 	}
 	rnode := unixfs.EmptyDirNode()
 	rnode.SetPrefix(adder.Prefix)
-	mr, err := mfs.NewRoot(adder.ctx, adder.dagService, rnode, nil)
+	mr, err := mfs.NewRoot(adder.ctx, adder.dagService, adder.provide, rnode, nil)
 	if err != nil {
 		return nil, err
 	}

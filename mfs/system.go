@@ -22,6 +22,8 @@ import (
 	node "gx/ipfs/QmNwUEK7QbwSqyKBu3mMtToo8SUc6wQJ7gdZq4gGGJqfnf/go-ipld-format"
 	logging "gx/ipfs/QmSpJByNKFX1sCsHBEp3R73FL4NF6FnQTEGyNAXHm2GS52/go-log"
 	cid "gx/ipfs/QmeSrf6pzut73u6zLQkRFQ3ygt3k6XFT2kjdYP8Tnkwwyg/go-cid"
+
+	"github.com/ipfs/go-ipfs/providers"
 )
 
 var ErrNotExist = errors.New("no such rootfs")
@@ -66,7 +68,7 @@ type Root struct {
 type PubFunc func(context.Context, *cid.Cid) error
 
 // newRoot creates a new Root and starts up a republisher routine for it
-func NewRoot(parent context.Context, ds dag.DAGService, node *dag.ProtoNode, pf PubFunc) (*Root, error) {
+func NewRoot(parent context.Context, ds dag.DAGService, prov providers.Interface, node *dag.ProtoNode, pf PubFunc) (*Root, error) {
 
 	var repub *Republisher
 	if pf != nil {
@@ -89,7 +91,7 @@ func NewRoot(parent context.Context, ds dag.DAGService, node *dag.ProtoNode, pf 
 
 	switch pbn.GetType() {
 	case ft.TDirectory, ft.THAMTShard:
-		rval, err := NewDirectory(parent, node.String(), node, root, ds)
+		rval, err := NewDirectory(parent, node.String(), node, root, ds, prov)
 		if err != nil {
 			return nil, err
 		}
