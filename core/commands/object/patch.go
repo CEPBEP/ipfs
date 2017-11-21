@@ -114,7 +114,7 @@ the limit will not be respected by the network.
 
 		err = nd.Providers.Provide(newkey)
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdkit.ErrNormal)
 			return
 		}
 
@@ -188,7 +188,7 @@ Example:
 
 		err = nd.Providers.Provide(newkey)
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdkit.ErrNormal)
 			return
 		}
 
@@ -256,7 +256,7 @@ Removes a link by the given name from root.
 
 		err = nd.Providers.Provide(nc)
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdkit.ErrNormal)
 			return
 		}
 
@@ -365,7 +365,7 @@ to a file containing 'bar', and returns the hash of the new object.
 
 		err = nd.Providers.Provide(nc)
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdkit.ErrNormal)
 			return
 		}
 
