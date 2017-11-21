@@ -17,6 +17,8 @@ import (
 
 	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
 	node "gx/ipfs/QmPN7cwmpcc4DWXb4KTB9dNAJgjuPY69h3npsMfhRrQL9c/go-ipld-format"
+
+	"github.com/ipfs/go-ipfs/providers"
 )
 
 var ErrNotYetImplemented = errors.New("not yet implemented")
@@ -25,6 +27,7 @@ var ErrDirExists = errors.New("directory already has entry by that name")
 
 type Directory struct {
 	dserv  dag.DAGService
+	prov   providers.Interface
 	parent childCloser
 
 	childDirs map[string]*Directory
@@ -40,7 +43,7 @@ type Directory struct {
 	name string
 }
 
-func NewDirectory(ctx context.Context, name string, node node.Node, parent childCloser, dserv dag.DAGService) (*Directory, error) {
+func NewDirectory(ctx context.Context, name string, node node.Node, parent childCloser, dserv dag.DAGService, prov providers.Interface) (*Directory, error) {
 	db, err := uio.NewDirectoryFromNode(dserv, node)
 	if err != nil {
 		return nil, err
@@ -48,6 +51,7 @@ func NewDirectory(ctx context.Context, name string, node node.Node, parent child
 
 	return &Directory{
 		dserv:      dserv,
+		prov:       prov,
 		ctx:        ctx,
 		name:       name,
 		dirbuilder: db,
@@ -109,6 +113,11 @@ func (d *Directory) flushCurrentNode() (*dag.ProtoNode, error) {
 		return nil, err
 	}
 
+	err = d.prov.Provide(nd.Cid())
+	if err != nil {
+		return nil, err
+	}
+
 	pbnd, ok := nd.(*dag.ProtoNode)
 	if !ok {
 		return nil, dag.ErrNotProtobuf
@@ -154,7 +163,7 @@ func (d *Directory) cacheNode(name string, nd node.Node) (FSNode, error) {
 
 		switch i.GetType() {
 		case ufspb.Data_Directory, ufspb.Data_HAMTShard:
-			ndir, err := NewDirectory(d.ctx, name, nd, d, d.dserv)
+			ndir, err := NewDirectory(d.ctx, name, nd, d, d.dserv, d.prov)
 			if err != nil {
 				return nil, err
 			}
@@ -311,12 +320,17 @@ func (d *Directory) Mkdir(name string) (*Directory, error) {
 		return nil, err
 	}
 
+	err = d.prov.Provide(ndir.Cid())
+	if err != nil {
+		return nil, err
+	}
+
 	err = d.dirbuilder.AddChild(d.ctx, name, ndir)
 	if err != nil {
 		return nil, err
 	}
 
-	dirobj, err := NewDirectory(d.ctx, name, ndir, d, d.dserv)
+	dirobj, err := NewDirectory(d.ctx, name, ndir, d, d.dserv, d.prov)
 	if err != nil {
 		return nil, err
 	}
@@ -355,6 +369,11 @@ func (d *Directory) AddChild(name string, nd node.Node) error {
 	}
 
 	_, err = d.dserv.Add(nd)
+	if err != nil {
+		return err
+	}
+
+	err = d.prov.Provide(nd.Cid())
 	if err != nil {
 		return err
 	}
@@ -421,6 +440,11 @@ func (d *Directory) GetNode() (node.Node, error) {
 	}
 
 	_, err = d.dserv.Add(nd)
+	if err != nil {
+		return nil, err
+	}
+
+	err = d.prov.Provide(nd.Cid())
 	if err != nil {
 		return nil, err
 	}
