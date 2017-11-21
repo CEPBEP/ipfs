@@ -194,9 +194,10 @@ func catNode(ds dag.DAGService, nd *dag.ProtoNode) ([]byte, error) {
 
 func setupRoot(ctx context.Context, t *testing.T) (dag.DAGService, *Root) {
 	ds := getDagserv(t)
+	prov := offline.Providers()
 
 	root := emptyDirNode()
-	rt, err := NewRoot(ctx, ds, root, func(ctx context.Context, c *cid.Cid) error {
+	rt, err := NewRoot(ctx, ds, prov, root, func(ctx context.Context, c *cid.Cid) error {
 		fmt.Println("PUBLISHED: ", c)
 		return nil
 	})
