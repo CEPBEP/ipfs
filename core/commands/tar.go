@@ -61,7 +61,7 @@ represent it.
 
 		err = nd.Providers.Provide(c)
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdkit.ErrNormal)
 			return
 		}
 

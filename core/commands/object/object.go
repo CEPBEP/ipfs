@@ -512,7 +512,7 @@ Available templates:
 
 		err = n.Providers.Provide(k)
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdkit.ErrNormal)
 			return
 		}
 
