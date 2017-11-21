@@ -74,7 +74,7 @@ findprovs_empty 'QmdfTbBqBPQ7VNxZEYEj14VmRuZBkqFbiwReogJgS1zR1n'
 
 test_expect_success 'ipfs object' '
   HASH_O1=$(ipfsi 0 object new) &&
-  HASH_O2=$(echo "{\"data\":\"foo\"}" | ipfsi 0 object put)
+  HASH_O2=$(echo "{\"data\":\"foo\"}" | ipfsi 0 object put -q)
 '
 
 findprovs_expect '$HASH_O1' '$PEERID_0'
