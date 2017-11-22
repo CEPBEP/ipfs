@@ -12,8 +12,8 @@ import (
 	"github.com/ipfs/go-ipfs/core"
 	"github.com/ipfs/go-ipfs/core/coreunix"
 	uio "github.com/ipfs/go-ipfs/unixfs/io"
-	cid "gx/ipfs/QmeSrf6pzut73u6zLQkRFQ3ygt3k6XFT2kjdYP8Tnkwwyg/go-cid"
 
+	cid "gx/ipfs/QmeSrf6pzut73u6zLQkRFQ3ygt3k6XFT2kjdYP8Tnkwwyg/go-cid"
 	// this import keeps gx from thinking the dep isn't used
 	_ "gx/ipfs/QmdZ4PvPHFQVLLEve7DgoKDcSY19wwpGBB1GKjjKi2rEL1/dir-index-html"
 )
@@ -45,7 +45,7 @@ func SeedInitDirIndex(nd *core.IpfsNode) (*cid.Cid, error) {
 }
 
 func addAssetList(nd *core.IpfsNode, l []string) (*cid.Cid, error) {
-	dirb := uio.NewDirectory(nd.DAG)
+	dirb := uio.NewDirectory(nd.DAG, nd.Providers)
 
 	for _, p := range l {
 		d, err := Asset(p)

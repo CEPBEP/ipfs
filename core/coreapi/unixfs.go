@@ -48,7 +48,7 @@ func (api *UnixfsAPI) Ls(ctx context.Context, p coreiface.Path) ([]*coreiface.Li
 	}
 
 	var ndlinks []*node.Link
-	dir, err := uio.NewDirectoryFromNode(api.node.DAG, dagnode)
+	dir, err := uio.NewDirectoryFromNode(api.node.DAG, api.node.Providers, dagnode)
 	switch err {
 	case nil:
 		l, err := dir.Links(ctx)

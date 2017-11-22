@@ -230,7 +230,7 @@ func setupNode(ctx context.Context, n *IpfsNode, cfg *BuildCfg) error {
 		// this is kinda sketchy and could cause data loss
 		n.Pinning = pin.NewPinner(n.Repo.Datastore(), n.DAG, internalDag)
 	}
-	n.Resolver = path.NewBasicResolver(n.DAG)
+	n.Resolver = path.NewBasicResolver(n.DAG, n.Providers)
 
 	if cfg.Online {
 		if err := n.startLateOnlineServices(ctx); err != nil {

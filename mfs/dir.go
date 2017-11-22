@@ -11,14 +11,13 @@ import (
 	"time"
 
 	dag "github.com/ipfs/go-ipfs/merkledag"
+	providers "github.com/ipfs/go-ipfs/providers"
 	ft "github.com/ipfs/go-ipfs/unixfs"
 	uio "github.com/ipfs/go-ipfs/unixfs/io"
 	ufspb "github.com/ipfs/go-ipfs/unixfs/pb"
 
 	node "gx/ipfs/QmNwUEK7QbwSqyKBu3mMtToo8SUc6wQJ7gdZq4gGGJqfnf/go-ipld-format"
 	cid "gx/ipfs/QmeSrf6pzut73u6zLQkRFQ3ygt3k6XFT2kjdYP8Tnkwwyg/go-cid"
-
-	"github.com/ipfs/go-ipfs/providers"
 )
 
 var ErrNotYetImplemented = errors.New("not yet implemented")
@@ -44,7 +43,7 @@ type Directory struct {
 }
 
 func NewDirectory(ctx context.Context, name string, node node.Node, parent childCloser, dserv dag.DAGService, prov providers.Interface) (*Directory, error) {
-	db, err := uio.NewDirectoryFromNode(dserv, node)
+	db, err := uio.NewDirectoryFromNode(dserv, prov, node)
 	if err != nil {
 		return nil, err
 	}
