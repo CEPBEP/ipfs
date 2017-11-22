@@ -278,7 +278,7 @@ func (i *gatewayHandler) getOrHeadHandler(ctx context.Context, w http.ResponseWr
 		return
 	}
 
-	dirr, err := uio.NewDirectoryFromNode(i.node.DAG, nd)
+	dirr, err := uio.NewDirectoryFromNode(i.node.DAG, i.node.Providers, nd)
 	if err != nil {
 		internalWebError(w, err)
 		return

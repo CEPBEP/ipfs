@@ -28,13 +28,14 @@ import (
 	"os"
 
 	dag "github.com/ipfs/go-ipfs/merkledag"
+	providers "github.com/ipfs/go-ipfs/providers"
 	format "github.com/ipfs/go-ipfs/unixfs"
 	upb "github.com/ipfs/go-ipfs/unixfs/pb"
 
 	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
 	node "gx/ipfs/QmPN7cwmpcc4DWXb4KTB9dNAJgjuPY69h3npsMfhRrQL9c/go-ipld-format"
 	proto "gx/ipfs/QmZ4Qi3GaRbjcx28Sme5eMH7RQjGkt8wHxt2a65oLaeFEV/gogo-protobuf/proto"
-	"gx/ipfs/QmfJHywXQu98UeZtGJBQrPAR6AtmDjjbe3qjTo9piXHPnx/murmur3"
+	murmur3 "gx/ipfs/QmfJHywXQu98UeZtGJBQrPAR6AtmDjjbe3qjTo9piXHPnx/murmur3"
 )
 
 const (
@@ -58,6 +59,7 @@ type HamtShard struct {
 	maxpadlen    int
 
 	dserv dag.DAGService
+	prov  providers.Interface
 }
 
 // child can either be another shard, or a leaf node value
@@ -66,8 +68,8 @@ type child interface {
 	Label() string
 }
 
-func NewHamtShard(dserv dag.DAGService, size int) (*HamtShard, error) {
-	ds, err := makeHamtShard(dserv, size)
+func NewHamtShard(dserv dag.DAGService, prov providers.Interface, size int) (*HamtShard, error) {
+	ds, err := makeHamtShard(dserv, prov, size)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +80,7 @@ func NewHamtShard(dserv dag.DAGService, size int) (*HamtShard, error) {
 	return ds, nil
 }
 
-func makeHamtShard(ds dag.DAGService, size int) (*HamtShard, error) {
+func makeHamtShard(ds dag.DAGService, prov providers.Interface, size int) (*HamtShard, error) {
 	lg2s := int(math.Log2(float64(size)))
 	if 1<<uint(lg2s) != size {
 		return nil, fmt.Errorf("hamt size should be a power of two")
@@ -90,10 +92,11 @@ func makeHamtShard(ds dag.DAGService, size int) (*HamtShard, error) {
 		maxpadlen:    len(maxpadding),
 		tableSize:    size,
 		dserv:        ds,
+		prov:         prov,
 	}, nil
 }
 
-func NewHamtFromDag(dserv dag.DAGService, nd node.Node) (*HamtShard, error) {
+func NewHamtFromDag(dserv dag.DAGService, prov providers.Interface, nd node.Node) (*HamtShard, error) {
 	pbnd, ok := nd.(*dag.ProtoNode)
 	if !ok {
 		return nil, dag.ErrLinkNotFound
@@ -112,7 +115,7 @@ func NewHamtFromDag(dserv dag.DAGService, nd node.Node) (*HamtShard, error) {
 		return nil, fmt.Errorf("only murmur3 supported as hash function")
 	}
 
-	ds, err := makeHamtShard(dserv, int(pbd.GetFanout()))
+	ds, err := makeHamtShard(dserv, prov, int(pbd.GetFanout()))
 	if err != nil {
 		return nil, err
 	}
@@ -184,7 +187,12 @@ func (ds *HamtShard) Node() (node.Node, error) {
 
 	out.SetData(data)
 
-	_, err = ds.dserv.Add(out) //TODO: do we need to provide here?
+	_, err = ds.dserv.Add(out)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ds.prov.Provide(out.Cid())
 	if err != nil {
 		return nil, err
 	}
@@ -221,7 +229,12 @@ func (ds *HamtShard) Label() string {
 // Set sets 'name' = nd in the HAMT
 func (ds *HamtShard) Set(ctx context.Context, name string, nd node.Node) error {
 	hv := &hashBits{b: hash([]byte(name))}
-	_, err := ds.dserv.Add(nd) //TODO: do we need to provide here?
+	_, err := ds.dserv.Add(nd)
+	if err != nil {
+		return err
+	}
+
+	err = ds.prov.Provide(nd.Cid())
 	if err != nil {
 		return err
 	}
@@ -306,7 +319,7 @@ func (ds *HamtShard) loadChild(ctx context.Context, i int) (child, error) {
 			return nil, fmt.Errorf("HAMT entries must have non-zero length name")
 		}
 
-		cds, err := NewHamtFromDag(ds.dserv, nd)
+		cds, err := NewHamtFromDag(ds.dserv, ds.prov, nd)
 		if err != nil {
 			return nil, err
 		}
@@ -335,7 +348,12 @@ func (ds *HamtShard) Link() (*node.Link, error) {
 		return nil, err
 	}
 
-	_, err = ds.dserv.Add(nd) //TODO: do we need to provide here?
+	_, err = ds.dserv.Add(nd)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ds.prov.Provide(nd.Cid())
 	if err != nil {
 		return nil, err
 	}
@@ -502,7 +520,7 @@ func (ds *HamtShard) modifyValue(ctx context.Context, hv *hashBits, key string, 
 			return nil
 
 		default: // replace value with another shard, one level deeper
-			ns, err := NewHamtShard(ds.dserv, ds.tableSize)
+			ns, err := NewHamtShard(ds.dserv, ds.prov, ds.tableSize)
 			if err != nil {
 				return err
 			}
