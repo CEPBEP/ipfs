@@ -212,7 +212,7 @@ test_launch_ipfs_daemon() {
 
   # wait for api file to show up
   test_expect_success "api file shows up" '
-    test_wait_for_file 20 100ms "$IPFS_PATH/api"
+    test_wait_for_file 20 1000ms "$IPFS_PATH/api"
   '
 
   test_set_address_vars actual_daemon
