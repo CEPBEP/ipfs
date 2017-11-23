@@ -48,7 +48,7 @@ func getRandFile(t *testing.T, ds dag.DAGService, size int64) node.Node {
 }
 
 func fileNodeFromReader(t *testing.T, ds dag.DAGService, r io.Reader) node.Node {
-	nd, err := importer.BuildDagFromReader(ds, chunk.DefaultSplitter(r))
+	nd, err := importer.BuildDagFromReader(ds, offline.Providers(), chunk.DefaultSplitter(r))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -551,7 +551,7 @@ func actorMakeFile(d *Directory) error {
 	}
 
 	name := randomName()
-	f, err := NewFile(name, dag.NodeWithData(ft.FilePBData(nil, 0)), d, d.dserv)
+	f, err := NewFile(name, dag.NodeWithData(ft.FilePBData(nil, 0)), d, d.dserv, offline.Providers())
 	if err != nil {
 		return err
 	}
@@ -1010,7 +1010,7 @@ func TestFileDescriptors(t *testing.T) {
 	dir := rt.GetValue().(*Directory)
 
 	nd := dag.NodeWithData(ft.FilePBData(nil, 0))
-	fi, err := NewFile("test", nd, dir, ds)
+	fi, err := NewFile("test", nd, dir, ds, offline.Providers())
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -7,6 +7,7 @@ import (
 
 	chunk "github.com/ipfs/go-ipfs/importer/chunk"
 	dag "github.com/ipfs/go-ipfs/merkledag"
+	providers "github.com/ipfs/go-ipfs/providers"
 	ft "github.com/ipfs/go-ipfs/unixfs"
 	mod "github.com/ipfs/go-ipfs/unixfs/mod"
 
@@ -20,21 +21,23 @@ type File struct {
 
 	desclock sync.RWMutex
 
-	dserv  dag.DAGService
-	node   node.Node
-	nodelk sync.Mutex
+	dserv    dag.DAGService
+	provider providers.Interface
+	node     node.Node
+	nodelk   sync.Mutex
 
 	RawLeaves bool
 }
 
 // NewFile returns a NewFile object with the given parameters.  If the
 // Cid version is non-zero RawLeaves will be enabled.
-func NewFile(name string, node node.Node, parent childCloser, dserv dag.DAGService) (*File, error) {
+func NewFile(name string, node node.Node, parent childCloser, dserv dag.DAGService, prov providers.Interface) (*File, error) {
 	fi := &File{
-		dserv:  dserv,
-		parent: parent,
-		name:   name,
-		node:   node,
+		dserv:    dserv,
+		provider: prov,
+		parent:   parent,
+		name:     name,
+		node:     node,
 	}
 	if node.Cid().Prefix().Version > 0 {
 		fi.RawLeaves = true
@@ -82,7 +85,7 @@ func (fi *File) Open(flags int, sync bool) (FileDescriptor, error) {
 		return nil, fmt.Errorf("mode not supported")
 	}
 
-	dmod, err := mod.NewDagModifier(context.TODO(), node, fi.dserv, chunk.DefaultSplitter)
+	dmod, err := mod.NewDagModifier(context.TODO(), node, fi.dserv, fi.provider, chunk.DefaultSplitter)
 	if err != nil {
 		return nil, err
 	}

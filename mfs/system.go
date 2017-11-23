@@ -97,7 +97,7 @@ func NewRoot(parent context.Context, ds dag.DAGService, prov providers.Interface
 
 		root.val = rval
 	case ft.TFile, ft.TMetadata, ft.TRaw:
-		fi, err := NewFile(node.String(), node, root, ds)
+		fi, err := NewFile(node.String(), node, root, ds, prov)
 		if err != nil {
 			return nil, err
 		}

@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"testing"
 
+	offline "github.com/ipfs/go-ipfs/exchange/offline"
 	chunk "github.com/ipfs/go-ipfs/importer/chunk"
 	dag "github.com/ipfs/go-ipfs/merkledag"
 	mdtest "github.com/ipfs/go-ipfs/merkledag/test"
@@ -19,7 +20,7 @@ import (
 func getBalancedDag(t testing.TB, size int64, blksize int64) (node.Node, dag.DAGService) {
 	ds := mdtest.Mock()
 	r := io.LimitReader(u.NewTimeSeededRand(), size)
-	nd, err := BuildDagFromReader(ds, chunk.NewSizeSplitter(r, blksize))
+	nd, err := BuildDagFromReader(ds, offline.Providers(), chunk.NewSizeSplitter(r, blksize))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -29,7 +30,7 @@ func getBalancedDag(t testing.TB, size int64, blksize int64) (node.Node, dag.DAG
 func getTrickleDag(t testing.TB, size int64, blksize int64) (node.Node, dag.DAGService) {
 	ds := mdtest.Mock()
 	r := io.LimitReader(u.NewTimeSeededRand(), size)
-	nd, err := BuildTrickleDagFromReader(ds, chunk.NewSizeSplitter(r, blksize))
+	nd, err := BuildTrickleDagFromReader(ds, offline.Providers(), chunk.NewSizeSplitter(r, blksize))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,7 +43,7 @@ func TestBalancedDag(t *testing.T) {
 	u.NewTimeSeededRand().Read(buf)
 	r := bytes.NewReader(buf)
 
-	nd, err := BuildDagFromReader(ds, chunk.DefaultSplitter(r))
+	nd, err := BuildDagFromReader(ds, offline.Providers(), chunk.DefaultSplitter(r))
 	if err != nil {
 		t.Fatal(err)
 	}

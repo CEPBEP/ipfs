@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	offline "github.com/ipfs/go-ipfs/exchange/offline"
 	mdtest "github.com/ipfs/go-ipfs/merkledag/test"
 	ft "github.com/ipfs/go-ipfs/unixfs"
 )
@@ -18,7 +19,7 @@ func TestEmptyNode(t *testing.T) {
 
 func TestDirectoryGrowth(t *testing.T) {
 	ds := mdtest.Mock()
-	dir := NewDirectory(ds)
+	dir := NewDirectory(ds, offline.Providers())
 	ctx := context.Background()
 
 	d := ft.EmptyDirNode()
@@ -72,7 +73,7 @@ func TestDirectoryGrowth(t *testing.T) {
 
 func TestDuplicateAddDir(t *testing.T) {
 	ds := mdtest.Mock()
-	dir := NewDirectory(ds)
+	dir := NewDirectory(ds, offline.Providers())
 	ctx := context.Background()
 	nd := ft.EmptyDirNode()
 
@@ -98,7 +99,7 @@ func TestDuplicateAddDir(t *testing.T) {
 
 func TestDirBuilder(t *testing.T) {
 	ds := mdtest.Mock()
-	dir := NewDirectory(ds)
+	dir := NewDirectory(ds, offline.Providers())
 	ctx := context.Background()
 
 	child := ft.EmptyDirNode()
@@ -130,7 +131,7 @@ func TestDirBuilder(t *testing.T) {
 		t.Fatal("not enough links dawg", len(links), count)
 	}
 
-	adir, err := NewDirectoryFromNode(ds, dirnd)
+	adir, err := NewDirectoryFromNode(ds, offline.Providers(), dirnd)
 	if err != nil {
 		t.Fatal(err)
 	}

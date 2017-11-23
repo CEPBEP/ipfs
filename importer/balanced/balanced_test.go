@@ -9,6 +9,7 @@ import (
 	mrand "math/rand"
 	"testing"
 
+	offline "github.com/ipfs/go-ipfs/exchange/offline"
 	chunk "github.com/ipfs/go-ipfs/importer/chunk"
 	h "github.com/ipfs/go-ipfs/importer/helpers"
 	dag "github.com/ipfs/go-ipfs/merkledag"
@@ -23,6 +24,7 @@ import (
 func buildTestDag(ds dag.DAGService, spl chunk.Splitter) (*dag.ProtoNode, error) {
 	dbp := h.DagBuilderParams{
 		Dagserv:  ds,
+		Provider: offline.Providers(),
 		Maxlinks: h.DefaultLinksPerBlock,
 	}
 

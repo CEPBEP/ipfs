@@ -19,6 +19,8 @@ import (
 	u "gx/ipfs/QmPsAfmDBnZN3kZGSuNwvCNDZiHneERSKmRcFyG3UkvcT3/go-ipfs-util"
 	mh "gx/ipfs/QmYeKnKpubCMRiq3PGZcTREErthbb5Q9cXsCoSkD9bjEBd/go-multihash"
 	cid "gx/ipfs/QmeSrf6pzut73u6zLQkRFQ3ygt3k6XFT2kjdYP8Tnkwwyg/go-cid"
+
+	"github.com/ipfs/go-ipfs/providers"
 )
 
 func SizeSplitterGen(size int64) chunk.SplitterGen {
@@ -51,11 +53,12 @@ func init() {
 	UseBlake2b256.Prefix.MhLength = -1
 }
 
-func GetNode(t testing.TB, dserv mdag.DAGService, data []byte, opts NodeOpts) node.Node {
+func GetNode(t testing.TB, dserv mdag.DAGService, prov providers.Interface, data []byte, opts NodeOpts) node.Node {
 	in := bytes.NewReader(data)
 
 	dbp := h.DagBuilderParams{
 		Dagserv:   dserv,
+		Provider:  prov,
 		Maxlinks:  h.DefaultLinksPerBlock,
 		Prefix:    &opts.Prefix,
 		RawLeaves: opts.RawLeavesUsed,
@@ -69,18 +72,18 @@ func GetNode(t testing.TB, dserv mdag.DAGService, data []byte, opts NodeOpts) no
 	return node
 }
 
-func GetEmptyNode(t testing.TB, dserv mdag.DAGService, opts NodeOpts) node.Node {
-	return GetNode(t, dserv, []byte{}, opts)
+func GetEmptyNode(t testing.TB, dserv mdag.DAGService, prov providers.Interface, opts NodeOpts) node.Node {
+	return GetNode(t, dserv, prov, []byte{}, opts)
 }
 
-func GetRandomNode(t testing.TB, dserv mdag.DAGService, size int64, opts NodeOpts) ([]byte, node.Node) {
+func GetRandomNode(t testing.TB, dserv mdag.DAGService, prov providers.Interface, size int64, opts NodeOpts) ([]byte, node.Node) {
 	in := io.LimitReader(u.NewTimeSeededRand(), size)
 	buf, err := ioutil.ReadAll(in)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	node := GetNode(t, dserv, buf, opts)
+	node := GetNode(t, dserv, prov, buf, opts)
 	return buf, node
 }
 

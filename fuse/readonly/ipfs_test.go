@@ -13,14 +13,18 @@ import (
 	"sync"
 	"testing"
 
+	ci "gx/ipfs/QmQgLZP9haZheimMHqqAjJh2LhRmNfEoZDfbtkpeMhi9xK/go-testutil/ci"
+
+	ci "gx/ipfs/QmeDA8gNhvRTsbrjEieay5wezupJDiky8xvCzDABbsGzmp/go-testutil/ci"
+
 	core "github.com/ipfs/go-ipfs/core"
 	coreunix "github.com/ipfs/go-ipfs/core/coreunix"
 	coremock "github.com/ipfs/go-ipfs/core/mock"
+	offline "github.com/ipfs/go-ipfs/exchange/offline"
 	importer "github.com/ipfs/go-ipfs/importer"
 	chunk "github.com/ipfs/go-ipfs/importer/chunk"
 	dag "github.com/ipfs/go-ipfs/merkledag"
 	uio "github.com/ipfs/go-ipfs/unixfs/io"
-	ci "gx/ipfs/QmeDA8gNhvRTsbrjEieay5wezupJDiky8xvCzDABbsGzmp/go-testutil/ci"
 
 	node "gx/ipfs/QmNwUEK7QbwSqyKBu3mMtToo8SUc6wQJ7gdZq4gGGJqfnf/go-ipld-format"
 	u "gx/ipfs/QmPsAfmDBnZN3kZGSuNwvCNDZiHneERSKmRcFyG3UkvcT3/go-ipfs-util"
@@ -37,7 +41,7 @@ func randObj(t *testing.T, nd *core.IpfsNode, size int64) (node.Node, []byte) {
 	buf := make([]byte, size)
 	u.NewTimeSeededRand().Read(buf)
 	read := bytes.NewReader(buf)
-	obj, err := importer.BuildTrickleDagFromReader(nd.DAG, chunk.DefaultSplitter(read))
+	obj, err := importer.BuildTrickleDagFromReader(nd.DAG, offline.Providers(), chunk.DefaultSplitter(read))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -131,7 +135,7 @@ func TestIpfsStressRead(t *testing.T) {
 
 	// Now make a bunch of dirs
 	for i := 0; i < ndiriter; i++ {
-		db := uio.NewDirectory(nd.DAG)
+		db := uio.NewDirectory(nd.DAG, offline.Providers())
 		for j := 0; j < 1+rand.Intn(10); j++ {
 			name := fmt.Sprintf("child%d", j)
 
@@ -213,7 +217,7 @@ func TestIpfsBasicDirRead(t *testing.T) {
 	fi, data := randObj(t, nd, 10000)
 
 	// Make a directory and put that file in it
-	db := uio.NewDirectory(nd.DAG)
+	db := uio.NewDirectory(nd.DAG, offline.Providers())
 	err := db.AddChild(nd.Context(), "actual", fi)
 	if err != nil {
 		t.Fatal(err)
