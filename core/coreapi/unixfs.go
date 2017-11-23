@@ -6,10 +6,11 @@ import (
 
 	coreiface "github.com/ipfs/go-ipfs/core/coreapi/interface"
 	coreunix "github.com/ipfs/go-ipfs/core/coreunix"
+	ufs "github.com/ipfs/go-ipfs/unixfs"
 	uio "github.com/ipfs/go-ipfs/unixfs/io"
 
 	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
-	node "gx/ipfs/QmPN7cwmpcc4DWXb4KTB9dNAJgjuPY69h3npsMfhRrQL9c/go-ipld-format"
+	ipld "gx/ipfs/QmPN7cwmpcc4DWXb4KTB9dNAJgjuPY69h3npsMfhRrQL9c/go-ipld-format"
 )
 
 type UnixfsAPI CoreAPI
@@ -42,33 +43,67 @@ func (api *UnixfsAPI) Cat(ctx context.Context, p coreiface.Path) (coreiface.Path
 }
 
 func (api *UnixfsAPI) Ls(ctx context.Context, p coreiface.Path) (coreiface.Path, []*coreiface.Link, error) {
+	rp, dir, err := api.LsDir(ctx, p)
+	if err != nil {
+		return nil, nil, err
+	}
+	links, err := dir.Links(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	return rp, links, nil
+}
+
+func (api *UnixfsAPI) LsDir(ctx context.Context, p coreiface.Path) (coreiface.Path, coreiface.UnixfsDir, error) {
 	rp, dagnode, err := api.core().ResolveNode(ctx, p)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	var ndlinks []*node.Link
 	dir, err := uio.NewDirectoryFromNode(api.node.DAG, dagnode)
-	switch err {
-	case nil:
-		l, err := dir.Links(ctx)
-		if err != nil {
-			return nil, nil, err
-		}
-		ndlinks = l
-	case uio.ErrNotADir:
-		ndlinks = dagnode.Links()
-	default:
-		return nil, nil, err
+	if err == uio.ErrNotADir {
+		return rp, nil, coreiface.ErrNotADir
 	}
 
-	links := make([]*coreiface.Link, len(ndlinks))
-	for i, l := range ndlinks {
-		links[i] = &coreiface.Link{l.Name, l.Size, l.Cid}
-	}
-	return rp, links, nil
+	return rp, unixfsDir{dir}, nil
 }
 
 func (api *UnixfsAPI) core() coreiface.CoreAPI {
 	return (*CoreAPI)(api)
+}
+
+// move to dageditor
+func EmptyUnixfsDir() coreiface.Node {
+	return ufs.EmptyDirNode()
+}
+
+type unixfsDir struct {
+	*uio.Directory
+}
+
+func (d unixfsDir) Node() (coreiface.Node, error) {
+	dagnode, err := d.Directory.GetNode()
+	if err != nil {
+		return nil, err
+	}
+	return (coreiface.Node)(dagnode), nil
+}
+
+func (d unixfsDir) Links(ctx context.Context) ([]*coreiface.Link, error) {
+	var links []*coreiface.Link
+	err := d.ForEachLink(ctx, func(link *coreiface.Link) error {
+		links = append(links, link)
+		return nil
+	})
+	return links, err
+}
+
+func (d unixfsDir) ForEachLink(ctx context.Context, f func(*coreiface.Link) error) error {
+	return d.Directory.ForEachLink(ctx, func(link *ipld.Link) error {
+		return f((*coreiface.Link)(link))
+	})
+}
+
+func (d unixfsDir) Find(ctx context.Context, name string) (coreiface.Node, error) {
+	return d.Directory.Find(ctx, name)
 }

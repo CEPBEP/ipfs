@@ -278,7 +278,6 @@ func TestLsEmptyDir(t *testing.T) {
 	}
 }
 
-// TODO(lgierth) this should test properly, with len(links) > 0
 func TestLsNonUnixfs(t *testing.T) {
 	ctx := context.Background()
 	node, api, err := makeAPI(ctx)
@@ -296,12 +295,8 @@ func TestLsNonUnixfs(t *testing.T) {
 		t.Error(err)
 	}
 
-	_, links, err := api.Ls(ctx, coreapi.ParseCid(c))
-	if err != nil {
-		t.Error(err)
-	}
-
-	if len(links) != 0 {
-		t.Fatalf("expected 0 links, got %d", len(links))
+	_, _, err = api.Ls(ctx, coreapi.ParseCid(c))
+	if err != coreiface.ErrNotADir {
+		t.Fatalf("expected ErrNotADir, got %s", err)
 	}
 }

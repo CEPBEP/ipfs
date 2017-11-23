@@ -19,8 +19,6 @@ import (
 	chunk "github.com/ipfs/go-ipfs/importer/chunk"
 	dag "github.com/ipfs/go-ipfs/merkledag"
 	dagutils "github.com/ipfs/go-ipfs/merkledag/utils"
-	ft "github.com/ipfs/go-ipfs/unixfs"
-	uio "github.com/ipfs/go-ipfs/unixfs/io"
 
 	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
 	node "gx/ipfs/QmPN7cwmpcc4DWXb4KTB9dNAJgjuPY69h3npsMfhRrQL9c/go-ipld-format"
@@ -271,13 +269,7 @@ func (i *gatewayHandler) getOrHeadHandler(ctx context.Context, w http.ResponseWr
 		return
 	}
 
-	_, nd, err := i.api.ResolveNode(ctx, resolvedPath)
-	if err != nil {
-		internalWebError(w, err)
-		return
-	}
-
-	dirr, err := uio.NewDirectoryFromNode(i.node.DAG, nd)
+	_, dirr, err := i.api.Unixfs().LsDir(ctx, resolvedPath)
 	if err != nil {
 		internalWebError(w, err)
 		return
@@ -319,7 +311,7 @@ func (i *gatewayHandler) getOrHeadHandler(ctx context.Context, w http.ResponseWr
 
 	// storage for directory listing
 	var dirListing []directoryItem
-	dirr.ForEachLink(ctx, func(link *node.Link) error {
+	dirr.ForEachLink(ctx, func(link *coreiface.Link) error {
 		// See comment above where originalUrlPath is declared.
 		di := directoryItem{humanize.Bytes(link.Size), link.Name, gopath.Join(originalUrlPath, link.Name)}
 		dirListing = append(dirListing, di)
@@ -433,8 +425,9 @@ func (i *gatewayHandler) putHandler(w http.ResponseWriter, r *http.Request) {
 		// TODO(lgierth): this seems to mean that PUT /ipfs/QmUNLL/foo/bar
 		//                results in bar being an empty directory,
 		//                no matter what
-		newnode = ft.EmptyDirNode()
+		newnode = coreapi.EmptyUnixfsDir()
 	} else {
+		// TODO(lgierth): defer building the DAG until we ran all checks
 		putNode, err := i.newDagFromReader(r.Body)
 		if err != nil {
 			webError(w, "putHandler: Could not create DAG from request", err, http.StatusInternalServerError)
@@ -473,7 +466,10 @@ func (i *gatewayHandler) putHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		e := dagutils.NewDagEditor(pbnd, i.node.DAG)
-		err = e.InsertNodeAtPath(ctx, newPath, newnode, ft.EmptyDirNode)
+		err = e.InsertNodeAtPath(ctx, newPath, newnode, func() *dag.ProtoNode {
+			dagnode := coreapi.EmptyUnixfsDir()
+			return dagnode.(*dag.ProtoNode)
+		})
 		if err != nil {
 			webError(w, "putHandler: InsertNodeAtPath failed", err, http.StatusInternalServerError)
 			return

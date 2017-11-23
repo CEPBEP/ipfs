@@ -19,6 +19,7 @@ type Path interface {
 
 // TODO: should we really copy these?
 //       if we didn't, godoc would generate nice links straight to go-ipld-format
+//       and we wouldn't need the typecasting layer as in unixfsDir.ForEachLink
 type Node ipld.Node
 type Link ipld.Link
 
@@ -37,6 +38,14 @@ type UnixfsAPI interface {
 	Add(context.Context, io.Reader) (Path, error)
 	Cat(context.Context, Path) (Path, Reader, error)
 	Ls(context.Context, Path) (Path, []*Link, error)
+	LsDir(context.Context, Path) (Path, UnixfsDir, error)
+}
+
+type UnixfsDir interface {
+	Node() (Node, error)
+	Links(context.Context) ([]*Link, error)
+	ForEachLink(context.Context, func(*Link) error) error
+	Find(context.Context, string) (Node, error)
 }
 
 // type ObjectAPI interface {
@@ -61,6 +70,7 @@ type UnixfsAPI interface {
 // 	CumulativeSize int
 // }
 
-var ErrIsDir = errors.New("object is a directory")
+var ErrIsDir = errors.New("node is a unixfs directory")
+var ErrNotADir = errors.New("node isn't a unixfs directory")
 var ErrOffline = errors.New("can't resolve, ipfs is offline")
 var ErrNotFound = errors.New("can't find requested node")
