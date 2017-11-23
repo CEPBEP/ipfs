@@ -170,7 +170,7 @@ func (d *Directory) cacheNode(name string, nd node.Node) (FSNode, error) {
 			d.childDirs[name] = ndir
 			return ndir, nil
 		case ufspb.Data_File, ufspb.Data_Raw, ufspb.Data_Symlink:
-			nfi, err := NewFile(name, nd, d, d.dserv)
+			nfi, err := NewFile(name, nd, d, d.dserv, d.prov)
 			if err != nil {
 				return nil, err
 			}
@@ -182,7 +182,7 @@ func (d *Directory) cacheNode(name string, nd node.Node) (FSNode, error) {
 			return nil, ErrInvalidChild
 		}
 	case *dag.RawNode:
-		nfi, err := NewFile(name, nd, d, d.dserv)
+		nfi, err := NewFile(name, nd, d, d.dserv, d.prov)
 		if err != nil {
 			return nil, err
 		}

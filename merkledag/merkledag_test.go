@@ -13,6 +13,8 @@ import (
 	"testing"
 	"time"
 
+	blocks "gx/ipfs/QmSn9Td7xgxm9EV7iEjTckpUWmWApggzPxu7eFGWkkpwin/go-block-format"
+
 	bserv "github.com/ipfs/go-ipfs/blockservice"
 	bstest "github.com/ipfs/go-ipfs/blockservice/test"
 	offline "github.com/ipfs/go-ipfs/exchange/offline"
@@ -22,7 +24,6 @@ import (
 	mdpb "github.com/ipfs/go-ipfs/merkledag/pb"
 	dstest "github.com/ipfs/go-ipfs/merkledag/test"
 	uio "github.com/ipfs/go-ipfs/unixfs/io"
-	blocks "gx/ipfs/QmSn9Td7xgxm9EV7iEjTckpUWmWApggzPxu7eFGWkkpwin/go-block-format"
 
 	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
 	node "gx/ipfs/QmPN7cwmpcc4DWXb4KTB9dNAJgjuPY69h3npsMfhRrQL9c/go-ipld-format"
@@ -138,7 +139,7 @@ func runBatchFetchTest(t *testing.T, read io.Reader) {
 
 	spl := chunk.NewSizeSplitter(read, 512)
 
-	root, err := imp.BuildDagFromReader(dagservs[0], spl)
+	root, err := imp.BuildDagFromReader(dagservs[0], offline.Providers(), spl)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -228,7 +229,7 @@ func TestFetchGraph(t *testing.T) {
 	}
 
 	read := io.LimitReader(u.NewTimeSeededRand(), 1024*32)
-	root, err := imp.BuildDagFromReader(dservs[0], chunk.NewSizeSplitter(read, 512))
+	root, err := imp.BuildDagFromReader(dservs[0], offline.Providers(), chunk.NewSizeSplitter(read, 512))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -254,7 +255,7 @@ func TestEnumerateChildren(t *testing.T) {
 	ds := NewDAGService(bsi[0])
 
 	read := io.LimitReader(u.NewTimeSeededRand(), 1024*1024)
-	root, err := imp.BuildDagFromReader(ds, chunk.NewSizeSplitter(read, 512))
+	root, err := imp.BuildDagFromReader(ds, offline.Providers(), chunk.NewSizeSplitter(read, 512))
 	if err != nil {
 		t.Fatal(err)
 	}

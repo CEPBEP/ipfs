@@ -58,6 +58,7 @@ func (i *gatewayHandler) newDagFromReader(r io.Reader) (node.Node, error) {
 	// return ufs.AddFromReader(i.node, r.Body)
 	return importer.BuildDagFromReader(
 		i.node.DAG,
+		i.node.Providers,
 		chunk.DefaultSplitter(r))
 }
 

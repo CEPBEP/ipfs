@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	offline "github.com/ipfs/go-ipfs/exchange/offline"
 	dag "github.com/ipfs/go-ipfs/merkledag"
 	mdtest "github.com/ipfs/go-ipfs/merkledag/test"
 	dagutils "github.com/ipfs/go-ipfs/merkledag/utils"
@@ -29,7 +30,7 @@ func makeDir(ds dag.DAGService, size int) ([]string, *HamtShard, error) {
 }
 
 func makeDirWidth(ds dag.DAGService, size, width int) ([]string, *HamtShard, error) {
-	s, _ := NewHamtShard(ds, width)
+	s, _ := NewHamtShard(ds, offline.Providers(), width)
 
 	var dirs []string
 	for i := 0; i < size; i++ {
@@ -78,7 +79,7 @@ func assertSerializationWorks(ds dag.DAGService, s *HamtShard) error {
 		return err
 	}
 
-	nds, err := NewHamtFromDag(ds, nd)
+	nds, err := NewHamtFromDag(ds, offline.Providers(), nd)
 	if err != nil {
 		return err
 	}
@@ -137,7 +138,7 @@ func TestBasicSet(t *testing.T) {
 
 func TestDirBuilding(t *testing.T) {
 	ds := mdtest.Mock()
-	_, _ = NewHamtShard(ds, 256)
+	_, _ = NewHamtShard(ds, offline.Providers(), 256)
 
 	_, s, err := makeDir(ds, 200)
 	if err != nil {
@@ -160,7 +161,7 @@ func TestDirBuilding(t *testing.T) {
 
 func TestShardReload(t *testing.T) {
 	ds := mdtest.Mock()
-	_, _ = NewHamtShard(ds, 256)
+	_, _ = NewHamtShard(ds, offline.Providers(), 256)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -174,7 +175,7 @@ func TestShardReload(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	nds, err := NewHamtFromDag(ds, nd)
+	nds, err := NewHamtFromDag(ds, offline.Providers(), nd)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -195,7 +196,7 @@ func TestShardReload(t *testing.T) {
 
 	// Now test roundtrip marshal with no operations
 
-	nds, err = NewHamtFromDag(ds, nd)
+	nds, err = NewHamtFromDag(ds, offline.Providers(), nd)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -259,7 +260,7 @@ func TestSetAfterMarshal(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	nds, err := NewHamtFromDag(ds, nd)
+	nds, err := NewHamtFromDag(ds, offline.Providers(), nd)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -289,7 +290,7 @@ func TestSetAfterMarshal(t *testing.T) {
 
 func TestDuplicateAddShard(t *testing.T) {
 	ds := mdtest.Mock()
-	dir, _ := NewHamtShard(ds, 256)
+	dir, _ := NewHamtShard(ds, offline.Providers(), 256)
 	nd := new(dag.ProtoNode)
 	ctx := context.Background()
 
@@ -317,14 +318,14 @@ func TestLoadFailsFromNonShard(t *testing.T) {
 	ds := mdtest.Mock()
 	nd := ft.EmptyDirNode()
 
-	_, err := NewHamtFromDag(ds, nd)
+	_, err := NewHamtFromDag(ds, offline.Providers(), nd)
 	if err == nil {
 		t.Fatal("expected dir shard creation to fail when given normal directory")
 	}
 
 	nd = new(dag.ProtoNode)
 
-	_, err = NewHamtFromDag(ds, nd)
+	_, err = NewHamtFromDag(ds, offline.Providers(), nd)
 	if err == nil {
 		t.Fatal("expected dir shard creation to fail when given normal directory")
 	}
@@ -371,7 +372,7 @@ func TestRemoveElemsAfterMarshal(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	nds, err := NewHamtFromDag(ds, nd)
+	nds, err := NewHamtFromDag(ds, offline.Providers(), nd)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -412,7 +413,7 @@ func TestRemoveElemsAfterMarshal(t *testing.T) {
 
 func TestBitfieldIndexing(t *testing.T) {
 	ds := mdtest.Mock()
-	s, _ := NewHamtShard(ds, 256)
+	s, _ := NewHamtShard(ds, offline.Providers(), 256)
 
 	set := func(i int) {
 		s.bitfield.SetBit(s.bitfield, i, 1)
@@ -446,7 +447,7 @@ func TestBitfieldIndexing(t *testing.T) {
 // itself.
 func TestSetHamtChild(t *testing.T) {
 	ds := mdtest.Mock()
-	s, _ := NewHamtShard(ds, 256)
+	s, _ := NewHamtShard(ds, offline.Providers(), 256)
 	ctx := context.Background()
 
 	e := ft.EmptyDirNode()
@@ -477,7 +478,7 @@ func TestSetHamtChild(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	hs, err := NewHamtFromDag(ds, nsnd)
+	hs, err := NewHamtFromDag(ds, offline.Providers(), nsnd)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -506,7 +507,7 @@ func printDiff(ds dag.DAGService, a, b *dag.ProtoNode) {
 
 func BenchmarkHAMTSet(b *testing.B) {
 	ds := mdtest.Mock()
-	sh, _ := NewHamtShard(ds, 256)
+	sh, _ := NewHamtShard(ds, offline.Providers(), 256)
 	nd, err := sh.Node()
 	if err != nil {
 		b.Fatal(err)
@@ -519,7 +520,7 @@ func BenchmarkHAMTSet(b *testing.B) {
 	ds.Add(ft.EmptyDirNode())
 
 	for i := 0; i < b.N; i++ {
-		s, err := NewHamtFromDag(ds, nd)
+		s, err := NewHamtFromDag(ds, offline.Providers(), nd)
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -539,7 +540,7 @@ func BenchmarkHAMTSet(b *testing.B) {
 }
 
 func TestHamtBadSize(t *testing.T) {
-	_, err := NewHamtShard(nil, 7)
+	_, err := NewHamtShard(nil, offline.Providers(), 7)
 	if err == nil {
 		t.Fatal("should have failed to construct hamt with bad size")
 	}

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/ipfs/go-ipfs/exchange/offline"
 	mdag "github.com/ipfs/go-ipfs/merkledag"
 	"github.com/ipfs/go-ipfs/unixfs"
 
@@ -17,7 +18,7 @@ import (
 
 func TestBasicRead(t *testing.T) {
 	dserv := testu.GetDAGServ()
-	inbuf, node := testu.GetRandomNode(t, dserv, 1024, testu.UseProtoBufLeaves)
+	inbuf, node := testu.GetRandomNode(t, dserv, offline.Providers(), 1024, testu.UseProtoBufLeaves)
 	ctx, closer := context.WithCancel(context.Background())
 	defer closer()
 
@@ -44,7 +45,7 @@ func TestSeekAndRead(t *testing.T) {
 		inbuf[i] = byte(i)
 	}
 
-	node := testu.GetNode(t, dserv, inbuf, testu.UseProtoBufLeaves)
+	node := testu.GetNode(t, dserv, offline.Providers(), inbuf, testu.UseProtoBufLeaves)
 	ctx, closer := context.WithCancel(context.Background())
 	defer closer()
 
@@ -84,7 +85,7 @@ func TestRelativeSeek(t *testing.T) {
 	}
 
 	inbuf[1023] = 1 // force the reader to be 1024 bytes
-	node := testu.GetNode(t, dserv, inbuf, testu.UseProtoBufLeaves)
+	node := testu.GetNode(t, dserv, offline.Providers(), inbuf, testu.UseProtoBufLeaves)
 
 	reader, err := NewDagReader(ctx, node, dserv)
 	if err != nil {
@@ -160,7 +161,7 @@ func TestBadPBData(t *testing.T) {
 
 func TestMetadataNode(t *testing.T) {
 	dserv := testu.GetDAGServ()
-	rdata, rnode := testu.GetRandomNode(t, dserv, 512, testu.UseProtoBufLeaves)
+	rdata, rnode := testu.GetRandomNode(t, dserv, offline.Providers(), 512, testu.UseProtoBufLeaves)
 	_, err := dserv.Add(rnode)
 	if err != nil {
 		t.Fatal(err)
@@ -203,7 +204,7 @@ func TestMetadataNode(t *testing.T) {
 
 func TestWriteTo(t *testing.T) {
 	dserv := testu.GetDAGServ()
-	inbuf, node := testu.GetRandomNode(t, dserv, 1024, testu.UseProtoBufLeaves)
+	inbuf, node := testu.GetRandomNode(t, dserv, offline.Providers(), 1024, testu.UseProtoBufLeaves)
 	ctx, closer := context.WithCancel(context.Background())
 	defer closer()
 
@@ -225,7 +226,7 @@ func TestWriteTo(t *testing.T) {
 func TestReaderSzie(t *testing.T) {
 	dserv := testu.GetDAGServ()
 	size := int64(1024)
-	_, node := testu.GetRandomNode(t, dserv, size, testu.UseProtoBufLeaves)
+	_, node := testu.GetRandomNode(t, dserv, offline.Providers(), size, testu.UseProtoBufLeaves)
 	ctx, closer := context.WithCancel(context.Background())
 	defer closer()
 

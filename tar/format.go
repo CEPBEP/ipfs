@@ -17,6 +17,8 @@ import (
 
 	node "gx/ipfs/QmPN7cwmpcc4DWXb4KTB9dNAJgjuPY69h3npsMfhRrQL9c/go-ipld-format"
 	logging "gx/ipfs/QmSpJByNKFX1sCsHBEp3R73FL4NF6FnQTEGyNAXHm2GS52/go-log"
+
+	"github.com/ipfs/go-ipfs/providers"
 )
 
 var log = logging.Logger("tarfmt")
@@ -34,7 +36,7 @@ func marshalHeader(h *tar.Header) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func ImportTar(r io.Reader, ds dag.DAGService) (*dag.ProtoNode, error) {
+func ImportTar(r io.Reader, ds dag.DAGService, prov providers.Interface) (*dag.ProtoNode, error) {
 	tr := tar.NewReader(r)
 
 	root := new(dag.ProtoNode)
@@ -62,7 +64,7 @@ func ImportTar(r io.Reader, ds dag.DAGService) (*dag.ProtoNode, error) {
 
 		if h.Size > 0 {
 			spl := chunk.NewRabin(tr, uint64(chunk.DefaultBlockSize))
-			nd, err := importer.BuildDagFromReader(ds, spl)
+			nd, err := importer.BuildDagFromReader(ds, prov, spl)
 			if err != nil {
 				return nil, err
 			}
