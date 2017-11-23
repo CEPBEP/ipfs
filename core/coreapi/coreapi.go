@@ -21,11 +21,13 @@ func NewCoreAPI(n *core.IpfsNode) coreiface.CoreAPI {
 	return api
 }
 
+// Unixfs returns a struct for working with the Unixfs API.
 func (api *CoreAPI) Unixfs() coreiface.UnixfsAPI {
 	return (*UnixfsAPI)(api)
 }
 
-// TODO: also return path here
+// ResolveNode takes an /ipfs or /ipns path, resolves it, and returns the
+// resulting IPLD node as well as the fully resolved path.
 func (api *CoreAPI) ResolveNode(ctx context.Context, p coreiface.Path) (coreiface.Path, coreiface.Node, error) {
 	p, err := api.ResolvePath(ctx, p)
 	if err != nil {
