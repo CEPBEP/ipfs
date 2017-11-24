@@ -68,6 +68,7 @@ func NewDirectoryFromNode(dserv mdag.DAGService, prov providers.Interface, nd no
 	case format.TDirectory:
 		return &Directory{
 			dserv:   dserv,
+			prov:    prov,
 			dirnode: pbnd.Copy().(*mdag.ProtoNode),
 		}, nil
 	case format.THAMTShard:
@@ -78,6 +79,7 @@ func NewDirectoryFromNode(dserv mdag.DAGService, prov providers.Interface, nd no
 
 		return &Directory{
 			dserv: dserv,
+			prov:  prov,
 			shard: shard,
 		}, nil
 	default:

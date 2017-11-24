@@ -3,8 +3,8 @@ package io
 import (
 	"context"
 
+	offline "github.com/ipfs/go-ipfs/exchange/offline"
 	dag "github.com/ipfs/go-ipfs/merkledag"
-	providers "github.com/ipfs/go-ipfs/providers"
 	ft "github.com/ipfs/go-ipfs/unixfs"
 	hamt "github.com/ipfs/go-ipfs/unixfs/hamt"
 
@@ -13,7 +13,7 @@ import (
 
 // ResolveUnixfsOnce resolves a single hop of a path through a graph in a
 // unixfs context. This includes handling traversing sharded directories.
-func ResolveUnixfsOnce(ctx context.Context, ds dag.DAGService, prov providers.Interface, nd node.Node, names []string) (*node.Link, []string, error) {
+func ResolveUnixfsOnce(ctx context.Context, ds dag.DAGService, nd node.Node, names []string) (*node.Link, []string, error) {
 	switch nd := nd.(type) {
 	case *dag.ProtoNode:
 		upb, err := ft.FromBytes(nd.Data())
@@ -29,7 +29,7 @@ func ResolveUnixfsOnce(ctx context.Context, ds dag.DAGService, prov providers.In
 
 		switch upb.GetType() {
 		case ft.THAMTShard:
-			s, err := hamt.NewHamtFromDag(ds, prov, nd)
+			s, err := hamt.NewHamtFromDag(ds, offline.Providers(), nd)
 			if err != nil {
 				return nil, nil, err
 			}
