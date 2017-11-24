@@ -143,7 +143,7 @@ func (s *Node) Attr(ctx context.Context, a *fuse.Attr) error {
 // Lookup performs a lookup under this node.
 func (s *Node) Lookup(ctx context.Context, name string) (fs.Node, error) {
 	log.Debugf("Lookup '%s'", name)
-	link, _, err := uio.ResolveUnixfsOnce(ctx, s.Ipfs.DAG, s.Ipfs.Providers, s.Nd, []string{name})
+	link, _, err := uio.ResolveUnixfsOnce(ctx, s.Ipfs.DAG, s.Nd, []string{name})
 	switch err {
 	case os.ErrNotExist, mdag.ErrLinkNotFound:
 		// todo: make this error more versatile.
