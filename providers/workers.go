@@ -9,7 +9,7 @@ import (
 	cid "gx/ipfs/QmeSrf6pzut73u6zLQkRFQ3ygt3k6XFT2kjdYP8Tnkwwyg/go-cid"
 )
 
-func (p *providers) startWorkers(px process.Process, ctx context.Context) {
+func (p *providers) startWorkers(ctx context.Context, px process.Process) {
 	// Start up a worker to manage sending out provides messages
 	px.Go(func(px process.Process) {
 		p.provideCollector(ctx)

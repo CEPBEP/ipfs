@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	offline "github.com/ipfs/go-ipfs/exchange/offline"
 	merkledag "github.com/ipfs/go-ipfs/merkledag"
 	dagmock "github.com/ipfs/go-ipfs/merkledag/test"
 	path "github.com/ipfs/go-ipfs/path"
@@ -54,7 +53,7 @@ func TestRecurivePathResolution(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	resolver := path.NewBasicResolver(dagService, offline.Providers())
+	resolver := path.NewBasicResolver(dagService)
 	node, err := resolver.ResolvePath(ctx, p)
 	if err != nil {
 		t.Fatal(err)

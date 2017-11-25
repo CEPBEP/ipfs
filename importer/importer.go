@@ -40,6 +40,7 @@ func BuildDagFromFile(fpath string, ds dag.DAGService, prov providers.Interface)
 	return BuildDagFromReader(ds, prov, chunk.NewSizeSplitter(f, chunk.DefaultBlockSize))
 }
 
+// BuildDagFromReader creates new DAG containing data provided by Splitter
 func BuildDagFromReader(ds dag.DAGService, prov providers.Interface, spl chunk.Splitter) (node.Node, error) {
 	dbp := h.DagBuilderParams{
 		Dagserv:  ds,
@@ -50,6 +51,7 @@ func BuildDagFromReader(ds dag.DAGService, prov providers.Interface, spl chunk.S
 	return bal.BalancedLayout(dbp.New(spl))
 }
 
+// BuildTrickleDagFromReader creates new DAG with trickle layout containing data provided by Splitter
 func BuildTrickleDagFromReader(ds dag.DAGService, prov providers.Interface, spl chunk.Splitter) (node.Node, error) {
 	dbp := h.DagBuilderParams{
 		Dagserv:  ds,

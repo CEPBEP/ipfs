@@ -36,6 +36,7 @@ func marshalHeader(h *tar.Header) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+// ImportTar turns tar stream provided by reader r into a DAG node
 func ImportTar(r io.Reader, ds dag.DAGService, prov providers.Interface) (*dag.ProtoNode, error) {
 	tr := tar.NewReader(r)
 

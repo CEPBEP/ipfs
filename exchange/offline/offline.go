@@ -76,6 +76,7 @@ func (e *offlineExchange) IsOnline() bool {
 
 type offlineProviders struct{}
 
+// Providers returns a dummy providers interface implementation
 func Providers() providers.Interface {
 	return &offlineProviders{}
 }
