@@ -53,6 +53,7 @@ func init() {
 	UseBlake2b256.Prefix.MhLength = -1
 }
 
+// GetNode creates new DAG node from data
 func GetNode(t testing.TB, dserv mdag.DAGService, prov providers.Interface, data []byte, opts NodeOpts) node.Node {
 	in := bytes.NewReader(data)
 
@@ -72,10 +73,12 @@ func GetNode(t testing.TB, dserv mdag.DAGService, prov providers.Interface, data
 	return node
 }
 
+// GetEmptyNode creates new node with no data
 func GetEmptyNode(t testing.TB, dserv mdag.DAGService, prov providers.Interface, opts NodeOpts) node.Node {
 	return GetNode(t, dserv, prov, []byte{}, opts)
 }
 
+// GetRandomNode creates new node with random data
 func GetRandomNode(t testing.TB, dserv mdag.DAGService, prov providers.Interface, size int64, opts NodeOpts) ([]byte, node.Node) {
 	in := io.LimitReader(u.NewTimeSeededRand(), size)
 	buf, err := ioutil.ReadAll(in)

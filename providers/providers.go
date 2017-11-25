@@ -15,7 +15,9 @@ import (
 
 var (
 	provideKeysBufferSize = 2048
-	HasBlockBufferSize    = 256
+	// HasBlockBufferSize is the maximum numbers of CIDs that will get buffered
+	// for providing
+	HasBlockBufferSize = 256
 
 	provideWorkerMax = 512
 	provideTimeout   = time.Second * 15
@@ -49,6 +51,8 @@ func init() {
 	}
 }
 
+// NewProviders returns providers interface implementation based on
+// libp2p routing
 func NewProviders(parent context.Context, routing routing.ContentRouting) Interface {
 	ctx, cancelFunc := context.WithCancel(parent)
 
@@ -64,7 +68,7 @@ func NewProviders(parent context.Context, routing routing.ContentRouting) Interf
 		provideKeys: make(chan *cid.Cid, provideKeysBufferSize),
 	}
 
-	p.startWorkers(px, ctx)
+	p.startWorkers(ctx, px)
 	// bind the context and process.
 	// do it over here to avoid closing before all setup is done.
 	go func() {

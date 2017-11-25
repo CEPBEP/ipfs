@@ -42,6 +42,7 @@ type Directory struct {
 	name string
 }
 
+// NewDirectory creates new directory instance
 func NewDirectory(ctx context.Context, name string, node node.Node, parent childCloser, dserv dag.DAGService, prov providers.Interface) (*Directory, error) {
 	db, err := uio.NewDirectoryFromNode(dserv, prov, node)
 	if err != nil {

@@ -9,7 +9,7 @@ import (
 	logging "gx/ipfs/QmSpJByNKFX1sCsHBEp3R73FL4NF6FnQTEGyNAXHm2GS52/go-log"
 )
 
-func (p *providers) startWorkers(px process.Process, ctx context.Context) {
+func (p *providers) startWorkers(ctx context.Context, px process.Process) {
 	// Start up a worker to manage sending out provides messages
 	px.Go(func(px process.Process) {
 		p.provideCollector(ctx)

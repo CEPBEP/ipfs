@@ -74,6 +74,7 @@ type AddedObject struct {
 	Size  string `json:",omitempty"`
 }
 
+// NewAdder constructs new adder with default settings
 func NewAdder(ctx context.Context, p pin.Pinner, bs bstore.GCBlockstore, ds dag.DAGService, pr providers.Interface) (*Adder, error) {
 	return &Adder{
 		ctx:        ctx,
