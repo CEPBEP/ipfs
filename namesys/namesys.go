@@ -68,12 +68,12 @@ func (ns *mpns) resolveOnce(ctx context.Context, name string) (path.Path, error)
 	}
 	segments := strings.SplitN(name, "/", 4)
 	if len(segments) < 3 || segments[0] != "" {
-		log.Warningf("Invalid name syntax for %s", name)
+		log.Debugf("invalid name syntax for %s", name)
 		return "", ErrResolveFailed
 	}
 
 	for protocol, resolver := range ns.resolvers {
-		log.Debugf("Attempting to resolve %s with %s", segments[2], protocol)
+		log.Debugf("attempting to resolve %s with %s", segments[2], protocol)
 		p, err := resolver.resolveOnce(ctx, segments[2])
 		if err == nil {
 			if len(segments) > 3 {
@@ -83,7 +83,7 @@ func (ns *mpns) resolveOnce(ctx context.Context, name string) (path.Path, error)
 			}
 		}
 	}
-	log.Warningf("No resolver found for %s", name)
+	log.Debugf("no resolver found for %s", name)
 	return "", ErrResolveFailed
 }
 
