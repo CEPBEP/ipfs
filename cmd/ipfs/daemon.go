@@ -527,6 +527,7 @@ func serveHTTPGateway(req *cmds.Request, cctx *oldcmds.Context) (error, <-chan e
 		corehttp.VersionOption(),
 		corehttp.IPNSHostnameOption(),
 		corehttp.GatewayOption(writable, "/ipfs", "/ipns"),
+		corehttp.CheckVersionOption(),
 	}
 
 	if len(cfg.Gateway.RootRedirect) > 0 {
