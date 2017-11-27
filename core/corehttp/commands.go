@@ -1,6 +1,8 @@
 package corehttp
 
 import (
+	"errors"
+	"fmt"
 	"net"
 	"net/http"
 	"os"
@@ -13,6 +15,10 @@ import (
 
 	cmds "gx/ipfs/QmamUWYjFeYYzFDFPTvnmGkozJigsoDWUA4zoifTRFTnwK/go-ipfs-cmds"
 	cmdsHttp "gx/ipfs/QmamUWYjFeYYzFDFPTvnmGkozJigsoDWUA4zoifTRFTnwK/go-ipfs-cmds/http"
+)
+
+var (
+	errApiVersionMismatch = errors.New("api version mismatch")
 )
 
 const originEnvKey = "API_ORIGIN"
@@ -127,4 +133,24 @@ func CommandsOption(cctx cmds.Context) ServeOption {
 
 func CommandsROOption(cctx cmds.Context) ServeOption {
 	return commandsOption(cctx, corecommands.RootRO)
+}
+
+func CheckVersionOption() ServeOption {
+	daemonVersion := config.ApiVersion
+
+	return ServeOption(func(n *core.IpfsNode, l net.Listener, next *http.ServeMux) (*http.ServeMux, error) {
+		mux := http.NewServeMux()
+		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			clientVersion := r.UserAgent()
+			// skips check if client is not go-ipfs
+			if clientVersion != "" && strings.Contains(clientVersion, "/go-ipfs/") && daemonVersion != clientVersion {
+				http.Error(w, fmt.Sprintf("%s (%s != %s)", errApiVersionMismatch, daemonVersion, clientVersion), http.StatusBadRequest)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+
+		return mux, nil
+	})
 }
