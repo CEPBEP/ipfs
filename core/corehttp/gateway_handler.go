@@ -614,10 +614,12 @@ func webErrorWithCode(w http.ResponseWriter, message string, err error, code int
 	w.WriteHeader(code)
 
 	fmt.Fprintf(w, "%s: %s\n", message, err)
+	if code >= 500 {
+		log.Infof("server error: %s: %s", err)
+	}
 }
 
 // return a 500 error and log
 func internalWebError(w http.ResponseWriter, err error) {
 	webErrorWithCode(w, "internalWebError", err, http.StatusInternalServerError)
-	log.Infof("internal server error: %s", err)
 }
