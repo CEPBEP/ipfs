@@ -53,6 +53,7 @@ func NewDirectory(dserv mdag.DAGService, prov providers.Interface) *Directory {
 // ErrNotADir implies that the given node was not a unixfs directory
 var ErrNotADir = fmt.Errorf("merkledag node was not a directory or shard")
 
+// NewDirectoryFromNode constructs a directory from a directory node
 func NewDirectoryFromNode(dserv mdag.DAGService, prov providers.Interface, nd node.Node) (*Directory, error) {
 	pbnd, ok := nd.(*mdag.ProtoNode)
 	if !ok {
