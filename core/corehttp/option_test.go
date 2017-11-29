@@ -12,6 +12,7 @@ import (
 
 type testcasecheckversion struct {
 	userAgent    string
+	uri          string
 	shouldHandle bool
 	responseBody string
 	responseCode int
@@ -27,25 +28,29 @@ func (tc testcasecheckversion) body() string {
 
 func TestCheckVersionOption(t *testing.T) {
 	tcs := []testcasecheckversion{
-		{"/go-ipfs/0.1/", false, "", http.StatusBadRequest},
-		{config.ApiVersion, true, "all tests pass", http.StatusOK},
-		{"Mozilla Firefox/no go ipfs note", true, "all tests pass", http.StatusOK},
+		{"/go-ipfs/0.1/", "/test/", false, "", http.StatusBadRequest},
+		{"/go-ipfs/0.1/", "/version", true, "all tests pass", http.StatusOK},
+		{config.ApiVersion, "/test", true, "all tests pass", http.StatusOK},
+		{"Mozilla Firefox/no go-ipfs node", "/test", true, "all tests pass", http.StatusOK},
 	}
 
 	for _, tc := range tcs {
-		r := httptest.NewRequest("POST", "/test", nil)
+		t.Logf("%#v", tc)
+		r := httptest.NewRequest("POST", tc.uri, nil)
 		r.Header.Add("User-Agent", tc.userAgent) // old version, should fail
 
 		called := false
 		inner := http.NewServeMux()
-		inner.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
+		hfunc := func(w http.ResponseWriter, r *http.Request) {
 			called = true
 			if !tc.shouldHandle {
 				t.Error("handler was called even though version didn't match")
 			} else {
 				io.WriteString(w, "all tests pass")
 			}
-		})
+		}
+		inner.HandleFunc("/version", hfunc)
+		inner.HandleFunc("/test", hfunc)
 
 		mux, err := CheckVersionOption()(nil, nil, inner)
 		if err != nil {
@@ -57,7 +62,7 @@ func TestCheckVersionOption(t *testing.T) {
 		mux.ServeHTTP(w, r)
 
 		if tc.shouldHandle && !called {
-			t.Error("handler wasn't called even though version matched")
+			t.Error("handler wasn't called even though it should have")
 		}
 
 		if w.Code != tc.responseCode {
