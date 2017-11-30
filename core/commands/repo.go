@@ -17,9 +17,9 @@ import (
 	fsrepo "github.com/ipfs/go-ipfs/repo/fsrepo"
 	lockfile "github.com/ipfs/go-ipfs/repo/fsrepo/lock"
 
+	lgc "github.com/ipfs/go-ipfs/commands/legacy"
 	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
 	cmds "gx/ipfs/QmTwKPLyeRKuDawuy6CAn1kRj1FVoqBEM8sviAUWN7NW9K/go-ipfs-cmds"
-	lgc "github.com/ipfs/go-ipfs/commands/legacy"
 	cmdkit "gx/ipfs/QmVD1W3MC8Hk1WZgFQPWWmBECJ3X72BgUYf9eCQ4PGzPps/go-ipfs-cmdkit"
 )
 
