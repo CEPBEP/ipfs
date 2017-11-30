@@ -9,12 +9,14 @@ import (
 	mockrouting "github.com/ipfs/go-ipfs/routing/mock"
 	delay "github.com/ipfs/go-ipfs/thirdparty/delay"
 
-	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
 	routing "gx/ipfs/QmPR2JzfKd9poHx9XBhzoFeBBC31ZM3W5iUPKJZWyaoZZm/go-libp2p-routing"
 	testutil "gx/ipfs/QmQgLZP9haZheimMHqqAjJh2LhRmNfEoZDfbtkpeMhi9xK/go-testutil"
 	logging "gx/ipfs/QmSpJByNKFX1sCsHBEp3R73FL4NF6FnQTEGyNAXHm2GS52/go-log"
 	ifconnmgr "gx/ipfs/QmWfkNorhirGE1Qp3VwBWcnGaj4adv4hNqCYwabMrEYc21/go-libp2p-interface-connmgr"
 	peer "gx/ipfs/QmXYjuNuxVzXKJCfWasQk1RqkhVLDM9jtUKhqc2WPQmFSB/go-libp2p-peer"
+
+	"github.com/ipfs/go-ipfs/exchange/offline"
+	"github.com/ipfs/go-ipfs/providers"
 )
 
 var log = logging.Logger("bstestnet")
@@ -48,6 +50,10 @@ func (n *network) Adapter(p testutil.Identity) bsnet.BitSwapNetwork {
 func (n *network) HasPeer(p peer.ID) bool {
 	_, found := n.clients[p]
 	return found
+}
+
+func (n *network) Providers() providers.Interface {
+	return offline.Providers() //TODO: probably need to pass regular/mock providers here
 }
 
 // TODO should this be completely asynchronous?
@@ -97,28 +103,6 @@ func (nc *networkClient) SendMessage(
 	return nc.network.SendMessage(ctx, nc.local, to, message)
 }
 
-// FindProvidersAsync returns a channel of providers for the given key
-func (nc *networkClient) FindProvidersAsync(ctx context.Context, k *cid.Cid, max int) <-chan peer.ID {
-
-	// NB: this function duplicates the PeerInfo -> ID transformation in the
-	// bitswap network adapter. Not to worry. This network client will be
-	// deprecated once the ipfsnet.Mock is added. The code below is only
-	// temporary.
-
-	out := make(chan peer.ID)
-	go func() {
-		defer close(out)
-		providers := nc.routing.FindProvidersAsync(ctx, k, max)
-		for info := range providers {
-			select {
-			case <-ctx.Done():
-			case out <- info.ID:
-			}
-		}
-	}()
-	return out
-}
-
 func (nc *networkClient) ConnectionManager() ifconnmgr.ConnManager {
 	return &ifconnmgr.NullConnMgr{}
 }
@@ -149,11 +133,6 @@ func (n *networkClient) NewMessageSender(ctx context.Context, p peer.ID) (bsnet.
 		local:  n.local,
 		ctx:    ctx,
 	}, nil
-}
-
-// Provide provides the key to the network
-func (nc *networkClient) Provide(ctx context.Context, k *cid.Cid) error {
-	return nc.routing.Provide(ctx, k, true)
 }
 
 func (nc *networkClient) SetDelegate(r bsnet.Receiver) {

@@ -25,18 +25,13 @@ import (
 	blocks "gx/ipfs/QmSn9Td7xgxm9EV7iEjTckpUWmWApggzPxu7eFGWkkpwin/go-block-format"
 	logging "gx/ipfs/QmSpJByNKFX1sCsHBEp3R73FL4NF6FnQTEGyNAXHm2GS52/go-log"
 	peer "gx/ipfs/QmXYjuNuxVzXKJCfWasQk1RqkhVLDM9jtUKhqc2WPQmFSB/go-libp2p-peer"
+
+	"github.com/ipfs/go-ipfs/providers"
 )
 
 var log = logging.Logger("bitswap")
 
 const (
-	// maxProvidersPerRequest specifies the maximum number of providers desired
-	// from the network. This value is specified because the network streams
-	// results.
-	// TODO: if a 'non-nice' strategy is implemented, consider increasing this value
-	maxProvidersPerRequest = 3
-	providerRequestTimeout = time.Second * 10
-	sizeBatchRequestChan   = 32
 	// kMaxPriority is the max priority as defined by the bitswap protocol
 	kMaxPriority = math.MaxInt32
 )
@@ -53,7 +48,7 @@ var rebroadcastDelay = delay.Fixed(time.Minute)
 // delegate.
 // Runs until context is cancelled.
 func New(parent context.Context, p peer.ID, network bsnet.BitSwapNetwork,
-	bstore blockstore.Blockstore, nice bool) exchange.Interface {
+	bstore blockstore.Blockstore, providers providers.Interface, nice bool) exchange.Interface {
 
 	// important to use provided parent context (since it may include important
 	// loggable data). It's probably not a good idea to allow bitswap to be
@@ -77,10 +72,10 @@ func New(parent context.Context, p peer.ID, network bsnet.BitSwapNetwork,
 
 	bs := &Bitswap{
 		blockstore:    bstore,
+		providers:     providers,
 		notifications: notif,
 		engine:        decision.NewEngine(ctx, bstore), // TODO close the engine with Close() method
 		network:       network,
-		findKeys:      make(chan *blockRequest, sizeBatchRequestChan),
 		process:       px,
 		wm:            NewWantManager(ctx, network),
 		counters:      new(counters),
@@ -121,12 +116,12 @@ type Bitswap struct {
 	// NB: ensure threadsafety
 	blockstore blockstore.Blockstore
 
+	// providers implement content routing logic
+	providers providers.Interface
+
 	// notifications engine for receiving new blocks and routing them to the
 	// appropriate user requests
 	notifications notifications.PubSub
-
-	// findKeys sends keys to a worker to find and connect to providers for them
-	findKeys chan *blockRequest
 
 	process process.Process
 
@@ -154,11 +149,6 @@ type counters struct {
 	dataSent       uint64
 	dataRecvd      uint64
 	messagesRecvd  uint64
-}
-
-type blockRequest struct {
-	Cid *cid.Cid
-	Ctx context.Context
 }
 
 // GetBlock attempts to retrieve a particular block from peers within the
@@ -208,14 +198,6 @@ func (bs *Bitswap) GetBlocks(ctx context.Context, keys []*cid.Cid) (<-chan block
 
 	bs.wm.WantBlocks(ctx, keys, nil, mses)
 
-	// NB: Optimization. Assumes that providers of key[0] are likely to
-	// be able to provide for all keys. This currently holds true in most
-	// every situation. Later, this assumption may not hold as true.
-	req := &blockRequest{
-		Cid: keys[0],
-		Ctx: ctx,
-	}
-
 	remaining := cid.NewSet()
 	for _, k := range keys {
 		remaining.Add(k)
@@ -250,12 +232,13 @@ func (bs *Bitswap) GetBlocks(ctx context.Context, keys []*cid.Cid) (<-chan block
 		}
 	}()
 
-	select {
-	case bs.findKeys <- req:
-		return out, nil
-	case <-ctx.Done():
-		return nil, ctx.Err()
+	// NB: Optimization. Assumes that providers of key[0] are likely to
+	// be able to provide for all keys. This currently holds true in most
+	// every situation. Later, this assumption may not hold as true.
+	if err := bs.providers.FindProviders(ctx, keys[0]); err != nil {
+		return nil, err
 	}
+	return out, nil
 }
 
 func (bs *Bitswap) getNextSessionID() uint64 {
@@ -367,7 +350,7 @@ func (bs *Bitswap) ReceiveMessage(ctx context.Context, p peer.ID, incoming bsmsg
 			if err := bs.receiveBlockFrom(b, p); err != nil {
 				log.Warningf("ReceiveMessage recvBlockFrom error: %s", err)
 			}
-			if err := bs.network.Provide(ctx, b.Cid()); err != nil {
+			if err := bs.providers.Provide(b.Cid()); err != nil {
 				log.Warningf("ReceiveMessage Provide error: %s", err)
 			}
 			log.Event(ctx, "Bitswap.GetBlockRequest.End", b.Cid())

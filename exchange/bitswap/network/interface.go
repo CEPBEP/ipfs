@@ -5,7 +5,6 @@ import (
 
 	bsmsg "github.com/ipfs/go-ipfs/exchange/bitswap/message"
 
-	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
 	ifconnmgr "gx/ipfs/QmWfkNorhirGE1Qp3VwBWcnGaj4adv4hNqCYwabMrEYc21/go-libp2p-interface-connmgr"
 	peer "gx/ipfs/QmXYjuNuxVzXKJCfWasQk1RqkhVLDM9jtUKhqc2WPQmFSB/go-libp2p-peer"
 	protocol "gx/ipfs/QmZNkThpqfVXs9GNbexPrfBbXSLNYeKrE7jwFM2oqHbyqN/go-libp2p-protocol"
@@ -37,8 +36,6 @@ type BitSwapNetwork interface {
 	NewMessageSender(context.Context, peer.ID) (MessageSender, error)
 
 	ConnectionManager() ifconnmgr.ConnManager
-
-	Routing
 }
 
 type MessageSender interface {
@@ -59,12 +56,4 @@ type Receiver interface {
 	// Connected/Disconnected warns bitswap about peer connections
 	PeerConnected(peer.ID)
 	PeerDisconnected(peer.ID)
-}
-
-type Routing interface {
-	// FindProvidersAsync returns a channel of providers for the given key
-	FindProvidersAsync(context.Context, *cid.Cid, int) <-chan peer.ID
-
-	// Provide provides the key to the network
-	Provide(context.Context, *cid.Cid) error
 }
