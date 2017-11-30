@@ -1,10 +1,11 @@
 package commands
 
 import (
+	"context"
 	"testing"
 
-	"gx/ipfs/QmUyfy4QSr3NXym4etEiRyxBLqqAeKHJuRdi8AACxg63fZ/go-ipfs-cmdkit"
-	"gx/ipfs/QmamUWYjFeYYzFDFPTvnmGkozJigsoDWUA4zoifTRFTnwK/go-ipfs-cmds"
+	cmds "gx/ipfs/QmTwKPLyeRKuDawuy6CAn1kRj1FVoqBEM8sviAUWN7NW9K/go-ipfs-cmds"
+	cmdkit "gx/ipfs/QmVD1W3MC8Hk1WZgFQPWWmBECJ3X72BgUYf9eCQ4PGzPps/go-ipfs-cmdkit"
 )
 
 func TestGetOutputPath(t *testing.T) {
@@ -44,13 +45,15 @@ func TestGetOutputPath(t *testing.T) {
 		},
 	}
 
-	defOpts, err := GetCmd.GetOptions([]string{})
-	if err != nil {
-		t.Fatalf("error getting default command options: %v", err)
-	}
+	/*
+		defOpts, err := GetCmd.GetOptions([]string{})
+		if err != nil {
+			t.Fatalf("error getting default command options: %v", err)
+		}
+	*/
 
 	for _, tc := range cases {
-		req, err := cmds.NewRequest([]string{}, tc.opts, tc.args, nil, GetCmd, defOpts)
+		req, err := cmds.NewRequest(context.TODO(), []string{}, tc.opts, tc.args, nil, GetCmd)
 		if err != nil {
 			t.Fatalf("error creating a command request: %v", err)
 		}

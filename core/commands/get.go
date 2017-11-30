@@ -16,8 +16,8 @@ import (
 	tar "github.com/ipfs/go-ipfs/thirdparty/tar"
 	uarchive "github.com/ipfs/go-ipfs/unixfs/archive"
 
-	"gx/ipfs/QmVyK9pkXc5aPCtfxyvRTLrieon1CD31QmcmUxozBc32bh/go-ipfs-cmdkit"
-	"gx/ipfs/QmbiDinMY27VPE3hoJJuK7A6C1epPz4cy7vmR9d4FmpzMK/go-ipfs-cmds"
+	"gx/ipfs/QmTwKPLyeRKuDawuy6CAn1kRj1FVoqBEM8sviAUWN7NW9K/go-ipfs-cmds"
+	"gx/ipfs/QmVD1W3MC8Hk1WZgFQPWWmBECJ3X72BgUYf9eCQ4PGzPps/go-ipfs-cmdkit"
 	"gx/ipfs/QmeWjRodbcZFKe5tMN7poEx3izym6osrLSnTLf9UjJZBbs/pb"
 )
 
@@ -188,10 +188,10 @@ func makeProgressBar(out io.Writer, l int64) *pb.ProgressBar {
 	return bar
 }
 
-func getOutPath(req cmds.Request) string {
-	outPath, _, _ := req.Option("output").String()
+func getOutPath(req *cmds.Request) string {
+	outPath, _ := req.Options["output"].(string)
 	if outPath == "" {
-		trimmed := strings.TrimRight(req.Arguments()[0], "/")
+		trimmed := strings.TrimRight(req.Arguments[0], "/")
 		_, outPath = gopath.Split(trimmed)
 		outPath = gopath.Clean(outPath)
 	}

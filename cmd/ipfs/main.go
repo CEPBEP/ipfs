@@ -29,13 +29,13 @@ import (
 	u "gx/ipfs/QmSU6eubNdhXjFBJBSksTp8kv8YRub8mGAPv8tVJHmL2EU/go-ipfs-util"
 	logging "gx/ipfs/QmSpJByNKFX1sCsHBEp3R73FL4NF6FnQTEGyNAXHm2GS52/go-log"
 	loggables "gx/ipfs/QmT4PgCNdv73hnFAqzHqwW44q7M9PWpykSswHDxndquZbc/go-libp2p-loggables"
-	"gx/ipfs/QmVyK9pkXc5aPCtfxyvRTLrieon1CD31QmcmUxozBc32bh/go-ipfs-cmdkit"
+	"gx/ipfs/QmTwKPLyeRKuDawuy6CAn1kRj1FVoqBEM8sviAUWN7NW9K/go-ipfs-cmds"
+	"gx/ipfs/QmTwKPLyeRKuDawuy6CAn1kRj1FVoqBEM8sviAUWN7NW9K/go-ipfs-cmds/cli"
+	"gx/ipfs/QmTwKPLyeRKuDawuy6CAn1kRj1FVoqBEM8sviAUWN7NW9K/go-ipfs-cmds/http"
+	"gx/ipfs/QmVD1W3MC8Hk1WZgFQPWWmBECJ3X72BgUYf9eCQ4PGzPps/go-ipfs-cmdkit"
 	manet "gx/ipfs/QmX3U3YXCQ6UYBxq2LVWF8dARS1hPUTEYLrSx654Qyxyw6/go-multiaddr-net"
 	ma "gx/ipfs/QmXY77cVe7rVRQXZZQRioukUM7aRW3BTcAgJe12MCtb3Ji/go-multiaddr"
 	osh "gx/ipfs/QmXuBJ7DR6k3rmUEKtvVMhwjmXDuJgXXPUt4LQXKBMsU93/go-os-helper"
-	"gx/ipfs/QmbiDinMY27VPE3hoJJuK7A6C1epPz4cy7vmR9d4FmpzMK/go-ipfs-cmds"
-	"gx/ipfs/QmbiDinMY27VPE3hoJJuK7A6C1epPz4cy7vmR9d4FmpzMK/go-ipfs-cmds/cli"
-	"gx/ipfs/QmbiDinMY27VPE3hoJJuK7A6C1epPz4cy7vmR9d4FmpzMK/go-ipfs-cmds/http"
 )
 
 // log is the command logger
@@ -269,11 +269,11 @@ func (i *cmdInvocation) Parse(ctx context.Context, args []string) error {
 
 	// if no encoding was specified by user, default to plaintext encoding
 	// (if command doesn't support plaintext, use JSON instead)
-	if enc := i.req.Options[cmdkit.EncShort]; enc == "" {
+	if enc := i.req.Options[cmds.EncShort]; enc == "" {
 		if i.req.Command.Encoders != nil && i.req.Command.Encoders[cmds.Text] != nil {
-			i.req.SetOption(cmdkit.EncShort, cmds.Text)
+			i.req.SetOption(cmds.EncShort, cmds.Text)
 		} else {
-			i.req.SetOption(cmdkit.EncShort, cmds.JSON)
+			i.req.SetOption(cmds.EncShort, cmds.JSON)
 		}
 	}
 
@@ -313,7 +313,7 @@ func callCommand(ctx context.Context, req *cmds.Request, root *cmds.Command, cct
 		return err
 	}
 
-	encTypeStr, _ := req.Options[cmdkit.EncShort].(string)
+	encTypeStr, _ := req.Options[cmds.EncShort].(string)
 	encType := cmds.EncodingType(encTypeStr)
 
 	var (

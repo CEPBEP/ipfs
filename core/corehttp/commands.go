@@ -12,8 +12,8 @@ import (
 	corecommands "github.com/ipfs/go-ipfs/core/commands"
 	config "github.com/ipfs/go-ipfs/repo/config"
 
-	cmds "gx/ipfs/QmbiDinMY27VPE3hoJJuK7A6C1epPz4cy7vmR9d4FmpzMK/go-ipfs-cmds"
-	cmdsHttp "gx/ipfs/QmbiDinMY27VPE3hoJJuK7A6C1epPz4cy7vmR9d4FmpzMK/go-ipfs-cmds/http"
+	cmds "gx/ipfs/QmTwKPLyeRKuDawuy6CAn1kRj1FVoqBEM8sviAUWN7NW9K/go-ipfs-cmds"
+	cmdsHttp "gx/ipfs/QmTwKPLyeRKuDawuy6CAn1kRj1FVoqBEM8sviAUWN7NW9K/go-ipfs-cmds/http"
 )
 
 const originEnvKey = "API_ORIGIN"
@@ -29,6 +29,8 @@ or
 
 	ipfs daemon --api-http-header 'Access-Control-Allow-Origin: *'
 `
+
+const APIPath = "/api/v0"
 
 var defaultLocalhostOrigins = []string{
 	"http://127.0.0.1:<port>",
@@ -117,7 +119,7 @@ func commandsOption(cctx oldcmds.Context, command *cmds.Command) ServeOption {
 		patchCORSVars(cfg, l.Addr())
 
 		cmdHandler := cmdsHttp.NewHandler(&cctx, command, cfg)
-		mux.Handle(cmdsHttp.ApiPath+"/", cmdHandler)
+		mux.Handle(APIPath, cmdHandler)
 		return mux, nil
 	}
 }
