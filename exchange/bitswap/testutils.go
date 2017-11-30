@@ -19,8 +19,7 @@ import (
 )
 
 // WARNING: this uses RandTestBogusIdentity DO NOT USE for NON TESTS!
-func NewTestSessionGenerator(
-	net tn.Network) SessionGenerator {
+func NewTestSessionGenerator(net tn.Network) SessionGenerator {
 	ctx, cancel := context.WithCancel(context.Background())
 	return SessionGenerator{
 		net:    net,
@@ -49,7 +48,7 @@ func (g *SessionGenerator) Next() Instance {
 	if err != nil {
 		panic("FIXME") // TODO change signature
 	}
-	return MkSession(g.ctx, g.net, p)
+	return MkSession(g.ctx, g.net, p, g.net.Providers())
 }
 
 func (g *SessionGenerator) Instances(n int) []Instance {
@@ -89,7 +88,7 @@ func (i *Instance) SetBlockstoreLatency(t time.Duration) time.Duration {
 // NB: It's easy make mistakes by providing the same peer ID to two different
 // sessions. To safeguard, use the SessionGenerator to generate sessions. It's
 // just a much better idea.
-func MkSession(ctx context.Context, net tn.Network, p testutil.Identity) Instance {
+func MkSession(ctx context.Context, net tn.Network, p testutil.Identity, provs providers.Interface) Instance {
 	bsdelay := delay.Fixed(0)
 
 	adapter := net.Adapter(p)
@@ -104,7 +103,7 @@ func MkSession(ctx context.Context, net tn.Network, p testutil.Identity) Instanc
 
 	const alwaysSendToPeer = true
 
-	bs := New(ctx, p.ID(), adapter, bstore, alwaysSendToPeer).(*Bitswap)
+	bs := New(ctx, p.ID(), adapter, bstore, provs, alwaysSendToPeer).(*Bitswap)
 
 	return Instance{
 		Peer:            p.ID(),

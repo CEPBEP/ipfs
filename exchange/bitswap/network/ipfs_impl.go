@@ -7,7 +7,6 @@ import (
 	"time"
 
 	bsmsg "github.com/ipfs/go-ipfs/exchange/bitswap/message"
-	provider "github.com/ipfs/go-ipfs/providers"
 
 	host "gx/ipfs/QmP46LGWhzVZTMmt5akNNLfoV8qL4h5wTwmzQxLyDafggd/go-libp2p-host"
 	routing "gx/ipfs/QmPCGUjMRuBcPybZFpjhzpifwPP9wPRoiy5geTQKU4vqWA/go-libp2p-routing"
@@ -18,7 +17,6 @@ import (
 	peer "gx/ipfs/QmWNY7dV54ZDYmTA1ykVdwNCqC11mpU4zSUp6XDpLTH9eG/go-libp2p-peer"
 	pstore "gx/ipfs/QmYijbtjCxFEjSXaudaQAUz3LN5VKLssm8WCUsRoqzXmQR/go-libp2p-peerstore"
 	ggio "gx/ipfs/QmZ4Qi3GaRbjcx28Sme5eMH7RQjGkt8wHxt2a65oLaeFEV/gogo-protobuf/io"
-	cid "gx/ipfs/QmeSrf6pzut73u6zLQkRFQ3ygt3k6XFT2kjdYP8Tnkwwyg/go-cid"
 )
 
 var log = logging.Logger("bitswap_network")
@@ -26,11 +24,10 @@ var log = logging.Logger("bitswap_network")
 var sendMessageTimeout = time.Minute * 10
 
 // NewFromIpfsHost returns a BitSwapNetwork supported by underlying IPFS host
-func NewFromIpfsHost(host host.Host, r routing.ContentRouting, p provider.Interface) BitSwapNetwork {
+func NewFromIpfsHost(host host.Host, r routing.ContentRouting) BitSwapNetwork {
 	bitswapNetwork := impl{
-		host:     host,
-		routing:  r,
-		provider: p,
+		host:    host,
+		routing: r,
 	}
 	host.SetStreamHandler(ProtocolBitswap, bitswapNetwork.handleNewStream)
 	host.SetStreamHandler(ProtocolBitswapOne, bitswapNetwork.handleNewStream)
@@ -44,9 +41,8 @@ func NewFromIpfsHost(host host.Host, r routing.ContentRouting, p provider.Interf
 // impl transforms the ipfs network interface, which sends and receives
 // NetMessage objects, into the bitswap network interface.
 type impl struct {
-	host     host.Host
-	routing  routing.ContentRouting
-	provider provider.Interface
+	host    host.Host
+	routing routing.ContentRouting
 
 	// inbound messages from the network are forwarded to the receiver
 	receiver Receiver
@@ -137,48 +133,6 @@ func (bsnet *impl) SetDelegate(r Receiver) {
 
 func (bsnet *impl) ConnectTo(ctx context.Context, p peer.ID) error {
 	return bsnet.host.Connect(ctx, pstore.PeerInfo{ID: p})
-}
-
-// FindProvidersAsync returns a channel of providers for the given key
-// TODO: move this and other FindProvider stuff out to exch.provider
-func (bsnet *impl) FindProvidersAsync(ctx context.Context, k *cid.Cid, max int) <-chan peer.ID {
-
-	// Since routing queries are expensive, give bitswap the peers to which we
-	// have open connections. Note that this may cause issues if bitswap starts
-	// precisely tracking which peers provide certain keys. This optimization
-	// would be misleading. In the long run, this may not be the most
-	// appropriate place for this optimization, but it won't cause any harm in
-	// the short term.
-	connectedPeers := bsnet.host.Network().Peers()
-	out := make(chan peer.ID, len(connectedPeers)) // just enough buffer for these connectedPeers
-	for _, id := range connectedPeers {
-		if id == bsnet.host.ID() {
-			continue // ignore self as provider
-		}
-		out <- id
-	}
-
-	go func() {
-		defer close(out)
-		providers := bsnet.routing.FindProvidersAsync(ctx, k, max)
-		for info := range providers {
-			if info.ID == bsnet.host.ID() {
-				continue // ignore self as provider
-			}
-			bsnet.host.Peerstore().AddAddrs(info.ID, info.Addrs, pstore.TempAddrTTL)
-			select {
-			case <-ctx.Done():
-				return
-			case out <- info.ID:
-			}
-		}
-	}()
-	return out
-}
-
-// Provide provides the key to the network
-func (bsnet *impl) Provide(ctx context.Context, k *cid.Cid) error {
-	return bsnet.provider.Provide(k)
 }
 
 // handleNewStream receives a new stream from the network.

@@ -2,10 +2,13 @@ package providers
 
 import (
 	"context"
+	"sync"
 
 	process "gx/ipfs/QmSF8fPo3jgVBAy8fpdjjYqgG87dkJgUprRBHRd2tmfgpP/goprocess"
 	procctx "gx/ipfs/QmSF8fPo3jgVBAy8fpdjjYqgG87dkJgUprRBHRd2tmfgpP/goprocess/context"
 	logging "gx/ipfs/QmSpJByNKFX1sCsHBEp3R73FL4NF6FnQTEGyNAXHm2GS52/go-log"
+	peer "gx/ipfs/QmWNY7dV54ZDYmTA1ykVdwNCqC11mpU4zSUp6XDpLTH9eG/go-libp2p-peer"
+	pstore "gx/ipfs/QmYijbtjCxFEjSXaudaQAUz3LN5VKLssm8WCUsRoqzXmQR/go-libp2p-peerstore"
 	cid "gx/ipfs/QmeSrf6pzut73u6zLQkRFQ3ygt3k6XFT2kjdYP8Tnkwwyg/go-cid"
 )
 
@@ -94,6 +97,54 @@ func (p *providers) provideCollector(ctx context.Context) {
 			} else {
 				keysOut = nil
 			}
+		case <-ctx.Done():
+			return
+		}
+	}
+}
+
+func (p *providers) providerQueryManager(ctx context.Context) {
+	var activeLk sync.Mutex
+	kset := cid.NewSet()
+
+	for {
+		select {
+		case e := <-p.findKeys:
+			select { // make sure its not already cancelled
+			case <-e.Ctx.Done():
+				continue
+			default:
+			}
+
+			activeLk.Lock()
+			if kset.Has(e.Cid) {
+				activeLk.Unlock()
+				continue
+			}
+			kset.Add(e.Cid)
+			activeLk.Unlock()
+
+			go func(e *blockRequest) {
+				child, cancel := context.WithTimeout(e.Ctx, providerRequestTimeout)
+				defer cancel()
+				providers := p.FindProvidersAsync(child, e.Cid, maxProvidersPerRequest)
+				wg := &sync.WaitGroup{}
+				for pr := range providers {
+					wg.Add(1)
+					go func(pi peer.ID) {
+						defer wg.Done()
+						err := p.host.Connect(ctx, pstore.PeerInfo{ID: pi})
+						if err != nil {
+							log.Debug("failed to connect to provider %s: %s", p, err)
+						}
+					}(pr)
+				}
+				wg.Wait()
+				activeLk.Lock()
+				kset.Remove(e.Cid)
+				activeLk.Unlock()
+			}(e)
+
 		case <-ctx.Done():
 			return
 		}
