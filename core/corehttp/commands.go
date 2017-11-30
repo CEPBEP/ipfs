@@ -146,9 +146,8 @@ func CheckVersionOption() ServeOption {
 
 	return ServeOption(func(n *core.IpfsNode, l net.Listener, next *http.ServeMux) (*http.ServeMux, error) {
 		mux := http.NewServeMux()
-		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			pth := path.SplitList(r.URL.Path)
-
+		mux.HandleFunc(APIPath+"/", func(w http.ResponseWriter, r *http.Request) {
+			pth := path.SplitList(r.URL.Path[len(APIPath):])
 			// backwards compatibility to previous version check
 			if pth[1] != "version" {
 				clientVersion := r.UserAgent()
@@ -161,6 +160,7 @@ func CheckVersionOption() ServeOption {
 
 			next.ServeHTTP(w, r)
 		})
+		mux.HandleFunc("/", next.ServeHTTP)
 
 		return mux, nil
 	})
