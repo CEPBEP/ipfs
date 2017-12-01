@@ -11,6 +11,7 @@ import (
 
 	bstore "github.com/ipfs/go-ipfs/blocks/blockstore"
 	oldcmds "github.com/ipfs/go-ipfs/commands"
+	core "github.com/ipfs/go-ipfs/core"
 	e "github.com/ipfs/go-ipfs/core/commands/e"
 	corerepo "github.com/ipfs/go-ipfs/core/corerepo"
 	config "github.com/ipfs/go-ipfs/repo/config"
@@ -18,7 +19,9 @@ import (
 	lockfile "github.com/ipfs/go-ipfs/repo/fsrepo/lock"
 
 	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
+	b58 "gx/ipfs/QmT8rehPR3F6bmwL6zjUN8XpiDBFFpMP2myPdC6ApsWfJf/go-base58"
 	cmdkit "gx/ipfs/QmUyfy4QSr3NXym4etEiRyxBLqqAeKHJuRdi8AACxg63fZ/go-ipfs-cmdkit"
+	ds "gx/ipfs/QmVSase1JP7cq9QkPT46oNwdp9pT6kBkG3oqS14y3QcZjG/go-datastore"
 	cmds "gx/ipfs/QmamUWYjFeYYzFDFPTvnmGkozJigsoDWUA4zoifTRFTnwK/go-ipfs-cmds"
 )
 
@@ -35,7 +38,8 @@ var RepoCmd = &cmds.Command{
 	},
 
 	Subcommands: map[string]*cmds.Command{
-		"stat": repoStatCmd,
+		"stat":    repoStatCmd,
+		"rm-root": repoRmRootCmd,
 	},
 	OldSubcommands: map[string]*oldcmds.Command{
 		"gc":      repoGcCmd,
@@ -264,7 +268,66 @@ daemons are running.
 	},
 	Type: MessageOutput{},
 	Marshalers: oldcmds.MarshalerMap{
-		oldcmds.Text: MessageTextMarshaler,
+		cmds.Text: MessageTextMarshaler,
+	},
+}
+
+var repoRmRootCmd = &cmds.Command{
+	Helptext: cmdkit.HelpText{
+		Tagline: "Unlink the root used by the files API.",
+		ShortDescription: `
+'ipfs repo rm-root' will unlink the root used by the files API ('ipfs
+files' commands) without trying to read the root itself.  The root and
+its children will then be removed by the garbage collector unless
+pinned.  This command can only run when no ipfs daemons are running.
+`,
+	},
+	Run: func(req cmds.Request, res cmds.ResponseEmitter) {
+		configRoot := req.InvocContext().ConfigRoot
+
+		// Can't use a full node as that interferes with the removal
+		// of the files root, so open the repo directly
+		repo, err := fsrepo.Open(configRoot)
+		if err != nil {
+			res.SetError(err, cmdkit.ErrNormal)
+			return
+		}
+
+		// Get the old root and display it to the user so that they can
+		// can do something to prevent from being garbage collected,
+		// such as pin it
+		dsk := core.FilesRootKey()
+		val, err := repo.Datastore().Get(dsk)
+		switch {
+		case err == ds.ErrNotFound || val == nil:
+			cmds.EmitOnce(res, &MessageOutput{"Files API root not found.\n"})
+		default:
+			c, err := cid.Cast(val.([]byte))
+			cidStr := ""
+			if err != nil {
+				cidStr = c.String()
+			} else {
+				cidStr = b58.Encode(val.([]byte))
+			}
+			err = repo.Datastore().Delete(dsk)
+			if err != nil {
+				res.SetError(fmt.Errorf("unable to remove API root: %s.  Root hash was %s", err.Error(), cidStr), cmdkit.ErrNormal)
+				return
+			}
+			cmds.EmitOnce(res, &MessageOutput{fmt.Sprintf("Unlinked files API root.  Root hash was %s.\n", cidStr)})
+		}
+		repo.Close()
+	},
+	Type: MessageOutput{},
+	Encoders: cmds.EncoderMap{
+		cmds.Text: cmds.MakeEncoder(func(req cmds.Request, w io.Writer, v interface{}) error {
+			msg, ok := v.(*MessageOutput)
+			if !ok {
+				return e.TypeErr(msg, v)
+			}
+			_, err := fmt.Fprintf(w, "%s", msg.Message)
+			return err
+		}),
 	},
 }
 

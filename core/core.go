@@ -716,8 +716,10 @@ func (n *IpfsNode) loadBootstrapPeers() ([]pstore.PeerInfo, error) {
 	return toPeerInfos(parsed), nil
 }
 
+func FilesRootKey() ds.Key { return ds.NewKey("/local/filesroot") }
+
 func (n *IpfsNode) loadFilesRoot() error {
-	dsk := ds.NewKey("/local/filesroot")
+	dsk := FilesRootKey()
 	pf := func(ctx context.Context, c *cid.Cid) error {
 		return n.Repo.Datastore().Put(dsk, c.Bytes())
 	}
