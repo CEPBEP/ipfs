@@ -116,6 +116,7 @@ func commandsOption(cctx oldcmds.Context, command *cmds.Command) ServeOption {
 
 		cfg := cmdsHttp.NewServerConfig()
 		cfg.SetAllowedMethods("GET", "POST", "PUT")
+		cfg.APIPath = APIPath
 		rcfg, err := n.Repo.Config()
 		if err != nil {
 			return nil, err

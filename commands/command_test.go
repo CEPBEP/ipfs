@@ -59,7 +59,7 @@ func TestOptionValidation(t *testing.T) {
 	}
 
 	req, _ = NewRequest(nil, nil, nil, nil, nil, opts)
-	req.SetOption(cmds.EncShort, "json")
+	req.SetOption(cmds.EncLong, "json")
 	res = cmd.Call(req)
 	if res.Error() != nil {
 		t.Error("Should have passed")

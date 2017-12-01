@@ -269,11 +269,11 @@ func (i *cmdInvocation) Parse(ctx context.Context, args []string) error {
 
 	// if no encoding was specified by user, default to plaintext encoding
 	// (if command doesn't support plaintext, use JSON instead)
-	if enc := i.req.Options[cmds.EncShort]; enc == "" {
+	if enc := i.req.Options[cmds.EncLong]; enc == "" {
 		if i.req.Command.Encoders != nil && i.req.Command.Encoders[cmds.Text] != nil {
-			i.req.SetOption(cmds.EncShort, cmds.Text)
+			i.req.SetOption(cmds.EncLong, cmds.Text)
 		} else {
-			i.req.SetOption(cmds.EncShort, cmds.JSON)
+			i.req.SetOption(cmds.EncLong, cmds.JSON)
 		}
 	}
 
@@ -313,7 +313,7 @@ func callCommand(ctx context.Context, req *cmds.Request, root *cmds.Command, cct
 		return err
 	}
 
-	encTypeStr, _ := req.Options[cmds.EncShort].(string)
+	encTypeStr, _ := req.Options[cmds.EncLong].(string)
 	encType := cmds.EncodingType(encTypeStr)
 
 	var (

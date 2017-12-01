@@ -149,7 +149,7 @@ func (r *response) Marshal() (io.Reader, error) {
 		return bytes.NewReader([]byte{}), nil
 	}
 
-	enc, found, err := r.req.Option(cmds.EncShort).String()
+	enc, found, err := r.req.Option(cmds.EncLong).String()
 	if err != nil {
 		return nil, err
 	}
