@@ -6,7 +6,6 @@ import (
 	"os"
 
 	mdag "github.com/ipfs/go-ipfs/merkledag"
-	providers "github.com/ipfs/go-ipfs/providers"
 	format "github.com/ipfs/go-ipfs/unixfs"
 	hamt "github.com/ipfs/go-ipfs/unixfs/hamt"
 
@@ -27,19 +26,18 @@ var UseHAMTSharding = false
 var DefaultShardWidth = 256
 
 type Directory struct {
-	dserv mdag.DAGService
-	prov  providers.Interface
-
+	dserv   mdag.DAGService
 	dirnode *mdag.ProtoNode
-	shard   *hamt.HamtShard
+
+	shard *hamt.HamtShard
 }
 
 // NewDirectory returns a Directory. It needs a DAGService to add the Children
-func NewDirectory(dserv mdag.DAGService, prov providers.Interface) *Directory {
+func NewDirectory(dserv mdag.DAGService) *Directory {
 	db := new(Directory)
 	db.dserv = dserv
 	if UseHAMTSharding {
-		s, err := hamt.NewHamtShard(dserv, prov, DefaultShardWidth)
+		s, err := hamt.NewHamtShard(dserv, DefaultShardWidth)
 		if err != nil {
 			panic(err) // will only panic if DefaultShardWidth is a bad value
 		}
@@ -54,7 +52,7 @@ func NewDirectory(dserv mdag.DAGService, prov providers.Interface) *Directory {
 var ErrNotADir = fmt.Errorf("merkledag node was not a directory or shard")
 
 // NewDirectoryFromNode constructs a directory from a directory node
-func NewDirectoryFromNode(dserv mdag.DAGService, prov providers.Interface, nd node.Node) (*Directory, error) {
+func NewDirectoryFromNode(dserv mdag.DAGService, nd node.Node) (*Directory, error) {
 	pbnd, ok := nd.(*mdag.ProtoNode)
 	if !ok {
 		return nil, ErrNotADir
@@ -69,18 +67,16 @@ func NewDirectoryFromNode(dserv mdag.DAGService, prov providers.Interface, nd no
 	case format.TDirectory:
 		return &Directory{
 			dserv:   dserv,
-			prov:    prov,
 			dirnode: pbnd.Copy().(*mdag.ProtoNode),
 		}, nil
 	case format.THAMTShard:
-		shard, err := hamt.NewHamtFromDag(dserv, prov, nd)
+		shard, err := hamt.NewHamtFromDag(dserv, nd)
 		if err != nil {
 			return nil, err
 		}
 
 		return &Directory{
 			dserv: dserv,
-			prov:  prov,
 			shard: shard,
 		}, nil
 	default:
@@ -116,7 +112,7 @@ func (d *Directory) AddChild(ctx context.Context, name string, nd node.Node) err
 }
 
 func (d *Directory) switchToSharding(ctx context.Context) error {
-	s, err := hamt.NewHamtShard(d.dserv, d.prov, DefaultShardWidth)
+	s, err := hamt.NewHamtShard(d.dserv, DefaultShardWidth)
 	if err != nil {
 		return err
 	}

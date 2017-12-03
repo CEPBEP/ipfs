@@ -15,13 +15,11 @@ import (
 	dag "github.com/ipfs/go-ipfs/merkledag"
 
 	node "gx/ipfs/QmPN7cwmpcc4DWXb4KTB9dNAJgjuPY69h3npsMfhRrQL9c/go-ipld-format"
-
-	"github.com/ipfs/go-ipfs/providers"
 )
 
 // Builds a DAG from the given file, writing created blocks to disk as they are
 // created
-func BuildDagFromFile(fpath string, ds dag.DAGService, prov providers.Interface) (node.Node, error) {
+func BuildDagFromFile(fpath string, ds dag.DAGService) (node.Node, error) {
 	stat, err := os.Lstat(fpath)
 	if err != nil {
 		return nil, err
@@ -37,14 +35,13 @@ func BuildDagFromFile(fpath string, ds dag.DAGService, prov providers.Interface)
 	}
 	defer f.Close()
 
-	return BuildDagFromReader(ds, prov, chunk.NewSizeSplitter(f, chunk.DefaultBlockSize))
+	return BuildDagFromReader(ds, chunk.NewSizeSplitter(f, chunk.DefaultBlockSize))
 }
 
 // BuildDagFromReader creates new DAG containing data provided by Splitter
-func BuildDagFromReader(ds dag.DAGService, prov providers.Interface, spl chunk.Splitter) (node.Node, error) {
+func BuildDagFromReader(ds dag.DAGService, spl chunk.Splitter) (node.Node, error) {
 	dbp := h.DagBuilderParams{
 		Dagserv:  ds,
-		Provider: prov,
 		Maxlinks: h.DefaultLinksPerBlock,
 	}
 
@@ -52,10 +49,9 @@ func BuildDagFromReader(ds dag.DAGService, prov providers.Interface, spl chunk.S
 }
 
 // BuildTrickleDagFromReader creates new DAG with trickle layout containing data provided by Splitter
-func BuildTrickleDagFromReader(ds dag.DAGService, prov providers.Interface, spl chunk.Splitter) (node.Node, error) {
+func BuildTrickleDagFromReader(ds dag.DAGService, spl chunk.Splitter) (node.Node, error) {
 	dbp := h.DagBuilderParams{
 		Dagserv:  ds,
-		Provider: prov,
 		Maxlinks: h.DefaultLinksPerBlock,
 	}
 

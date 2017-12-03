@@ -28,7 +28,6 @@ import (
 	"os"
 
 	dag "github.com/ipfs/go-ipfs/merkledag"
-	providers "github.com/ipfs/go-ipfs/providers"
 	format "github.com/ipfs/go-ipfs/unixfs"
 	upb "github.com/ipfs/go-ipfs/unixfs/pb"
 
@@ -59,7 +58,6 @@ type HamtShard struct {
 	maxpadlen    int
 
 	dserv dag.DAGService
-	prov  providers.Interface
 }
 
 // child can either be another shard, or a leaf node value
@@ -69,8 +67,8 @@ type child interface {
 }
 
 // NewHamtShard creates new hamt shard. Size should be a power of two
-func NewHamtShard(dserv dag.DAGService, prov providers.Interface, size int) (*HamtShard, error) {
-	ds, err := makeHamtShard(dserv, prov, size)
+func NewHamtShard(dserv dag.DAGService, size int) (*HamtShard, error) {
+	ds, err := makeHamtShard(dserv, size)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +79,7 @@ func NewHamtShard(dserv dag.DAGService, prov providers.Interface, size int) (*Ha
 	return ds, nil
 }
 
-func makeHamtShard(ds dag.DAGService, prov providers.Interface, size int) (*HamtShard, error) {
+func makeHamtShard(ds dag.DAGService, size int) (*HamtShard, error) {
 	lg2s := int(math.Log2(float64(size)))
 	if 1<<uint(lg2s) != size {
 		return nil, fmt.Errorf("hamt size should be a power of two")
@@ -93,12 +91,11 @@ func makeHamtShard(ds dag.DAGService, prov providers.Interface, size int) (*Hamt
 		maxpadlen:    len(maxpadding),
 		tableSize:    size,
 		dserv:        ds,
-		prov:         prov,
 	}, nil
 }
 
 // NewHamtFromDag creates new hamt shard from a hamt DAG node
-func NewHamtFromDag(dserv dag.DAGService, prov providers.Interface, nd node.Node) (*HamtShard, error) {
+func NewHamtFromDag(dserv dag.DAGService, nd node.Node) (*HamtShard, error) {
 	pbnd, ok := nd.(*dag.ProtoNode)
 	if !ok {
 		return nil, dag.ErrLinkNotFound
@@ -117,7 +114,7 @@ func NewHamtFromDag(dserv dag.DAGService, prov providers.Interface, nd node.Node
 		return nil, fmt.Errorf("only murmur3 supported as hash function")
 	}
 
-	ds, err := makeHamtShard(dserv, prov, int(pbd.GetFanout()))
+	ds, err := makeHamtShard(dserv, int(pbd.GetFanout()))
 	if err != nil {
 		return nil, err
 	}
@@ -194,11 +191,6 @@ func (ds *HamtShard) Node() (node.Node, error) {
 		return nil, err
 	}
 
-	err = ds.prov.Provide(out.Cid())
-	if err != nil {
-		return nil, err
-	}
-
 	return out, nil
 }
 
@@ -232,11 +224,6 @@ func (ds *HamtShard) Label() string {
 func (ds *HamtShard) Set(ctx context.Context, name string, nd node.Node) error {
 	hv := &hashBits{b: hash([]byte(name))}
 	_, err := ds.dserv.Add(nd)
-	if err != nil {
-		return err
-	}
-
-	err = ds.prov.Provide(nd.Cid())
 	if err != nil {
 		return err
 	}
@@ -321,7 +308,7 @@ func (ds *HamtShard) loadChild(ctx context.Context, i int) (child, error) {
 			return nil, fmt.Errorf("HAMT entries must have non-zero length name")
 		}
 
-		cds, err := NewHamtFromDag(ds.dserv, ds.prov, nd)
+		cds, err := NewHamtFromDag(ds.dserv, nd)
 		if err != nil {
 			return nil, err
 		}
@@ -351,11 +338,6 @@ func (ds *HamtShard) Link() (*node.Link, error) {
 	}
 
 	_, err = ds.dserv.Add(nd)
-	if err != nil {
-		return nil, err
-	}
-
-	err = ds.prov.Provide(nd.Cid())
 	if err != nil {
 		return nil, err
 	}
@@ -522,7 +504,7 @@ func (ds *HamtShard) modifyValue(ctx context.Context, hv *hashBits, key string, 
 			return nil
 
 		default: // replace value with another shard, one level deeper
-			ns, err := NewHamtShard(ds.dserv, ds.prov, ds.tableSize)
+			ns, err := NewHamtShard(ds.dserv, ds.tableSize)
 			if err != nil {
 				return err
 			}

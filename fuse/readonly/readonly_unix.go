@@ -171,7 +171,7 @@ func (s *Node) Lookup(ctx context.Context, name string) (fs.Node, error) {
 // ReadDirAll reads the link structure as directory entries
 func (s *Node) ReadDirAll(ctx context.Context) ([]fuse.Dirent, error) {
 	log.Debug("Node ReadDir")
-	dir, err := uio.NewDirectoryFromNode(s.Ipfs.DAG, s.Ipfs.Providers, s.Nd)
+	dir, err := uio.NewDirectoryFromNode(s.Ipfs.DAG, s.Nd)
 	if err != nil {
 		return nil, err
 	}

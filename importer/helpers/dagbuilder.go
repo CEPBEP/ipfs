@@ -6,7 +6,6 @@ import (
 
 	"github.com/ipfs/go-ipfs/importer/chunk"
 	dag "github.com/ipfs/go-ipfs/merkledag"
-	"github.com/ipfs/go-ipfs/providers"
 	ft "github.com/ipfs/go-ipfs/unixfs"
 
 	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
@@ -18,7 +17,6 @@ import (
 // efficiently create unixfs dag trees
 type DagBuilderHelper struct {
 	dserv     dag.DAGService
-	prov      providers.Interface
 	spl       chunk.Splitter
 	recvdErr  error
 	rawLeaves bool
@@ -44,9 +42,6 @@ type DagBuilderParams struct {
 	// DAGService to write blocks to (required)
 	Dagserv dag.DAGService
 
-	// Provider to use to announce blocks (required)
-	Provider providers.Interface
-
 	// NoCopy signals to the chunker that it should track fileinfo for
 	// filestore adds
 	NoCopy bool
@@ -57,7 +52,6 @@ type DagBuilderParams struct {
 func (dbp *DagBuilderParams) New(spl chunk.Splitter) *DagBuilderHelper {
 	db := &DagBuilderHelper{
 		dserv:     dbp.Dagserv,
-		prov:      dbp.Provider,
 		spl:       spl,
 		rawLeaves: dbp.RawLeaves,
 		prefix:    dbp.Prefix,
@@ -199,7 +193,6 @@ func (db *DagBuilderHelper) SetPosInfo(node *UnixfsNode, offset uint64) {
 	}
 }
 
-//TODO: Check if provide is needed here
 func (db *DagBuilderHelper) Add(node *UnixfsNode) (node.Node, error) {
 	dn, err := node.GetDagNode()
 	if err != nil {

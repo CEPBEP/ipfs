@@ -45,7 +45,7 @@ func SeedInitDirIndex(nd *core.IpfsNode) (*cid.Cid, error) {
 }
 
 func addAssetList(nd *core.IpfsNode, l []string) (*cid.Cid, error) {
-	dirb := uio.NewDirectory(nd.DAG, nd.Providers)
+	dirb := uio.NewDirectory(nd.DAG)
 
 	for _, p := range l {
 		d, err := Asset(p)

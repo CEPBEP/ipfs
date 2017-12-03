@@ -17,7 +17,6 @@ import (
 	"time"
 
 	dag "github.com/ipfs/go-ipfs/merkledag"
-	providers "github.com/ipfs/go-ipfs/providers"
 	ft "github.com/ipfs/go-ipfs/unixfs"
 
 	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
@@ -67,7 +66,7 @@ type Root struct {
 type PubFunc func(context.Context, *cid.Cid) error
 
 // newRoot creates a new Root and starts up a republisher routine for it
-func NewRoot(parent context.Context, ds dag.DAGService, prov providers.Interface, node *dag.ProtoNode, pf PubFunc) (*Root, error) {
+func NewRoot(parent context.Context, ds dag.DAGService, node *dag.ProtoNode, pf PubFunc) (*Root, error) {
 
 	var repub *Republisher
 	if pf != nil {
@@ -79,7 +78,7 @@ func NewRoot(parent context.Context, ds dag.DAGService, prov providers.Interface
 	root := &Root{
 		node:  node,
 		repub: repub,
-		dserv: ds, //TODO: look into node providing here
+		dserv: ds,
 	}
 
 	pbn, err := ft.FromBytes(node.Data())
@@ -90,14 +89,14 @@ func NewRoot(parent context.Context, ds dag.DAGService, prov providers.Interface
 
 	switch pbn.GetType() {
 	case ft.TDirectory, ft.THAMTShard:
-		rval, err := NewDirectory(parent, node.String(), node, root, ds, prov)
+		rval, err := NewDirectory(parent, node.String(), node, root, ds)
 		if err != nil {
 			return nil, err
 		}
 
 		root.val = rval
 	case ft.TFile, ft.TMetadata, ft.TRaw:
-		fi, err := NewFile(node.String(), node, root, ds, prov)
+		fi, err := NewFile(node.String(), node, root, ds)
 		if err != nil {
 			return nil, err
 		}

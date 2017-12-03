@@ -58,7 +58,6 @@ func (i *gatewayHandler) newDagFromReader(r io.Reader) (node.Node, error) {
 	// return ufs.AddFromReader(i.node, r.Body)
 	return importer.BuildDagFromReader(
 		i.node.DAG,
-		i.node.Providers,
 		chunk.DefaultSplitter(r))
 }
 
@@ -279,7 +278,7 @@ func (i *gatewayHandler) getOrHeadHandler(ctx context.Context, w http.ResponseWr
 		return
 	}
 
-	dirr, err := uio.NewDirectoryFromNode(i.node.DAG, i.node.Providers, nd)
+	dirr, err := uio.NewDirectoryFromNode(i.node.DAG, nd)
 	if err != nil {
 		internalWebError(w, err)
 		return

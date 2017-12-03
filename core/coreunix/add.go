@@ -21,7 +21,6 @@ import (
 	dag "github.com/ipfs/go-ipfs/merkledag"
 	mfs "github.com/ipfs/go-ipfs/mfs"
 	"github.com/ipfs/go-ipfs/pin"
-	"github.com/ipfs/go-ipfs/providers"
 	posinfo "github.com/ipfs/go-ipfs/thirdparty/posinfo"
 	unixfs "github.com/ipfs/go-ipfs/unixfs"
 
@@ -75,13 +74,12 @@ type AddedObject struct {
 }
 
 // NewAdder constructs new adder with default settings
-func NewAdder(ctx context.Context, p pin.Pinner, bs bstore.GCBlockstore, ds dag.DAGService, pr providers.Interface) (*Adder, error) {
+func NewAdder(ctx context.Context, p pin.Pinner, bs bstore.GCBlockstore, ds dag.DAGService) (*Adder, error) {
 	return &Adder{
 		ctx:        ctx,
 		pinning:    p,
 		blockstore: bs,
 		dagService: ds,
-		provide:    pr,
 		Progress:   false,
 		Hidden:     true,
 		Pin:        true,
@@ -97,7 +95,6 @@ type Adder struct {
 	pinning    pin.Pinner
 	blockstore bstore.GCBlockstore
 	dagService dag.DAGService
-	provide    providers.Interface
 	Out        chan interface{}
 	Progress   bool
 	Hidden     bool
@@ -122,7 +119,7 @@ func (adder *Adder) mfsRoot() (*mfs.Root, error) {
 	}
 	rnode := unixfs.EmptyDirNode()
 	rnode.SetPrefix(adder.Prefix)
-	mr, err := mfs.NewRoot(adder.ctx, adder.dagService, adder.provide, rnode, nil)
+	mr, err := mfs.NewRoot(adder.ctx, adder.dagService, rnode, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +140,6 @@ func (adder Adder) add(reader io.Reader) (node.Node, error) {
 
 	params := ihelper.DagBuilderParams{
 		Dagserv:   adder.dagService,
-		Provider:  adder.provide,
 		RawLeaves: adder.RawLeaves,
 		Maxlinks:  ihelper.DefaultLinksPerBlock,
 		NoCopy:    adder.NoCopy,
@@ -196,11 +192,6 @@ func (adder *Adder) PinRoot() error {
 	}
 
 	rnk, err := adder.dagService.Add(root)
-	if err != nil {
-		return err
-	}
-
-	err = adder.provide.Provide(rnk)
 	if err != nil {
 		return err
 	}
@@ -345,7 +336,7 @@ func AddR(n *core.IpfsNode, root string) (key string, err error) {
 	}
 	defer f.Close()
 
-	fileAdder, err := NewAdder(n.Context(), n.Pinning, n.Blockstore, n.DAG, n.Providers)
+	fileAdder, err := NewAdder(n.Context(), n.Pinning, n.Blockstore, n.DAG)
 	if err != nil {
 		return "", err
 	}
@@ -369,7 +360,7 @@ func AddR(n *core.IpfsNode, root string) (key string, err error) {
 // the directory, and and error if any.
 func AddWrapped(n *core.IpfsNode, r io.Reader, filename string) (string, node.Node, error) {
 	file := files.NewReaderFile(filename, filename, ioutil.NopCloser(r), nil)
-	fileAdder, err := NewAdder(n.Context(), n.Pinning, n.Blockstore, n.DAG, n.Providers)
+	fileAdder, err := NewAdder(n.Context(), n.Pinning, n.Blockstore, n.DAG)
 	if err != nil {
 		return "", nil, err
 	}
@@ -473,12 +464,7 @@ func (adder *Adder) addFile(file files.File) error {
 
 		dagnode := dag.NodeWithData(sdata)
 		dagnode.SetPrefix(adder.Prefix)
-		ci, err := adder.dagService.Add(dagnode)
-		if err != nil {
-			return err
-		}
-
-		err = adder.provide.Provide(ci)
+		_, err = adder.dagService.Add(dagnode)
 		if err != nil {
 			return err
 		}

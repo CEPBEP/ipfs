@@ -7,6 +7,7 @@ import (
 )
 
 type Stat struct {
+	ProvideBufLen   int
 	Wantlist        []*cid.Cid
 	Peers           []string
 	BlocksReceived  uint64
@@ -19,6 +20,7 @@ type Stat struct {
 
 func (bs *Bitswap) Stat() (*Stat, error) {
 	st := new(Stat)
+	st.ProvideBufLen = len(bs.newBlocks)
 	st.Wantlist = bs.GetWantlist()
 	bs.counterLk.Lock()
 	c := bs.counters
