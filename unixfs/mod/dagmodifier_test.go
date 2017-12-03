@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"testing"
 
-	offline "github.com/ipfs/go-ipfs/exchange/offline"
 	h "github.com/ipfs/go-ipfs/importer/helpers"
 	trickle "github.com/ipfs/go-ipfs/importer/trickle"
 
@@ -86,11 +85,11 @@ func TestDagModifierBasic(t *testing.T) {
 }
 func testDagModifierBasic(t *testing.T, opts testu.NodeOpts) {
 	dserv := testu.GetDAGServ()
-	b, n := testu.GetRandomNode(t, dserv, offline.Providers(), 50000, opts)
+	b, n := testu.GetRandomNode(t, dserv, 50000, opts)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	dagmod, err := NewDagModifier(ctx, n, dserv, offline.Providers(), testu.SizeSplitterGen(512))
+	dagmod, err := NewDagModifier(ctx, n, dserv, testu.SizeSplitterGen(512))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,12 +145,12 @@ func TestMultiWrite(t *testing.T) {
 }
 func testMultiWrite(t *testing.T, opts testu.NodeOpts) {
 	dserv := testu.GetDAGServ()
-	n := testu.GetEmptyNode(t, dserv, offline.Providers(), opts)
+	n := testu.GetEmptyNode(t, dserv, opts)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	dagmod, err := NewDagModifier(ctx, n, dserv, offline.Providers(), testu.SizeSplitterGen(512))
+	dagmod, err := NewDagModifier(ctx, n, dserv, testu.SizeSplitterGen(512))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -189,12 +188,12 @@ func TestMultiWriteAndFlush(t *testing.T) {
 }
 func testMultiWriteAndFlush(t *testing.T, opts testu.NodeOpts) {
 	dserv := testu.GetDAGServ()
-	n := testu.GetEmptyNode(t, dserv, offline.Providers(), opts)
+	n := testu.GetEmptyNode(t, dserv, opts)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	dagmod, err := NewDagModifier(ctx, n, dserv, offline.Providers(), testu.SizeSplitterGen(512))
+	dagmod, err := NewDagModifier(ctx, n, dserv, testu.SizeSplitterGen(512))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -227,12 +226,12 @@ func TestWriteNewFile(t *testing.T) {
 }
 func testWriteNewFile(t *testing.T, opts testu.NodeOpts) {
 	dserv := testu.GetDAGServ()
-	n := testu.GetEmptyNode(t, dserv, offline.Providers(), opts)
+	n := testu.GetEmptyNode(t, dserv, opts)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	dagmod, err := NewDagModifier(ctx, n, dserv, offline.Providers(), testu.SizeSplitterGen(512))
+	dagmod, err := NewDagModifier(ctx, n, dserv, testu.SizeSplitterGen(512))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -259,12 +258,12 @@ func TestMultiWriteCoal(t *testing.T) {
 }
 func testMultiWriteCoal(t *testing.T, opts testu.NodeOpts) {
 	dserv := testu.GetDAGServ()
-	n := testu.GetEmptyNode(t, dserv, offline.Providers(), opts)
+	n := testu.GetEmptyNode(t, dserv, opts)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	dagmod, err := NewDagModifier(ctx, n, dserv, offline.Providers(), testu.SizeSplitterGen(512))
+	dagmod, err := NewDagModifier(ctx, n, dserv, testu.SizeSplitterGen(512))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -295,12 +294,12 @@ func TestLargeWriteChunks(t *testing.T) {
 }
 func testLargeWriteChunks(t *testing.T, opts testu.NodeOpts) {
 	dserv := testu.GetDAGServ()
-	n := testu.GetEmptyNode(t, dserv, offline.Providers(), opts)
+	n := testu.GetEmptyNode(t, dserv, opts)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	dagmod, err := NewDagModifier(ctx, n, dserv, offline.Providers(), testu.SizeSplitterGen(512))
+	dagmod, err := NewDagModifier(ctx, n, dserv, testu.SizeSplitterGen(512))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -339,11 +338,11 @@ func TestDagTruncate(t *testing.T) {
 }
 func testDagTruncate(t *testing.T, opts testu.NodeOpts) {
 	dserv := testu.GetDAGServ()
-	b, n := testu.GetRandomNode(t, dserv, offline.Providers(), 50000, opts)
+	b, n := testu.GetRandomNode(t, dserv, 50000, opts)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	dagmod, err := NewDagModifier(ctx, n, dserv, offline.Providers(), testu.SizeSplitterGen(512))
+	dagmod, err := NewDagModifier(ctx, n, dserv, testu.SizeSplitterGen(512))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -412,11 +411,11 @@ func TestSparseWrite(t *testing.T) {
 }
 func testSparseWrite(t *testing.T, opts testu.NodeOpts) {
 	dserv := testu.GetDAGServ()
-	n := testu.GetEmptyNode(t, dserv, offline.Providers(), opts)
+	n := testu.GetEmptyNode(t, dserv, opts)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	dagmod, err := NewDagModifier(ctx, n, dserv, offline.Providers(), testu.SizeSplitterGen(512))
+	dagmod, err := NewDagModifier(ctx, n, dserv, testu.SizeSplitterGen(512))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -456,11 +455,11 @@ func TestSeekPastEndWrite(t *testing.T) {
 }
 func testSeekPastEndWrite(t *testing.T, opts testu.NodeOpts) {
 	dserv := testu.GetDAGServ()
-	n := testu.GetEmptyNode(t, dserv, offline.Providers(), opts)
+	n := testu.GetEmptyNode(t, dserv, opts)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	dagmod, err := NewDagModifier(ctx, n, dserv, offline.Providers(), testu.SizeSplitterGen(512))
+	dagmod, err := NewDagModifier(ctx, n, dserv, testu.SizeSplitterGen(512))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -509,11 +508,11 @@ func TestRelativeSeek(t *testing.T) {
 }
 func testRelativeSeek(t *testing.T, opts testu.NodeOpts) {
 	dserv := testu.GetDAGServ()
-	n := testu.GetEmptyNode(t, dserv, offline.Providers(), opts)
+	n := testu.GetEmptyNode(t, dserv, opts)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	dagmod, err := NewDagModifier(ctx, n, dserv, offline.Providers(), testu.SizeSplitterGen(512))
+	dagmod, err := NewDagModifier(ctx, n, dserv, testu.SizeSplitterGen(512))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -545,11 +544,11 @@ func TestInvalidSeek(t *testing.T) {
 }
 func testInvalidSeek(t *testing.T, opts testu.NodeOpts) {
 	dserv := testu.GetDAGServ()
-	n := testu.GetEmptyNode(t, dserv, offline.Providers(), opts)
+	n := testu.GetEmptyNode(t, dserv, opts)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	dagmod, err := NewDagModifier(ctx, n, dserv, offline.Providers(), testu.SizeSplitterGen(512))
+	dagmod, err := NewDagModifier(ctx, n, dserv, testu.SizeSplitterGen(512))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -570,11 +569,11 @@ func TestEndSeek(t *testing.T) {
 func testEndSeek(t *testing.T, opts testu.NodeOpts) {
 	dserv := testu.GetDAGServ()
 
-	n := testu.GetEmptyNode(t, dserv, offline.Providers(), opts)
+	n := testu.GetEmptyNode(t, dserv, opts)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	dagmod, err := NewDagModifier(ctx, n, dserv, offline.Providers(), testu.SizeSplitterGen(512))
+	dagmod, err := NewDagModifier(ctx, n, dserv, testu.SizeSplitterGen(512))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -618,11 +617,11 @@ func TestReadAndSeek(t *testing.T) {
 func testReadAndSeek(t *testing.T, opts testu.NodeOpts) {
 	dserv := testu.GetDAGServ()
 
-	n := testu.GetEmptyNode(t, dserv, offline.Providers(), opts)
+	n := testu.GetEmptyNode(t, dserv, opts)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	dagmod, err := NewDagModifier(ctx, n, dserv, offline.Providers(), testu.SizeSplitterGen(512))
+	dagmod, err := NewDagModifier(ctx, n, dserv, testu.SizeSplitterGen(512))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -692,11 +691,11 @@ func TestCtxRead(t *testing.T) {
 func testCtxRead(t *testing.T, opts testu.NodeOpts) {
 	dserv := testu.GetDAGServ()
 
-	n := testu.GetEmptyNode(t, dserv, offline.Providers(), opts)
+	n := testu.GetEmptyNode(t, dserv, opts)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	dagmod, err := NewDagModifier(ctx, n, dserv, offline.Providers(), testu.SizeSplitterGen(512))
+	dagmod, err := NewDagModifier(ctx, n, dserv, testu.SizeSplitterGen(512))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -726,13 +725,13 @@ func testCtxRead(t *testing.T, opts testu.NodeOpts) {
 func BenchmarkDagmodWrite(b *testing.B) {
 	b.StopTimer()
 	dserv := testu.GetDAGServ()
-	n := testu.GetEmptyNode(b, dserv, offline.Providers(), testu.UseProtoBufLeaves)
+	n := testu.GetEmptyNode(b, dserv, testu.UseProtoBufLeaves)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	wrsize := 4096
 
-	dagmod, err := NewDagModifier(ctx, n, dserv, offline.Providers(), testu.SizeSplitterGen(512))
+	dagmod, err := NewDagModifier(ctx, n, dserv, testu.SizeSplitterGen(512))
 	if err != nil {
 		b.Fatal(err)
 	}

@@ -9,7 +9,6 @@ import (
 	mrand "math/rand"
 	"testing"
 
-	offline "github.com/ipfs/go-ipfs/exchange/offline"
 	chunk "github.com/ipfs/go-ipfs/importer/chunk"
 	h "github.com/ipfs/go-ipfs/importer/helpers"
 	merkledag "github.com/ipfs/go-ipfs/merkledag"
@@ -35,7 +34,6 @@ func runBothSubtests(t *testing.T, tfunc func(*testing.T, UseRawLeaves)) {
 func buildTestDag(ds merkledag.DAGService, spl chunk.Splitter, rawLeaves UseRawLeaves) (*merkledag.ProtoNode, error) {
 	dbp := h.DagBuilderParams{
 		Dagserv:   ds,
-		Provider:  offline.Providers(),
 		Maxlinks:  h.DefaultLinksPerBlock,
 		RawLeaves: bool(rawLeaves),
 	}
@@ -497,7 +495,6 @@ func testAppend(t *testing.T, rawLeaves UseRawLeaves) {
 
 	dbp := &h.DagBuilderParams{
 		Dagserv:   ds,
-		Provider:  offline.Providers(),
 		Maxlinks:  h.DefaultLinksPerBlock,
 		RawLeaves: bool(rawLeaves),
 	}
@@ -557,7 +554,6 @@ func testMultipleAppends(t *testing.T, rawLeaves UseRawLeaves) {
 
 	dbp := &h.DagBuilderParams{
 		Dagserv:   ds,
-		Provider:  offline.Providers(),
 		Maxlinks:  4,
 		RawLeaves: bool(rawLeaves),
 	}
@@ -609,7 +605,6 @@ func TestAppendSingleBytesToEmpty(t *testing.T) {
 
 	dbp := &h.DagBuilderParams{
 		Dagserv:  ds,
-		Provider: offline.Providers(),
 		Maxlinks: 4,
 	}
 

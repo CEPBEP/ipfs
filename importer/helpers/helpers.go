@@ -110,11 +110,7 @@ func (n *UnixfsNode) AddChild(child *UnixfsNode, db *DagBuilderHelper) error {
 		return err
 	}
 
-	_, err = db.batch.Add(childnode) //TODO: do we need to provide here?
-	err = db.prov.Provide(childnode.Cid())
-	if err != nil {
-		return err
-	}
+	_, err = db.batch.Add(childnode)
 
 	return err
 }

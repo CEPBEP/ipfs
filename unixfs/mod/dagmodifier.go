@@ -11,7 +11,6 @@ import (
 	help "github.com/ipfs/go-ipfs/importer/helpers"
 	trickle "github.com/ipfs/go-ipfs/importer/trickle"
 	mdag "github.com/ipfs/go-ipfs/merkledag"
-	providers "github.com/ipfs/go-ipfs/providers"
 	ft "github.com/ipfs/go-ipfs/unixfs"
 	uio "github.com/ipfs/go-ipfs/unixfs/io"
 
@@ -30,9 +29,8 @@ var writebufferSize = 1 << 21
 // perform surgery on a DAG 'file'
 // Dear god, please rename this to something more pleasant
 type DagModifier struct {
-	dagserv  mdag.DAGService
-	provider providers.Interface
-	curNode  node.Node
+	dagserv mdag.DAGService
+	curNode node.Node
 
 	splitter   chunk.SplitterGen
 	ctx        context.Context
@@ -54,7 +52,7 @@ var ErrNotUnixfs = fmt.Errorf("dagmodifier only supports unixfs nodes (proto or 
 // created nodes will be inherted from the passed in node.  If the Cid
 // version if not 0 raw leaves will also be enabled.  The Prefix and
 // RawLeaves options can be overridden by changing them after the call.
-func NewDagModifier(ctx context.Context, from node.Node, serv mdag.DAGService, prov providers.Interface, spl chunk.SplitterGen) (*DagModifier, error) {
+func NewDagModifier(ctx context.Context, from node.Node, serv mdag.DAGService, spl chunk.SplitterGen) (*DagModifier, error) {
 	switch from.(type) {
 	case *mdag.ProtoNode, *mdag.RawNode:
 		// ok
@@ -72,7 +70,6 @@ func NewDagModifier(ctx context.Context, from node.Node, serv mdag.DAGService, p
 	return &DagModifier{
 		curNode:   from.Copy(),
 		dagserv:   serv,
-		provider:  prov,
 		splitter:  spl,
 		ctx:       ctx,
 		Prefix:    prefix,
@@ -131,7 +128,7 @@ func (dm *DagModifier) expandSparse(size int64) error {
 	if err != nil {
 		return err
 	}
-	_, err = dm.dagserv.Add(nnode) //TODO: do we need to provide here?
+	_, err = dm.dagserv.Add(nnode)
 	return err
 }
 
@@ -223,10 +220,6 @@ func (dm *DagModifier) Sync() error {
 		if err != nil {
 			return err
 		}
-		err = dm.provider.Provide(dm.curNode.Cid())
-		if err != nil {
-			return err
-		}
 	}
 
 	dm.writeStart += uint64(buflen)
@@ -266,10 +259,6 @@ func (dm *DagModifier) modifyDag(n node.Node, offset uint64, data io.Reader) (*c
 			if err != nil {
 				return nil, false, err
 			}
-			err = dm.provider.Provide(k)
-			if err != nil {
-				return nil, false, err
-			}
 
 			// Hey look! we're done!
 			var done bool
@@ -302,10 +291,6 @@ func (dm *DagModifier) modifyDag(n node.Node, offset uint64, data io.Reader) (*c
 				return nil, false, err
 			}
 			k, err := dm.dagserv.Add(nd)
-			if err != nil {
-				return nil, false, err
-			}
-			err = dm.provider.Provide(k)
 			if err != nil {
 				return nil, false, err
 			}
@@ -365,10 +350,6 @@ func (dm *DagModifier) modifyDag(n node.Node, offset uint64, data io.Reader) (*c
 	}
 
 	k, err := dm.dagserv.Add(node)
-	if err != nil {
-		return k, done, err
-	}
-	err = dm.provider.Provide(k)
 	return k, done, err
 }
 
@@ -378,7 +359,6 @@ func (dm *DagModifier) appendData(nd node.Node, spl chunk.Splitter) (node.Node, 
 	case *mdag.ProtoNode, *mdag.RawNode:
 		dbp := &help.DagBuilderParams{
 			Dagserv:   dm.dagserv,
-			Provider:  dm.provider,
 			Maxlinks:  help.DefaultLinksPerBlock,
 			Prefix:    &dm.Prefix,
 			RawLeaves: dm.RawLeaves,
@@ -525,10 +505,6 @@ func (dm *DagModifier) Truncate(size int64) error {
 	if err != nil {
 		return err
 	}
-	err = dm.provider.Provide(nnode.Cid())
-	if err != nil {
-		return err
-	}
 
 	dm.curNode = nnode
 	return nil
@@ -589,10 +565,6 @@ func (dm *DagModifier) dagTruncate(n node.Node, size uint64) (node.Node, error) 
 	}
 
 	_, err := dm.dagserv.Add(modified)
-	if err != nil {
-		return nil, err
-	}
-	err = dm.provider.Provide(modified.Cid())
 	if err != nil {
 		return nil, err
 	}

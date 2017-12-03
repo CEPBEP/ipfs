@@ -139,7 +139,7 @@ func runBatchFetchTest(t *testing.T, read io.Reader) {
 
 	spl := chunk.NewSizeSplitter(read, 512)
 
-	root, err := imp.BuildDagFromReader(dagservs[0], offline.Providers(), spl)
+	root, err := imp.BuildDagFromReader(dagservs[0], spl)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -229,7 +229,7 @@ func TestFetchGraph(t *testing.T) {
 	}
 
 	read := io.LimitReader(u.NewTimeSeededRand(), 1024*32)
-	root, err := imp.BuildDagFromReader(dservs[0], offline.Providers(), chunk.NewSizeSplitter(read, 512))
+	root, err := imp.BuildDagFromReader(dservs[0], chunk.NewSizeSplitter(read, 512))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -255,7 +255,7 @@ func TestEnumerateChildren(t *testing.T) {
 	ds := NewDAGService(bsi[0])
 
 	read := io.LimitReader(u.NewTimeSeededRand(), 1024*1024)
-	root, err := imp.BuildDagFromReader(ds, offline.Providers(), chunk.NewSizeSplitter(read, 512))
+	root, err := imp.BuildDagFromReader(ds, chunk.NewSizeSplitter(read, 512))
 	if err != nil {
 		t.Fatal(err)
 	}

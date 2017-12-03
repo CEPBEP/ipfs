@@ -48,7 +48,7 @@ func getRandFile(t *testing.T, ds dag.DAGService, size int64) node.Node {
 }
 
 func fileNodeFromReader(t *testing.T, ds dag.DAGService, r io.Reader) node.Node {
-	nd, err := importer.BuildDagFromReader(ds, offline.Providers(), chunk.DefaultSplitter(r))
+	nd, err := importer.BuildDagFromReader(ds, chunk.DefaultSplitter(r))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -194,10 +194,9 @@ func catNode(ds dag.DAGService, nd *dag.ProtoNode) ([]byte, error) {
 
 func setupRoot(ctx context.Context, t *testing.T) (dag.DAGService, *Root) {
 	ds := getDagserv(t)
-	prov := offline.Providers()
 
 	root := emptyDirNode()
-	rt, err := NewRoot(ctx, ds, prov, root, func(ctx context.Context, c *cid.Cid) error {
+	rt, err := NewRoot(ctx, ds, root, func(ctx context.Context, c *cid.Cid) error {
 		fmt.Println("PUBLISHED: ", c)
 		return nil
 	})
@@ -551,7 +550,7 @@ func actorMakeFile(d *Directory) error {
 	}
 
 	name := randomName()
-	f, err := NewFile(name, dag.NodeWithData(ft.FilePBData(nil, 0)), d, d.dserv, offline.Providers())
+	f, err := NewFile(name, dag.NodeWithData(ft.FilePBData(nil, 0)), d, d.dserv)
 	if err != nil {
 		return err
 	}
@@ -1010,7 +1009,7 @@ func TestFileDescriptors(t *testing.T) {
 	dir := rt.GetValue().(*Directory)
 
 	nd := dag.NodeWithData(ft.FilePBData(nil, 0))
-	fi, err := NewFile("test", nd, dir, ds, offline.Providers())
+	fi, err := NewFile("test", nd, dir, ds)
 	if err != nil {
 		t.Fatal(err)
 	}

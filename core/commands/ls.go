@@ -77,9 +77,8 @@ The JSON output contains type information.
 
 		dserv := nd.DAG
 		if !resolve {
-			exch := offline.Exchange(nd.Blockstore)
-
-			bserv := blockservice.New(nd.Blockstore, exch)
+			offlineexch := offline.Exchange(nd.Blockstore)
+			bserv := blockservice.New(nd.Blockstore, offlineexch)
 			dserv = merkledag.NewDAGService(bserv)
 		}
 
@@ -109,7 +108,7 @@ The JSON output contains type information.
 		output := make([]LsObject, len(req.Arguments()))
 
 		for i, dagnode := range dagnodes {
-			dir, err := uio.NewDirectoryFromNode(nd.DAG, nd.Providers, dagnode)
+			dir, err := uio.NewDirectoryFromNode(nd.DAG, dagnode)
 			if err != nil && err != uio.ErrNotADir {
 				res.SetError(err, cmdkit.ErrNormal)
 				return

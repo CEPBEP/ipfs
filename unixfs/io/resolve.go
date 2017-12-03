@@ -3,7 +3,6 @@ package io
 import (
 	"context"
 
-	offline "github.com/ipfs/go-ipfs/exchange/offline"
 	dag "github.com/ipfs/go-ipfs/merkledag"
 	ft "github.com/ipfs/go-ipfs/unixfs"
 	hamt "github.com/ipfs/go-ipfs/unixfs/hamt"
@@ -29,7 +28,7 @@ func ResolveUnixfsOnce(ctx context.Context, ds dag.DAGService, nd node.Node, nam
 
 		switch upb.GetType() {
 		case ft.THAMTShard:
-			s, err := hamt.NewHamtFromDag(ds, offline.Providers(), nd)
+			s, err := hamt.NewHamtFromDag(ds, nd)
 			if err != nil {
 				return nil, nil, err
 			}
