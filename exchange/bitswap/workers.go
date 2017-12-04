@@ -94,7 +94,7 @@ func (bs *Bitswap) rebroadcastWorker(parent context.Context) {
 			// TODO: come up with a better strategy for determining when to search
 			// for new providers for blocks.
 			i := rand.Intn(len(entries))
-			bs.providers.FindProviders(ctx, entries[i].Cid)
+			bs.network.FindProviders(ctx, entries[i].Cid)
 		case <-parent.Done():
 			return
 		}

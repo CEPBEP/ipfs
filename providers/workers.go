@@ -127,7 +127,7 @@ func (p *providers) providerQueryManager(ctx context.Context) {
 			go func(e *blockRequest) {
 				child, cancel := context.WithTimeout(e.Ctx, providerRequestTimeout)
 				defer cancel()
-				providers := p.FindProvidersAsync(child, e.Cid, maxProvidersPerRequest)
+				providers := p.FindProvidersAsync(child, e.Cid, MaxProvidersPerRequest)
 				wg := &sync.WaitGroup{}
 				for pr := range providers {
 					wg.Add(1)

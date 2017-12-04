@@ -5,12 +5,11 @@ package offline
 import (
 	"context"
 
-	blockstore "github.com/ipfs/go-ipfs/blocks/blockstore"
-	exchange "github.com/ipfs/go-ipfs/exchange"
-	providers "github.com/ipfs/go-ipfs/providers"
-
-	peer "gx/ipfs/QmWNY7dV54ZDYmTA1ykVdwNCqC11mpU4zSUp6XDpLTH9eG/go-libp2p-peer"
 	blocks "gx/ipfs/QmYsEQydGrsxNZfAiskvQ76N2xE9hDQtSAkRSynwMiUK3c/go-block-format"
+
+	"github.com/ipfs/go-ipfs/blocks/blockstore"
+	exchange "github.com/ipfs/go-ipfs/exchange"
+
 	cid "gx/ipfs/QmeSrf6pzut73u6zLQkRFQ3ygt3k6XFT2kjdYP8Tnkwwyg/go-cid"
 )
 
@@ -73,29 +72,4 @@ func (e *offlineExchange) GetBlocks(ctx context.Context, ks []*cid.Cid) (<-chan 
 
 func (e *offlineExchange) IsOnline() bool {
 	return false
-}
-
-type offlineProviders struct{}
-
-// Providers returns a dummy providers interface implementation
-func Providers() providers.Interface {
-	return &offlineProviders{}
-}
-
-// Provide always returns nil.
-func (p *offlineProviders) Provide(*cid.Cid) error {
-	return nil
-}
-
-// Provide always returns nil.
-func (p *offlineProviders) Stat() (*providers.Stat, error) {
-	return nil, nil
-}
-
-func (p *offlineProviders) FindProviders(ctx context.Context, c *cid.Cid) error {
-	return nil
-}
-
-func (p *offlineProviders) FindProvidersAsync(ctx context.Context, k *cid.Cid, max int) <-chan peer.ID {
-	return nil
 }

@@ -6,8 +6,6 @@ import (
 
 	blockstore "github.com/ipfs/go-ipfs/blocks/blockstore"
 	tn "github.com/ipfs/go-ipfs/exchange/bitswap/testnet"
-	offline "github.com/ipfs/go-ipfs/exchange/offline"
-	providers "github.com/ipfs/go-ipfs/providers"
 	datastore2 "github.com/ipfs/go-ipfs/thirdparty/datastore2"
 	delay "github.com/ipfs/go-ipfs/thirdparty/delay"
 
@@ -48,7 +46,7 @@ func (g *SessionGenerator) Next() Instance {
 	if err != nil {
 		panic("FIXME") // TODO change signature
 	}
-	return MkSession(g.ctx, g.net, p, g.net.Providers())
+	return MkSession(g.ctx, g.net, p)
 }
 
 func (g *SessionGenerator) Instances(n int) []Instance {
@@ -69,7 +67,6 @@ func (g *SessionGenerator) Instances(n int) []Instance {
 type Instance struct {
 	Peer       peer.ID
 	Exchange   *Bitswap
-	Providers  providers.Interface
 	blockstore blockstore.Blockstore
 
 	blockstoreDelay delay.D
@@ -88,7 +85,7 @@ func (i *Instance) SetBlockstoreLatency(t time.Duration) time.Duration {
 // NB: It's easy make mistakes by providing the same peer ID to two different
 // sessions. To safeguard, use the SessionGenerator to generate sessions. It's
 // just a much better idea.
-func MkSession(ctx context.Context, net tn.Network, p testutil.Identity, provs providers.Interface) Instance {
+func MkSession(ctx context.Context, net tn.Network, p testutil.Identity) Instance {
 	bsdelay := delay.Fixed(0)
 
 	adapter := net.Adapter(p)
@@ -103,12 +100,11 @@ func MkSession(ctx context.Context, net tn.Network, p testutil.Identity, provs p
 
 	const alwaysSendToPeer = true
 
-	bs := New(ctx, p.ID(), adapter, bstore, provs, alwaysSendToPeer).(*Bitswap)
+	bs := New(ctx, p.ID(), adapter, bstore, alwaysSendToPeer).(*Bitswap)
 
 	return Instance{
 		Peer:            p.ID(),
 		Exchange:        bs,
-		Providers:       offline.Providers(), //TODO: make sure this is correct
 		blockstore:      bstore,
 		blockstoreDelay: bsdelay,
 	}

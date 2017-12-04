@@ -5,13 +5,10 @@ import (
 	"gx/ipfs/QmeDA8gNhvRTsbrjEieay5wezupJDiky8xvCzDABbsGzmp/go-testutil"
 
 	bsnet "github.com/ipfs/go-ipfs/exchange/bitswap/network"
-
-	"github.com/ipfs/go-ipfs/providers"
 )
 
 type Network interface {
 	Adapter(testutil.Identity) bsnet.BitSwapNetwork
-	Providers() providers.Interface
 
 	HasPeer(peer.ID) bool
 }

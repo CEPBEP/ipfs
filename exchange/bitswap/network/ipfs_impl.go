@@ -7,9 +7,9 @@ import (
 	"time"
 
 	bsmsg "github.com/ipfs/go-ipfs/exchange/bitswap/message"
+	providers "github.com/ipfs/go-ipfs/providers"
 
 	host "gx/ipfs/QmP46LGWhzVZTMmt5akNNLfoV8qL4h5wTwmzQxLyDafggd/go-libp2p-host"
-	routing "gx/ipfs/QmPCGUjMRuBcPybZFpjhzpifwPP9wPRoiy5geTQKU4vqWA/go-libp2p-routing"
 	ifconnmgr "gx/ipfs/QmSAJm4QdTJ3EGF2cvgNcQyXTEbxqWSW1x4kCVV1aJQUQr/go-libp2p-interface-connmgr"
 	logging "gx/ipfs/QmSpJByNKFX1sCsHBEp3R73FL4NF6FnQTEGyNAXHm2GS52/go-log"
 	inet "gx/ipfs/QmU4vCDZTPLDqSDKguWbHCiUe46mZUtmM2g2suBZ9NE8ko/go-libp2p-net"
@@ -17,6 +17,7 @@ import (
 	peer "gx/ipfs/QmWNY7dV54ZDYmTA1ykVdwNCqC11mpU4zSUp6XDpLTH9eG/go-libp2p-peer"
 	pstore "gx/ipfs/QmYijbtjCxFEjSXaudaQAUz3LN5VKLssm8WCUsRoqzXmQR/go-libp2p-peerstore"
 	ggio "gx/ipfs/QmZ4Qi3GaRbjcx28Sme5eMH7RQjGkt8wHxt2a65oLaeFEV/gogo-protobuf/io"
+	cid "gx/ipfs/QmeSrf6pzut73u6zLQkRFQ3ygt3k6XFT2kjdYP8Tnkwwyg/go-cid"
 )
 
 var log = logging.Logger("bitswap_network")
@@ -24,10 +25,10 @@ var log = logging.Logger("bitswap_network")
 var sendMessageTimeout = time.Minute * 10
 
 // NewFromIpfsHost returns a BitSwapNetwork supported by underlying IPFS host
-func NewFromIpfsHost(host host.Host, r routing.ContentRouting) BitSwapNetwork {
+func NewFromIpfsHost(host host.Host, p providers.Interface) BitSwapNetwork {
 	bitswapNetwork := impl{
-		host:    host,
-		routing: r,
+		host:      host,
+		providers: p,
 	}
 	host.SetStreamHandler(ProtocolBitswap, bitswapNetwork.handleNewStream)
 	host.SetStreamHandler(ProtocolBitswapOne, bitswapNetwork.handleNewStream)
@@ -41,8 +42,8 @@ func NewFromIpfsHost(host host.Host, r routing.ContentRouting) BitSwapNetwork {
 // impl transforms the ipfs network interface, which sends and receives
 // NetMessage objects, into the bitswap network interface.
 type impl struct {
-	host    host.Host
-	routing routing.ContentRouting
+	host      host.Host
+	providers providers.Interface
 
 	// inbound messages from the network are forwarded to the receiver
 	receiver Receiver
@@ -161,6 +162,19 @@ func (bsnet *impl) handleNewStream(s inet.Stream) {
 		log.Debugf("bitswap net handleNewStream from %s", s.Conn().RemotePeer())
 		bsnet.receiver.ReceiveMessage(ctx, p, received)
 	}
+}
+
+// FindProvidersAsync returns a channel of providers for the given key
+func (bsnet *impl) FindProvidersAsync(ctx context.Context, k *cid.Cid, max int) <-chan peer.ID {
+	return bsnet.providers.FindProvidersAsync(ctx, k, max)
+}
+
+func (bsnet *impl) FindProviders(ctx context.Context, k *cid.Cid) error {
+	return bsnet.providers.FindProviders(ctx, k)
+}
+
+func (bsnet *impl) Provide(ctx context.Context, k *cid.Cid) error {
+	return bsnet.providers.Provide(k)
 }
 
 func (bsnet *impl) ConnectionManager() ifconnmgr.ConnManager {

@@ -510,8 +510,7 @@ Available templates:
 			return
 		}
 
-		err = n.Providers.Provide(k)
-		if err != nil {
+		if err = n.Providers.Provide(k); err != nil {
 			res.SetError(err, cmdkit.ErrNormal)
 			return
 		}
@@ -609,12 +608,12 @@ func objectPut(n *core.IpfsNode, input io.Reader, encoding string, dataFieldEnco
 		return nil, err
 	}
 
-	c, err := n.DAG.Add(dagnode)
+	_, err = n.DAG.Add(dagnode)
 	if err != nil {
 		return nil, err
 	}
 
-	err = n.Providers.Provide(c)
+	err = n.Providers.Provide(dagnode.Cid())
 	if err != nil {
 		return nil, err
 	}

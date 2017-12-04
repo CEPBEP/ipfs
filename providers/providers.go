@@ -16,6 +16,19 @@ import (
 	cid "gx/ipfs/QmeSrf6pzut73u6zLQkRFQ3ygt3k6XFT2kjdYP8Tnkwwyg/go-cid"
 )
 
+const (
+	provideTimeout = time.Second * 15
+
+	// maxProvidersPerRequest specifies the maximum number of providers desired
+	// from the network. This value is specified because the network streams
+	// results.
+	// TODO: if a 'non-nice' strategy is implemented, consider increasing this value
+	MaxProvidersPerRequest = 3
+	providerRequestTimeout = time.Second * 10
+
+	sizeBatchRequestChan = 32
+)
+
 var (
 	provideKeysBufferSize = 2048
 	// HasBlockBufferSize is the maximum numbers of CIDs that will get buffered
@@ -23,16 +36,6 @@ var (
 	HasBlockBufferSize = 256
 
 	provideWorkerMax = 512
-	provideTimeout   = time.Second * 15
-
-	// maxProvidersPerRequest specifies the maximum number of providers desired
-	// from the network. This value is specified because the network streams
-	// results.
-	// TODO: if a 'non-nice' strategy is implemented, consider increasing this value
-	maxProvidersPerRequest = 3
-	providerRequestTimeout = time.Second * 10
-
-	sizeBatchRequestChan = 32
 )
 
 var log = logging.Logger("providers")
