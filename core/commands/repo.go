@@ -279,7 +279,15 @@ var repoRmRootCmd = &cmds.Command{
 'ipfs repo rm-root' will unlink the root used by the files API ('ipfs
 files' commands) without trying to read the root itself.  The root and
 its children will then be removed by the garbage collector unless
-pinned.  This command can only run when no ipfs daemons are running.
+pinned.
+
+This command is designed to recover form the situation when the root
+becomes unavailable and recovering it (such as recreating it, or
+fetching it from the network) is not possible.  This command should
+only be used as a last resort as using this command could lead to data
+loss if there are unpinned nodes connected to the root.
+
+This command can only run when the ipfs daemon is not running.
 `,
 	},
 	Run: func(req cmds.Request, res cmds.ResponseEmitter) {
@@ -302,9 +310,9 @@ pinned.  This command can only run when no ipfs daemons are running.
 		case err == ds.ErrNotFound || val == nil:
 			cmds.EmitOnce(res, &MessageOutput{"Files API root not found.\n"})
 		default:
+			var cidStr string
 			c, err := cid.Cast(val.([]byte))
-			cidStr := ""
-			if err != nil {
+			if err == nil {
 				cidStr = c.String()
 			} else {
 				cidStr = b58.Encode(val.([]byte))

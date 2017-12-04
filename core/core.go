@@ -716,6 +716,7 @@ func (n *IpfsNode) loadBootstrapPeers() ([]pstore.PeerInfo, error) {
 	return toPeerInfos(parsed), nil
 }
 
+// FilesRootKey returns the datastore key for the files root
 func FilesRootKey() ds.Key { return ds.NewKey("/local/filesroot") }
 
 func (n *IpfsNode) loadFilesRoot() error {
