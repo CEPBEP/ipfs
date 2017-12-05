@@ -16,6 +16,7 @@ import (
 	dag "github.com/ipfs/go-ipfs/merkledag"
 	path "github.com/ipfs/go-ipfs/path"
 	pin "github.com/ipfs/go-ipfs/pin"
+	providers "github.com/ipfs/go-ipfs/providers"
 	repo "github.com/ipfs/go-ipfs/repo"
 	cfg "github.com/ipfs/go-ipfs/repo/config"
 	uio "github.com/ipfs/go-ipfs/unixfs/io"
@@ -214,7 +215,9 @@ func setupNode(ctx context.Context, n *IpfsNode, cfg *BuildCfg) error {
 			return err
 		}
 	} else {
+		n.SetupOfflineRouting()
 		n.Exchange = offline.Exchange(n.Blockstore)
+		n.Providers = providers.NewProviders(n.ctx, n.Routing, nil)
 	}
 
 	n.Blocks = bserv.New(n.Blockstore, n.Exchange)

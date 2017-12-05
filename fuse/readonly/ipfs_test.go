@@ -13,8 +13,6 @@ import (
 	"sync"
 	"testing"
 
-	ci "gx/ipfs/QmQgLZP9haZheimMHqqAjJh2LhRmNfEoZDfbtkpeMhi9xK/go-testutil/ci"
-
 	ci "gx/ipfs/QmeDA8gNhvRTsbrjEieay5wezupJDiky8xvCzDABbsGzmp/go-testutil/ci"
 
 	core "github.com/ipfs/go-ipfs/core"

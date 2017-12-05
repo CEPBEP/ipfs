@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"os"
 
-	"gx/ipfs/QmQp2a2Hhb7F6eK2A5hN8f9aJy4mtkEikL9Zj4cgB7d1dD/go-ipfs-cmdkit/files"
-
 	bal "github.com/ipfs/go-ipfs/importer/balanced"
 	"github.com/ipfs/go-ipfs/importer/chunk"
 	h "github.com/ipfs/go-ipfs/importer/helpers"
@@ -15,6 +13,7 @@ import (
 	dag "github.com/ipfs/go-ipfs/merkledag"
 
 	node "gx/ipfs/QmNwUEK7QbwSqyKBu3mMtToo8SUc6wQJ7gdZq4gGGJqfnf/go-ipld-format"
+	files "gx/ipfs/QmQp2a2Hhb7F6eK2A5hN8f9aJy4mtkEikL9Zj4cgB7d1dD/go-ipfs-cmdkit/files"
 )
 
 // Builds a DAG from the given file, writing created blocks to disk as they are

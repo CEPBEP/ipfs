@@ -13,6 +13,13 @@ import (
 )
 
 func (p *providers) startWorkers(ctx context.Context, px process.Process) {
+	if p.host != nil {
+		// Start up a worker to handle block requests this node is making
+		px.Go(func(px process.Process) {
+			p.providerQueryManager(ctx)
+		})
+	}
+
 	// Start up a worker to manage sending out provides messages
 	px.Go(func(px process.Process) {
 		p.provideCollector(ctx)
