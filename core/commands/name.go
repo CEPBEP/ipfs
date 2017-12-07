@@ -64,5 +64,6 @@ Resolve the value of a dnslink:
 		"publish": PublishCmd,
 		"resolve": IpnsCmd,
 		"pubsub":  IpnsPubsubCmd,
+		"follow":  IpnsFollowCmd,
 	},
 }

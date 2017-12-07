@@ -31,6 +31,7 @@ import (
 	mount "github.com/ipfs/go-ipfs/fuse/mount"
 	merkledag "github.com/ipfs/go-ipfs/merkledag"
 	mfs "github.com/ipfs/go-ipfs/mfs"
+	namecache "github.com/ipfs/go-ipfs/namecache"
 	namesys "github.com/ipfs/go-ipfs/namesys"
 	ipnsrp "github.com/ipfs/go-ipfs/namesys/republisher"
 	p2p "github.com/ipfs/go-ipfs/p2p"
@@ -130,6 +131,7 @@ type IpfsNode struct {
 	Routing      routing.IpfsRouting // the routing system. recommend ipfs-dht
 	Exchange     exchange.Interface  // the block exchange + strategy (bitswap)
 	Namesys      namesys.NameSystem  // the name system, resolves paths to hashes
+	Namecache    namecache.NameCache // the name system follower cache
 	Ping         *ping.PingService
 	Reprovider   *rp.Reprovider // the value reprovider system
 	IpnsRepub    *ipnsrp.Republisher
@@ -457,6 +459,7 @@ func (n *IpfsNode) startOnlineServicesWithHost(ctx context.Context, host p2phost
 
 	// setup name system
 	n.Namesys = namesys.NewNameSystem(n.Routing, n.Repo.Datastore(), size)
+	n.Namecache = namecache.NewNameCache(ctx, n.Namesys, n.Pinning, n.DAG)
 
 	// setup ipns republishing
 	return n.setupIpnsRepublisher()
