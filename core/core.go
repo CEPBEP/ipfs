@@ -459,7 +459,7 @@ func (n *IpfsNode) startOnlineServicesWithHost(ctx context.Context, host p2phost
 
 	// setup name system
 	n.Namesys = namesys.NewNameSystem(n.Routing, n.Repo.Datastore(), size)
-	n.Namecache = namecache.NewNameCache(ctx, n.Namesys, n.Pinning, n.DAG)
+	n.Namecache = namecache.NewNameCache(ctx, n.Namesys, n.Pinning, n.DAG, n.Blockstore)
 
 	// setup ipns republishing
 	return n.setupIpnsRepublisher()
