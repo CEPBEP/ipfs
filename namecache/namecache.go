@@ -8,12 +8,15 @@ import (
 	"sync"
 	"time"
 
+	bstore "github.com/ipfs/go-ipfs/blocks/blockstore"
 	merkledag "github.com/ipfs/go-ipfs/merkledag"
 	namesys "github.com/ipfs/go-ipfs/namesys"
 	path "github.com/ipfs/go-ipfs/path"
 	pin "github.com/ipfs/go-ipfs/pin"
 	uio "github.com/ipfs/go-ipfs/unixfs/io"
 
+	cid "gx/ipfs/QmNp85zy9RLrQ5oQD4hPyS39ezrrXpcaa7R4Y9kxdWQLLQ/go-cid"
+	node "gx/ipfs/QmPN7cwmpcc4DWXb4KTB9dNAJgjuPY69h3npsMfhRrQL9c/go-ipld-format"
 	logging "gx/ipfs/QmSpJByNKFX1sCsHBEp3R73FL4NF6FnQTEGyNAXHm2GS52/go-log"
 )
 
@@ -38,6 +41,7 @@ type nameCache struct {
 	nsys    namesys.NameSystem
 	pinning pin.Pinner
 	dag     merkledag.DAGService
+	bstore  bstore.GCBlockstore
 
 	ctx     context.Context
 	follows map[string]func()
@@ -100,7 +104,12 @@ func (nc *nameCache) ListFollows() []string {
 }
 
 func (nc *nameCache) followName(ctx context.Context, name string, pinit bool) {
-	nc.resolveAndPin(ctx, name, pinit)
+	// if cid != nil, we have created a new pin that is updated on changes and
+	// unpinned on cancel
+	cid, err := nc.resolveAndPin(ctx, name, pinit)
+	if err != nil {
+		log.Errorf("Error following %s: %s", name, err.Error())
+	}
 
 	ticker := time.NewTicker(followInterval)
 	defer ticker.Stop()
@@ -108,15 +117,107 @@ func (nc *nameCache) followName(ctx context.Context, name string, pinit bool) {
 	for {
 		select {
 		case <-ticker.C:
-			nc.resolveAndPin(ctx, name, pinit)
+			if cid != nil {
+				cid, err = nc.resolveAndUpdate(ctx, name, cid)
+			} else {
+				cid, err = nc.resolveAndPin(ctx, name, pinit)
+			}
+
+			if err != nil {
+				log.Errorf("Error following %s: %s", name, err.Error())
+			}
 
 		case <-ctx.Done():
+			if cid != nil {
+				err = nc.unpin(cid)
+				if err != nil {
+					log.Errorf("Error unpinning followed %s: %s", name, err.Error())
+				}
+			}
 			return
 		}
 	}
 }
 
-func (nc *nameCache) resolveAndPin(ctx context.Context, name string, pinit bool) {
+func (nc *nameCache) resolveAndPin(ctx context.Context, name string, pinit bool) (*cid.Cid, error) {
+	ptr, err := nc.resolve(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+
+	if !pinit {
+		return nil, nil
+	}
+
+	cid, err := pathToCid(ptr)
+	if err != nil {
+		return nil, err
+	}
+
+	defer nc.bstore.PinLock().Unlock()
+
+	_, pinned, err := nc.pinning.IsPinned(cid)
+	if pinned || err != nil {
+		return nil, err
+	}
+
+	n, err := nc.pathToNode(ctx, ptr)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Debugf("pinning %s", cid.String())
+
+	err = nc.pinning.Pin(ctx, n, true)
+	if err != nil {
+		return nil, err
+	}
+
+	err = nc.pinning.Flush()
+
+	return cid, err
+}
+
+func (nc *nameCache) resolveAndUpdate(ctx context.Context, name string, cid *cid.Cid) (*cid.Cid, error) {
+
+	ptr, err := nc.resolve(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+
+	ncid, err := pathToCid(ptr)
+	if err != nil {
+		return nil, err
+	}
+
+	if ncid.Equals(cid) {
+		return cid, nil
+	}
+
+	defer nc.bstore.PinLock().Unlock()
+
+	err = nc.pinning.Update(ctx, cid, ncid, true)
+	if err != nil {
+		return cid, err
+	}
+
+	err = nc.pinning.Flush()
+
+	return ncid, err
+}
+
+func (nc *nameCache) unpin(cid *cid.Cid) error {
+	defer nc.bstore.PinLock().Unlock()
+
+	err := nc.pinning.Unpin(nc.ctx, cid, true)
+	if err != nil {
+		return err
+	}
+
+	return nc.pinning.Flush()
+}
+
+func (nc *nameCache) resolve(ctx context.Context, name string) (path.Path, error) {
 	log.Debugf("resolving %s", name)
 
 	if !strings.HasPrefix(name, "/ipns/") {
@@ -128,37 +229,23 @@ func (nc *nameCache) resolveAndPin(ctx context.Context, name string, pinit bool)
 
 	p, err := nc.nsys.Resolve(rctx, name)
 	if err != nil {
-		log.Debugf("error resolving %s: %s", name, err.Error())
-		return
+		return "", err
 	}
 
 	log.Debugf("resolved %s to %s", name, p)
 
-	if !pinit {
-		return
-	}
+	return p, nil
+}
 
-	log.Debugf("pinning %s", p)
+func pathToCid(p path.Path) (*cid.Cid, error) {
+	return cid.Decode(p.Segments()[1])
+}
 
+func (nc *nameCache) pathToNode(ctx context.Context, p path.Path) (node.Node, error) {
 	r := &path.Resolver{
 		DAG:         nc.dag,
 		ResolveOnce: uio.ResolveUnixfsOnce,
 	}
 
-	n, err := r.ResolvePath(ctx, p)
-	if err != nil {
-		log.Debugf("error resolving path %s to node: %s", p, err.Error())
-		return
-	}
-
-	err = nc.pinning.Pin(ctx, n, true)
-	if err != nil {
-		log.Debugf("error pinning path %s: %s", p, err.Error())
-		return
-	}
-
-	err = nc.pinning.Flush()
-	if err != nil {
-		log.Debugf("error flushing pin: %s", err.Error())
-	}
+	return r.ResolvePath(ctx, p)
 }
