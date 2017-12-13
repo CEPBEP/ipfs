@@ -154,7 +154,7 @@ type Mounts struct {
 	Ipns mount.Mount
 }
 
-func (n *IpfsNode) startOnlineServices(ctx context.Context, routingOption RoutingOption, hostOption HostOption, do DiscoveryOption, pubsub, ipnsps, mplex bool) error {
+func (n *IpfsNode) startOnlineServices(ctx context.Context, routingOption RoutingOption, hostOption HostOption, do DiscoveryOption, pubsub, ipnsps, mplex, follow bool) error {
 
 	if n.PeerHost != nil { // already online.
 		return errors.New("node already online")
@@ -263,6 +263,10 @@ func (n *IpfsNode) startOnlineServices(ctx context.Context, routingOption Routin
 	}
 
 	n.P2P = p2p.NewP2P(n.Identity, n.PeerHost, n.Peerstore)
+
+	if follow {
+		n.Namecache = namecache.NewNameCache(ctx, n.Namesys, n.Pinning, n.DAG, n.Blockstore)
+	}
 
 	// setup local discovery
 	if do != nil {
@@ -459,7 +463,6 @@ func (n *IpfsNode) startOnlineServicesWithHost(ctx context.Context, host p2phost
 
 	// setup name system
 	n.Namesys = namesys.NewNameSystem(n.Routing, n.Repo.Datastore(), size)
-	n.Namecache = namecache.NewNameCache(ctx, n.Namesys, n.Pinning, n.DAG, n.Blockstore)
 
 	// setup ipns republishing
 	return n.setupIpnsRepublisher()
