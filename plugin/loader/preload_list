@@ -4,3 +4,4 @@
 # name             go-path                  number of the sub-plugin
 
 #ipldgit github.com/ipfs/go-ipfs/plugin/plugins/git 0
+#jaegertracer github.com/ipfs/go-ipfs/plugin/plugins/jaeger 0
