@@ -38,7 +38,7 @@ var CatCmd = &cmds.Command{
 		}
 
 		err = req.ParseBodyArgs()
-		if err != nil && err.Error() != "all arguments covered by positional arguments" {
+		if err != nil && !cmds.IsAllArgsAlreadyCovered(err) {
 			res.SetError(err, cmdkit.ErrNormal)
 			return
 		}
