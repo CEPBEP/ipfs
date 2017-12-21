@@ -24,9 +24,9 @@ import (
 	"github.com/ipfs/go-ipfs/Godeps/_workspace/src/github.com/mitchellh/go-homedir"
 
 	util "gx/ipfs/QmPsAfmDBnZN3kZGSuNwvCNDZiHneERSKmRcFyG3UkvcT3/go-ipfs-util"
-	logging "gx/ipfs/QmSpJByNKFX1sCsHBEp3R73FL4NF6FnQTEGyNAXHm2GS52/go-log"
 	measure "gx/ipfs/QmU7tt6mHJ5Wocjy2omBxpDfN8g9pkRimzJae7EXdrs96k/go-ds-measure"
 	ma "gx/ipfs/QmW8s4zTsUoX1Q6CeYxVKPyqSKbF7H1YDUyTostBtZ8DaG/go-multiaddr"
+	logging "gx/ipfs/QmeMFK13EDShD6L5dvrE9TEiuqtqRMBfxpgNkGxUYY4Vk5/go-log"
 )
 
 var log = logging.Logger("fsrepo")

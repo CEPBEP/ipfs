@@ -14,8 +14,8 @@ import (
 	posinfo "github.com/ipfs/go-ipfs/thirdparty/posinfo"
 	"gx/ipfs/QmYsEQydGrsxNZfAiskvQ76N2xE9hDQtSAkRSynwMiUK3c/go-block-format"
 
-	logging "gx/ipfs/QmSpJByNKFX1sCsHBEp3R73FL4NF6FnQTEGyNAXHm2GS52/go-log"
 	dsq "gx/ipfs/QmdHG8MAuARdGHxx4rPQASLcvhz24fzjSQq7AJRAQEorq5/go-datastore/query"
+	logging "gx/ipfs/QmeMFK13EDShD6L5dvrE9TEiuqtqRMBfxpgNkGxUYY4Vk5/go-log"
 	cid "gx/ipfs/QmeSrf6pzut73u6zLQkRFQ3ygt3k6XFT2kjdYP8Tnkwwyg/go-cid"
 )
 
