@@ -203,6 +203,10 @@ type getWriter struct {
 }
 
 func (gw *getWriter) Write(r io.Reader, fpath string) error {
+	if fpath == "-" {
+		_, err := io.Copy(gw.Out, r)
+		return err
+	}
 	if gw.Archive || gw.Compression != gzip.NoCompression {
 		return gw.writeArchive(r, fpath)
 	}
