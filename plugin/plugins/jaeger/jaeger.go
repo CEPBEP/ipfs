@@ -2,8 +2,8 @@ package jaeger
 
 import (
 	"github.com/ipfs/go-ipfs/plugin"
-	opentrace "github.com/opentracing/opentracing-go"
 	config "github.com/uber/jaeger-client-go/config"
+	opentrace "gx/ipfs/QmbWpD2QmLEmmoXhYpnc2E4g3jWB5TawSZmYavJopcRk44/opentracing-go"
 )
 
 // Plugins is exported list of plugins that will be loaded
@@ -44,6 +44,6 @@ func (*jaegerPlugin) InitGlobalTracer() error {
 		//probably failed to init the tracer
 		return err
 	}
-	opentrace.SetGlobalTracer(tracer)
+	opentrace.SetGlobalTracer(tracer.(opentrace.Tracer))
 	return nil
 }
