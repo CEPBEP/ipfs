@@ -3,6 +3,7 @@ package loader
 import (
 	"github.com/ipfs/go-ipfs/core/coredag"
 	"github.com/ipfs/go-ipfs/plugin"
+	"github.com/opentracing/opentracing-go"
 
 	format "gx/ipfs/QmNwUEK7QbwSqyKBu3mMtToo8SUc6wQJ7gdZq4gGGJqfnf/go-ipld-format"
 )
@@ -48,9 +49,10 @@ func runIPLDPlugin(pl plugin.PluginIPLD) error {
 }
 
 func runTracerPlugin(pl plugin.PluginTracer) error {
-	err := pl.InitGlobalTracer()
+	tracer, err := pl.InitGlobalTracer()
 	if err != nil {
 		return err
 	}
+	opentracing.SetGlobalTracer(tracer)
 	return nil
 }
