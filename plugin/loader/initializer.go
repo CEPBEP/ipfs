@@ -21,14 +21,14 @@ func initialize(plugins []plugin.Plugin) error {
 
 func run(plugins []plugin.Plugin) error {
 	for _, pl := range plugins {
-		switch pl.(type) {
+		switch pl := pl.(type) {
 		case plugin.PluginIPLD:
-			err := runIPLDPlugin(pl.(plugin.PluginIPLD))
+			err := runIPLDPlugin(pl)
 			if err != nil {
 				return err
 			}
 		case plugin.PluginTracer:
-			err := runTracerPlugin(pl.(plugin.PluginTracer))
+			err := runTracerPlugin(pl)
 			if err != nil {
 				return err
 			}
