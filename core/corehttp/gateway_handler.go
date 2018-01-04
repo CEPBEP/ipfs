@@ -266,8 +266,7 @@ func (i *gatewayHandler) getOrHeadHandler(ctx context.Context, w http.ResponseWr
 	}
 
 	if !dir {
-		name := gopath.Base(urlPath)
-		i.serveFile(w, r, name, modtime, dr)
+		i.serveFile(w, r, modtime, dr)
 		return
 	}
 
@@ -386,14 +385,14 @@ func (s *sizeSeeker) Seek(offset int64, whence int) (int64, error) {
 	return s.sizeReadSeeker.Seek(offset, whence)
 }
 
-func (i *gatewayHandler) serveFile(w http.ResponseWriter, req *http.Request, name string, modtime time.Time, content io.ReadSeeker) {
+func (i *gatewayHandler) serveFile(w http.ResponseWriter, req *http.Request, modtime time.Time, content io.ReadSeeker) {
 	if sp, ok := content.(sizeReadSeeker); ok {
 		content = &sizeSeeker{
 			sizeReadSeeker: sp,
 		}
 	}
 
-	http.ServeContent(w, req, name, modtime, content)
+	http.ServeContent(w, req, "", modtime, content)
 }
 
 func (i *gatewayHandler) postHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
