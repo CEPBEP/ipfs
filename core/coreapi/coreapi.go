@@ -25,6 +25,10 @@ func (api *CoreAPI) Unixfs() coreiface.UnixfsAPI {
 	return (*UnixfsAPI)(api)
 }
 
+func (api *CoreAPI) Block() coreiface.BlockAPI {
+	return &BlockAPI{api, nil}
+}
+
 func (api *CoreAPI) Dag() coreiface.DagAPI {
 	return &DagAPI{api, nil}
 }
